@@ -2,7 +2,7 @@ package demo;
 
 public class sourceClass {
 
-	private T a, b;
+	private T2 a, b;
 	
 	public void test () {
 		a = b;

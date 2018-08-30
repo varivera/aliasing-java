@@ -1,6 +1,5 @@
-package demo;
+package AST;
 import java.io.BufferedReader;
-
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -12,7 +11,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
-public class Java_ASTDemo {
+public class AliasAnalyzer {
 	
 	
 	/*
@@ -34,7 +33,7 @@ public class Java_ASTDemo {
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		String source = "source/sourceClass.java";
-		Java_ASTDemo t = new Java_ASTDemo();
+		AliasAnalyzer t = new AliasAnalyzer();
 		System.out.println(t.getFileContent(source));
 		ASTParser parser = ASTParser.newParser(AST.JLS2);
 		char[] fileContent = t.getFileContent(source).toCharArray();
@@ -56,10 +55,6 @@ public class Java_ASTDemo {
 			
 		});
 		
-		//MutableGraph g;
-		/*Graph g = graph("example1").directed().with(
-		        node("a").with(Color.RED).link(node("b")));
-		Graphviz.fromGraph(g).width(200).render(Format.PNG).toFile(new File("example/ex1.png"));*/
 
 	}
 
