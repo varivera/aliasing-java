@@ -23,9 +23,9 @@ public class AliasDiagramTest {
 		AliasObject <?> n = (AliasObject<?>) graph.getObjects("a").get(0);
 		n.attributes.put("c", new ArrayList<>());
 		n.attributes.get("c").add(new AliasObject<T2>(new T2()));
-		/*AliasObject <?> n2 = (AliasObject<?>) graph.getObjects("b").get(0);
+		AliasObject <?> n2 = (AliasObject<?>) graph.getObjects("b").get(0);
 		n2.attributes.put("d", new ArrayList<>());
-		n2.attributes.get("d").add(n);*/
+		n2.attributes.get("d").add(n);
 		
 		System.out.println(graph.toGraphViz());
 	}

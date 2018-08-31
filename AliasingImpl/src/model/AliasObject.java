@@ -117,7 +117,7 @@ public class AliasObject <T> {
 	}
 	
 	//idNode
-	//public String idNode;
+	public String idNode;
 	
 	
 	/**

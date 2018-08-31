@@ -1,11 +1,13 @@
 digraph G {
-n4->n5 [label="c"]
-n1->n4 [label="b"]
-n1->n3 [label="a"]
-n1->n2 [label="a"]
-n1[label="sourceClass"]
-n2[label="T2"]
-n3[label="T2"]
-n4[label="T2"]
-n5[label="T2"]
+n3->null [label="c"]
+n2->null [label="d"]
+n1->null [label="b"]
+n1->null [label="a"]
+n1->null [label="a"]
+n1[label="n1"]
+n2[label="n2"]
+n3[label="n3"]
+n4[label="n4"]
+n5[label="n5"]
 }
+
