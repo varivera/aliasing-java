@@ -47,24 +47,28 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	private Queue<Routine> stackCall;
 	
-	//TODO delete
-	private String method;
 	
 	// Compilation Unit
 	private CompilationUnit cu;
+	
+	// Method to be analysed
+	String method;
 	
 	public AliasAnalysis(ASTParser parser) {
 		cu = (CompilationUnit) parser.createAST(null);
 	}
 	
 	/**
-	 * Starts the analysis
+	 * Starts the analysis of method 'methodName' in class
+	 * 'className' stopping at point 'point'.
+	 * Initial implementation will consider the analysis of 
+	 * all method (i.e. point is equal to method exit)
 	 */
-	public void start (String method) {
-		
-		//TODO aliasGraph = new AliasDiagram (node.getName().toString());
+	public void start (String className, String methodName, int point) {
+		assert (cu == null);
+		aliasGraph = new AliasDiagram (className);
 		stackCall = new LinkedList <Routine>();
-		stackCall.add(new Routine ());
+		method = methodName;
 		cu.accept(this);
 	}
 	
@@ -76,6 +80,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 * 	It also finds the source code of the method being analysed.
 	 */
 	public boolean visit (TypeDeclaration node) {
+		//it is called only once
 		System.out.println ("TypeDeclaration: " + node.getName().toString());
 		
 		// finding the right method
@@ -109,7 +114,12 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (MethodDeclaration node) {
 		System.out.println ("MethodDeclaration: " + node.getName());
 		
-		// TODO: method signature
+		// method signature
+		Routine r = new Routine (node.getName().toString());
+		r.setReturnType(node.getReturnType2().toString());
+		System.out.println (r);
+		
+		//node.parameters()
 		
 		
 		return false;
@@ -134,7 +144,7 @@ public class AliasAnalysis extends ASTVisitor {
 		String source = "source/sourceClass.java";
 		AliasAnalyzer t = new AliasAnalyzer();
 		//System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS2);
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		char[] fileContent = t.getFileContent(source).toCharArray();
 
 		parser.setSource(fileContent);
@@ -143,7 +153,7 @@ public class AliasAnalysis extends ASTVisitor {
 		parser.setResolveBindings(true); //TODO this operation is expensive: do we really need it?
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("test");
+		v.start("sourceClass", "test", 0);
 		
 		String g = v.aliasGraph.toGraphViz();
 		Helpers.createDot (g, "test", "source");

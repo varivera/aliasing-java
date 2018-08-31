@@ -9,6 +9,11 @@ public class sourceClass {
 		a = b;
 	}
 	
+	public String test2 () {
+		a = b;
+		return "";
+	}
+	
 	public static void main(String[] args) {
 		
 

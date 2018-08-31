@@ -43,7 +43,7 @@ public class AliasAnalyzer {
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("test");
+		v.start("sourceClass","test",0);
 		
 		
 		/*CompilationUnit cu = (CompilationUnit) parser.createAST(null);
