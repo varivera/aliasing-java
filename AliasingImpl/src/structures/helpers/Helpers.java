@@ -20,11 +20,14 @@ public class Helpers {
 	 * @return string representation of the diagram
 	 * 			to be used by GraphViz
 	 */
-	public static String toGraph (AliasObject <?> g) {
+	public static String toGraph (ArrayList<AliasObject> g) {
 		StringBuilder res = new StringBuilder();
-		res.append ("digraph G {\n");
-		res.append (nodesAndEdges (g));
-		res.append("}\n");		
+		
+		for (AliasObject a: g) {
+			res.append ("digraph G {\n");
+			res.append (nodesAndEdges (a));
+			res.append("}\n");
+		}
 		return res.toString();
 	}
 	
@@ -34,10 +37,10 @@ public class Helpers {
 	 * @return string representation of the diagram (nodes and their
 	 * 		relationship)
 	 */
-	public static String nodesAndEdges (AliasObject <?> ao) {
+	public static String nodesAndEdges (AliasObject ao) {
 		ArrayList<String> lines = new ArrayList<String>();
 		
-		Deque <AliasObject <?>> objects = new ArrayDeque <AliasObject <?>>();
+		Deque <AliasObject> objects = new ArrayDeque <AliasObject>();
 		// workaround
 		HashMap <String, String> nodeIds = new HashMap <String, String>();
 		
@@ -47,24 +50,24 @@ public class Helpers {
 		objects.push(ao);
 		
 		while (!objects.isEmpty()) {
-			AliasObject <?> currentObject = objects.pop();
+			AliasObject currentObject = objects.pop();
 			if (!currentObject.isVisited()) {
-				//nodeIds.put(currentObject.idNode, currentObject.typeName());
-				//if (nodeIds.containsKey(key))
 				if (currentObject.idNode == null || currentObject.idNode.isEmpty()) {
 					currentObject.idNode = "n"+i;
 					i++;
-					nodeIds.put(currentObject.idNode, currentObject.idNode);
+					//nodeIds.put(currentObject.idNode, currentObject.idNode);
+					nodeIds.put(currentObject.idNode, currentObject.printableTypeName());
 				}
 				//nodeIds.put(currentObject.idNode, currentObject.idNode);
 				currentObject.setVisited(true);
 				for (String suc: currentObject.attributes.keySet()){
-					for (AliasObject<?> obj: currentObject.attributes.get(suc)) {
+					for (AliasObject obj: currentObject.attributes.get(suc)) {
 						objects.push(obj);
 						if (obj.idNode == null || obj.idNode.isEmpty()) {
 							obj.idNode = "n"+i;
 							i++;
-							nodeIds.put(obj.idNode, obj.idNode);
+							//nodeIds.put(obj.idNode, obj.idNode);
+							nodeIds.put(obj.idNode, obj.printableTypeName());
 						}
 						
 						// at the beginning of the list

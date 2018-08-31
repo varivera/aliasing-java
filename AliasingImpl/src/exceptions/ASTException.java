@@ -7,15 +7,15 @@ package exceptions;
  *  @author Victor Rivera
  */
 
-public class AliasException extends Exception{
+public class ASTException extends Exception{
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2738100477254712338L;
 	
-	public AliasException (String message) {
+	public ASTException (String message) {
 		super (message);
-	}
+	}  
 	
 }

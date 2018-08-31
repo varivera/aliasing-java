@@ -1,6 +1,6 @@
-package structures;
+package model.old;
 
-import model.AliasObject;
+
 import structures.helpers.Helpers;
 import java.util.ArrayList;
 
@@ -18,7 +18,7 @@ import java.util.ArrayList;
  *  @author Victor Rivera
  */
 
-public class AliasDiagram {
+public class AliasDiagramOld <T> {
 	
 	/**
 	 * the graph is rooted.
@@ -31,7 +31,7 @@ public class AliasDiagram {
 	 * computation in different scenarios)
 	 * 
 	 */
-	private ArrayList<AliasObject> root;
+	private ArrayList<AliasObjectOld <T>> root;
 	
 	/**
 	 * edges of the graph are represented by the variables of the
@@ -44,12 +44,12 @@ public class AliasDiagram {
 	 * the graph's root is the current (this) object.
 	 * It's class attributes will not be present, they will
 	 * be added when they are present in the source code
-	 * @param currentClass represents the current class
-	 * 			being analysed. 
+	 * @param current represents the current computation (where 
+	 * 				the method being analysed is.) 
 	 */
-	public AliasDiagram (String currentClass) {
-		root = new ArrayList <AliasObject>();
-		root.add(new AliasObject (currentClass));
+	public AliasDiagramOld (AliasObjectOld<T> current) {
+		root = new ArrayList <AliasObjectOld <T>>();
+		root.add(current);
 	}
 	
 
@@ -59,11 +59,10 @@ public class AliasDiagram {
 	 * attribute 'tag'. If not, it throws an exception.
 	 * If so, it creates the edge.  
 	 * @param tag is the name of the class attribute
-	 * @param type type of the class attribute
 	 */
-	public void addEdge (String tag, String type) {
-		for (AliasObject ao: root) {
-			ao.addAttribute (tag, type);
+	public void addEdge (String tag) {
+		for (AliasObjectOld <T> ao: root) {
+			ao.addAttribute (tag);
 		}
 	}
 	
@@ -74,8 +73,8 @@ public class AliasDiagram {
 	 * If so, it creates the edge.  
 	 * @param tag is the name of the class attribute
 	 */
-	public void addEdge (AliasObject o, String tag) {
-		for (AliasObject ao: root) {
+	public void addEdge (AliasObjectOld <?> o, String tag) {
+		for (AliasObjectOld <T> ao: root) {
 			ao.addObjectAtt (o, tag);
 		}
 	}
@@ -86,9 +85,9 @@ public class AliasDiagram {
 	 * @return the list of objects associated to attributeName, from the
 	 * 			current context
 	 */
-	public ArrayList<AliasObject> getObjects (String attributeName)  {
-		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
-		for (AliasObject ao: root) {
+	public ArrayList<AliasObjectOld <?>> getObjects (String attributeName)  {
+		ArrayList<AliasObjectOld <?>> res = new ArrayList<AliasObjectOld <?>>();
+		for (AliasObjectOld <T> ao: root) {
 			res.addAll(ao.getObjects(attributeName));
 		}
 		return res;
@@ -99,7 +98,8 @@ public class AliasDiagram {
 	 * @return the graph to be used by GraphViz
 	 */
 	public String toGraphViz () {
-		return Helpers.toGraph(root);
+		// commentout return Helpers.toGraph(root.get(0));
+		return null;
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class AliasDiagram {
 	 * 'changeRoot' implements such a change of computation 
 	 * @param newRoots what are the new roots of the graph
 	 *
-	public void changeRoot (ArrayList <AliasObject> newRoots){ 
+	public void changeRoot (ArrayList <AliasObjectOld> newRoots){ 
 		// newRoots should be
 	}
 

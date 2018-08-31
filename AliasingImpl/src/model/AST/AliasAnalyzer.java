@@ -1,4 +1,4 @@
-package AST;
+package model.AST;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -40,8 +40,14 @@ public class AliasAnalyzer {
 
 		parser.setSource(fileContent);
 		
-		CompilationUnit cu = (CompilationUnit) parser.createAST(null);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		
+		AliasAnalysis v = new AliasAnalysis (parser);
+		v.start("test");
+		
+		
+		/*CompilationUnit cu = (CompilationUnit) parser.createAST(null);
+		
 		
 		cu.accept(new ASTVisitor () {
 			public boolean visit (VariableDeclarationFragment node) {
@@ -53,7 +59,7 @@ public class AliasAnalyzer {
 				return false;
 			}
 			
-		});
+		});*/
 		
 
 	}

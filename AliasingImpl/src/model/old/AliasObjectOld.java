@@ -1,4 +1,4 @@
-package model;
+package model.old;
 
 
 import java.util.ArrayList;
@@ -16,23 +16,23 @@ import exceptions.Log;
  *
  */
 
-public class AliasObject {
+public class AliasObjectOld <T> {
 	
 	/**
 	 * class attributes of the current AliasObject.
 	 * It could be empty if not variables are used in the
 	 * source code
 	 */
-	public Map<String, ArrayList<AliasObject>> attributes;
+	public Map<String, ArrayList<AliasObjectOld <?>>> attributes;
 	
 	/**
 	 * type of the AliasObject.
 	 */
-	private String type;
+	private T type;
 	
-	public AliasObject(String t) {
+	public AliasObjectOld(T t) {
 		type = t;
-		attributes = new HashMap<String, ArrayList<AliasObject>>();
+		attributes = new HashMap<String, ArrayList<AliasObjectOld <?>>>(type.getClass().getDeclaredFields().length);
 		setVisited(false);
 	}
 	
@@ -44,11 +44,20 @@ public class AliasObject {
 	 * @throws NoSuchFieldException 
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void addAttribute (String attributeName, String type)  {
+	public void addAttribute (String attributeName)  {
 		if (!attributes.containsKey(attributeName)) {
-			attributes.put (attributeName, new ArrayList<AliasObject>());
+			attributes.put (attributeName, new ArrayList<AliasObjectOld <?>>());
 		}
-		attributes.get(attributeName).add(new AliasObject (type));
+		try {
+			attributes.get(attributeName).add(new AliasObjectOld (type.getClass().getDeclaredField(attributeName).getType()));
+		} catch (NoSuchFieldException e) {
+			e.printStackTrace();
+			Log.log.push(e);
+		} catch (SecurityException e) {
+			e.printStackTrace();
+			Log.log.push(e);
+		}
+		
 	}
 	
 	/**
@@ -56,9 +65,9 @@ public class AliasObject {
 	 * @param o Object
 	 * @param attributeName tag
 	 */
-	public void addObjectAtt (AliasObject o, String attributeName)  {
+	public void addObjectAtt (AliasObjectOld <?> o, String attributeName)  {
 		if (!attributes.containsKey(attributeName)) {
-			attributes.put (attributeName, new ArrayList<AliasObject>());
+			attributes.put (attributeName, new ArrayList<AliasObjectOld <?>>());
 		}
 		attributes.get(attributeName).add(o);
 	}
@@ -69,7 +78,7 @@ public class AliasObject {
 	 * @return the list of objects associated to attributeName, from the
 	 * 			current context
 	 */
-	public ArrayList<AliasObject> getObjects (String attributeName)  {
+	public ArrayList<AliasObjectOld <?>> getObjects (String attributeName)  {
 		return attributes.get (attributeName);
 	}
 	
@@ -78,15 +87,17 @@ public class AliasObject {
 	 * @return string representing the type
 	 */
 	public String typeName () {
-		return type;
-	}
-	
-	/**
-	 * 
-	 * @return printable type name
-	 */
-	public String printableTypeName () {
-		return "<"+typeName()+">";
+		String[] t = type.toString().split("\\.");
+		if (t.length>1) {
+			String[] t2 = t[1].split("@");
+			if (t2.length > 1) {
+				return t2[0];
+			}else {
+				return t[1];
+			}
+			
+		}
+		return type.toString();
 	}
 	
 	
@@ -114,14 +125,17 @@ public class AliasObject {
 	 */
 	
 	public static void main (String[] arg) throws NoSuchFieldException, SecurityException {
-		AliasObject t = new AliasObject("sourceClass");
+		AliasObjectOld<sourceClass> t = new AliasObjectOld<sourceClass>(new sourceClass());
 		
 		/*Field[] fields = t.type.getDeclaredFields();
 		System.out.println (fields.length);
 		for (int i=0;i<fields.length;i++) {
 			System.out.println (fields[i].getName());
 		}*/
-		
+		String f = t.type.getClass().getDeclaredField("a").getType().toString();
+		System.out.println (f);
+		String[] ff = "classdemo.T2".split("\\.");
+		System.out.println (ff.length);
 	}
 
 }
