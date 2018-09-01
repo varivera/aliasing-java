@@ -13,9 +13,13 @@ import model.Routine;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -115,13 +119,49 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println ("MethodDeclaration: " + node.getName());
 		
 		// method signature
-		Routine r = new Routine (node.getName().toString());
-		r.setReturnType(node.getReturnType2().toString());
-		System.out.println (r);
-		
-		//node.parameters()
+		stackCall.add(new Routine (node.getName().toString()));
+		currentRoutine().setReturnType(node.getReturnType2().toString());
 		
 		
+		for (int i=0;i<node.parameters().size();i++) {
+			((SingleVariableDeclaration) node.parameters().get(i)).accept(this);
+		}
+		
+		System.out.println (currentRoutine());
+		node.getBody().accept(this);
+		
+		return false;
+	}
+	
+	/**
+	 * AST for the body of the routine.
+	 * It goes down in the AST for each expression
+	 */
+	public boolean visit (Block node) {
+		System.out.println("Block: " + node.getNodeType());
+		for (int i=0;i<node.statements().size();i++) {
+			((ExpressionStatement)node.statements().get(i)).accept(this);
+		}
+		return false;
+	}
+	
+	/**
+	 * AST for assignments
+	 * This is the most crucial part of the implementation,
+	 * aliasing happens in assignments 
+	 */
+	public boolean visit (Assignment node) {
+		System.out.println("Assignment: " + node);
+		
+		return false;
+	}
+	
+	/**
+	 * It is visited for each argument a routine contains
+	 */
+	public boolean visit (SingleVariableDeclaration node) {
+		System.out.println("SingleVariableDeclaration: " + node.getName());
+		currentRoutine().addArgument(node.getName().toString(), node.getType().toString());
 		return false;
 	}
 	
@@ -135,6 +175,14 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("Line: " + lineNumber);
 		System.out.println("----------------------------");
 		return false;
+	}
+	
+	/**
+	 * 
+	 * @return the current routine being analysed
+	 */
+	public Routine currentRoutine () {
+		return stackCall.peek();
 	}
 	
 	
@@ -159,6 +207,13 @@ public class AliasAnalysis extends ASTVisitor {
 		Helpers.createDot (g, "test", "source");
 		System.out.println("\nGraphViz: ");
 		System.out.println(g);
+		
+		int[] i = new int[] {10};
+		int[] j = i;
+		i[0] = 1000;
+		System.out.println(i[0]);
+		System.out.println(j[0]);
+		System.out.println(i == j);
 		
 		
 
