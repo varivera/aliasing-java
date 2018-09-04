@@ -295,7 +295,7 @@ public class AliasAnalysis extends ASTVisitor {
 			ITypeBinding typeBinding = n.resolveTypeBinding();
 			System.out.println("typeBinding: " + typeBinding.getName());
 			// adding information to the alias graph in case it has not been added
-			aliasGraph.addEdge(n.toString(), typeBinding.getName());
+			aliasGraph.initEdge (n.toString(), typeBinding.getName());
 			
 			res = new nodeInfo (n.toString());
 			aliasGraph.aliasObjects(res);

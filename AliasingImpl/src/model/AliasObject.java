@@ -58,6 +58,19 @@ public class AliasObject {
 	}
 	
 	/**
+	 * Add 'tag' to the list of class attributes of the current
+	 * object only if it was not there already
+	 * @param attributeName
+	 * @throws NoSuchFieldException 
+	 */
+	public void initAttribute (String attributeName, String type)  {
+		if (!attributes.containsKey(attributeName)) {
+			attributes.put (attributeName, new ArrayList<AliasObject>());
+			attributes.get(attributeName).add(new AliasObject (type));
+		} 
+	}
+	
+	/**
 	 * Add object 'o' to the map[attributeName] 
 	 * @param o Object
 	 * @param attributeName tag

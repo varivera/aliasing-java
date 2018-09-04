@@ -69,6 +69,19 @@ public class AliasDiagram {
 	}
 	
 	/**
+	 * checks whether 'tag' is already in the graph
+	 * if not, it adds it
+	 * @param tag is the name of the class attribute
+	 * @param type type of the class attribute
+	 */
+	public void initEdge (String tag, String type) {
+		for (AliasObject ao: root) {
+			ao.initAttribute (tag, type);
+		}
+	}
+	
+
+	/**
 	 * Adds an edge to the graph with tag 'tag'. It checks
 	 * whether the class of the root object has a class
 	 * attribute 'tag'. If not, it throws an exception.
