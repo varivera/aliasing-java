@@ -1,6 +1,7 @@
 package structures;
 
 import model.AliasObject;
+import model.nodeInfo;
 import structures.helpers.Helpers;
 import java.util.ArrayList;
 
@@ -86,10 +87,22 @@ public class AliasDiagram {
 	 * @return the list of objects associated to attributeName, from the
 	 * 			current context
 	 */
-	public ArrayList<AliasObject> getObjects (String attributeName)  {
-		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
+	public void aliasObjects (nodeInfo ref)  {
 		for (AliasObject ao: root) {
-			res.addAll(ao.getObjects(attributeName));
+			//TODO: check if it exists
+			ref.addObjects(ao.getObjects(ref.tag));
+		}
+	}
+	
+	/**
+	 * 
+	 * @param tag variable name (in root)
+	 * @return the set of alias objects that were last visited, with tag 'tag'
+	 */
+	public ArrayList<ArrayList<AliasObject>> getLastVisited (String tag){
+		ArrayList<ArrayList<AliasObject>> res = new ArrayList<ArrayList<AliasObject>>(root.size());
+		for (AliasObject r: root) {
+			res.add(r.attributes.get(tag)); //reference to it
 		}
 		return res;
 	}

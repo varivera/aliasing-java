@@ -1,3 +1,6 @@
 digraph G {
-n1[label="<sourceClass>"]
+n1->n2 [label="w"]
+n1->n2 [label="v"]
+n1[label="<Basic>"]
+n2[label="<T>"]
 }

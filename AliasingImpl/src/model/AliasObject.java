@@ -4,8 +4,6 @@ package model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import demo.sourceClass;
-import exceptions.Log;
 
 /**
  * 
@@ -34,7 +32,15 @@ public class AliasObject {
 		type = t;
 		attributes = new HashMap<String, ArrayList<AliasObject>>();
 		setVisited(false);
+		//lastObjectVisited = null;
 	}
+	
+	/**
+	 * class attributes of the current AliasObject.
+	 * It could be empty if not variables are used in the
+	 * source code
+	 */
+	//public ArrayList<AliasObject> lastObjectVisited;
 	
 	/**
 	 * Add 'tag' to the list of class attributes of the current
@@ -43,12 +49,12 @@ public class AliasObject {
 	 * @throws SecurityException 
 	 * @throws NoSuchFieldException 
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void addAttribute (String attributeName, String type)  {
 		if (!attributes.containsKey(attributeName)) {
 			attributes.put (attributeName, new ArrayList<AliasObject>());
 		}
 		attributes.get(attributeName).add(new AliasObject (type));
+		//lastObjectVisited = attributes.get(attributeName); 
 	}
 	
 	/**
@@ -61,6 +67,7 @@ public class AliasObject {
 			attributes.put (attributeName, new ArrayList<AliasObject>());
 		}
 		attributes.get(attributeName).add(o);
+		//lastObjectVisited = attributes.get(attributeName); 
 	}
 	
 	/**
@@ -89,6 +96,9 @@ public class AliasObject {
 		return "<"+typeName()+">";
 	}
 	
+	public String toString() {
+		return "#" + this.hashCode();
+	}
 	
 	
 	/**
@@ -113,8 +123,10 @@ public class AliasObject {
 	 * For Debugging and Testing phases
 	 */
 	
+	@SuppressWarnings("unused")
 	public static void main (String[] arg) throws NoSuchFieldException, SecurityException {
 		AliasObject t = new AliasObject("sourceClass");
+		System.out.println(t);
 		
 		/*Field[] fields = t.type.getDeclaredFields();
 		System.out.println (fields.length);

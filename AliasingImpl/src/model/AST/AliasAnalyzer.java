@@ -35,7 +35,7 @@ public class AliasAnalyzer {
 		String source = "source/sourceClass.java";
 		AliasAnalyzer t = new AliasAnalyzer();
 		System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS2);
+		ASTParser parser = ASTParser.newParser(AST.JLS3);
 		char[] fileContent = t.getFileContent(source).toCharArray();
 
 		parser.setSource(fileContent);

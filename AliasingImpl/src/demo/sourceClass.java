@@ -12,6 +12,7 @@ public class sourceClass {
 	
 	public String test2 (T2 f) {
 		a = f;
+		a = b;
 		return "";
 	}
 	

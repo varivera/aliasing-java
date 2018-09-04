@@ -19,7 +19,7 @@ import structures.helpers.Helpers;
 public class AliasDiagramTest {
 
 	public static void main(String[] args) {
-		AliasDiagram graph = new AliasDiagram("sourceClass");
+		/*AliasDiagram graph = new AliasDiagram("sourceClass");
 		
 		graph.addEdge("a", "T2");
 		AliasObject n = (AliasObject) graph.getObjects("a").get(0);
@@ -37,7 +37,7 @@ public class AliasDiagramTest {
 		n2.attributes.get("d").add(n);
 		String g = graph.toGraphViz();
 		Helpers.createDot (g, "t", "source");
-		System.out.println(g);
+		System.out.println(g);*/
 	}
 
 }

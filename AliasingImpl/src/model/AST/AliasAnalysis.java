@@ -2,22 +2,33 @@ package model.AST;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
 
 import demo.sourceClass;
 import exceptions.ASTException;
+import exceptions.AliasException;
 import exceptions.Log;
+import model.AliasObject;
 import model.Routine;
+import model.nodeInfo;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -25,6 +36,7 @@ import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import structures.AliasDiagram;
 import structures.helpers.Helpers;
@@ -69,7 +81,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 * all method (i.e. point is equal to method exit)
 	 */
 	public void start (String className, String methodName, int point) {
-		assert (cu == null);
+		assert (cu != null);
 		aliasGraph = new AliasDiagram (className);
 		stackCall = new LinkedList <Routine>();
 		method = methodName;
@@ -82,6 +94,8 @@ public class AliasAnalysis extends ASTVisitor {
 	 * 	class being analysed.
 	 * 
 	 * 	It also finds the source code of the method being analysed.
+	 * 
+	 * TODO: is it visited in qualified calls?
 	 */
 	public boolean visit (TypeDeclaration node) {
 		//it is called only once
@@ -140,8 +154,31 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (Block node) {
 		System.out.println("Block: " + node.getNodeType());
 		for (int i=0;i<node.statements().size();i++) {
-			((ExpressionStatement)node.statements().get(i)).accept(this);
+			System.out.println("-> " + node.statements().get(i).getClass());
+			((ASTNode)node.statements().get(i)).accept(this);
 		}
+		return false;
+	}
+	
+	public boolean visit (VariableDeclarationStatement node) {
+		System.out.println("VariableDeclarationStatement: " + node);
+		return false;
+	}
+	
+	/**
+	 * Expression
+	 */
+	public boolean visit (ExpressionStatement node) {
+		System.out.println("ExpressionStatement " + node);
+		node.getExpression().accept(this);
+		return false;
+	}
+	
+	/**
+	 * Return statement
+	 */
+	public boolean visit (ReturnStatement node) {
+		System.out.println("ReturnStatement " + node);
 		return false;
 	}
 	
@@ -149,11 +186,71 @@ public class AliasAnalysis extends ASTVisitor {
 	 * AST for assignments
 	 * This is the most crucial part of the implementation,
 	 * aliasing happens in assignments 
+	 * 
+	 * The process is as follows. In 'a = b', where 'a' and 'b'
+	 * 		could be anything:
+	 * 	(i) collect all objects that 'a' is pointing at (from root)
+	 *  (ii) collect all objects that 'b' is pointing at (from root)
+	 *  (iii) remove objects in (i)
+	 *  (iv) for each object in (ii), put it in (i)
+	 * 
+	 * TODO: check how to manage local variables.
 	 */
 	public boolean visit (Assignment node) {
 		System.out.println("Assignment: " + node);
+		/**
+		 * v = w; where 'v' is a variable (could be a path)
+		 * and 'w' is an expression 
+		 */
+		
+		System.out.println("left");
+		nodeInfo left = getNodeInfo(null, node.getLeftHandSide());
+		System.out.println("right");
+		nodeInfo right = getNodeInfo(null, node.getRightHandSide());
+		
+		aliasing (left, right);
+		
+		
+		/*System.out.println("left");
+		node.getLeftHandSide().accept(this);
+		System.out.println("right");
+		node.getRightHandSide().accept(this);*/
 		
 		return false;
+	}
+	
+	/**
+	 * Basic operation of Aliasing
+	 * @param left
+	 * @param right
+	 */
+	public void aliasing (nodeInfo left, nodeInfo right) {
+		assert (left.pointingAt.size() == right.pointingAt.size());
+		/** a = b
+		 * a [[o1, o2]]
+		 * b [[o3]]
+		 */
+		for (ArrayList<AliasObject> l: left.pointingAt) {
+			l.clear();
+		}
+		
+		for (int i=0;i<right.pointingAt.size();i++) {
+			for (AliasObject ao: right.pointingAt.get(i)) {
+				left.pointingAt.get(i).add(ao);
+			}
+		}
+	}
+	
+	/**
+	 * Taking SimpleName as class variables 
+	 * TODO: check how to catch local variables and 
+	 * arguments.
+	 */
+	public boolean visit (SimpleName node) {
+		System.out.println("SimpleName: " + node);
+		
+		return false;
+		
 	}
 	
 	/**
@@ -177,6 +274,36 @@ public class AliasAnalysis extends ASTVisitor {
 		return false;
 	}
 	
+	public boolean visit (TypeDeclarationStatement node) {
+		System.out.println("TypeDeclarationStatement: " + node);
+		return false;
+	}
+	
+	/**
+	 * 
+	 * @param target represents qualified calls (null otherwise)
+	 * @param node the ASTNode being analysed
+	 * @return the information about the node. For instance, if the
+	 * 		node is a variable, the nodeInfo will contain the alias
+	 * 		object that variable is pointing at.
+	 */
+	public nodeInfo getNodeInfo (AliasObject target, ASTNode node) {
+		nodeInfo res = null;
+		
+		if (node instanceof SimpleName) {
+			SimpleName n = (SimpleName) node;
+			ITypeBinding typeBinding = n.resolveTypeBinding();
+			System.out.println("typeBinding: " + typeBinding.getName());
+			// adding information to the alias graph in case it has not been added
+			aliasGraph.addEdge(n.toString(), typeBinding.getName());
+			
+			res = new nodeInfo (n.toString());
+			aliasGraph.aliasObjects(res);
+		}
+		
+		return res;
+	}
+	
 	/**
 	 * 
 	 * @return the current routine being analysed
@@ -186,37 +313,61 @@ public class AliasAnalysis extends ASTVisitor {
 	}
 	
 	
+	/***** no visit *****/
+	/**
+	 * AST for Package Declaration
+	 */
+	public boolean visit (PackageDeclaration node) {
+		System.out.println("PackageDeclaration: " + node + " doNothing");
+		return false;
+	}
+	
+	/**
+	 * AST for Package Declaration
+	 */
+	public boolean visit (ImportDeclaration node) {
+		System.out.println("ImportDeclaration: " + node + " doNothing");
+		return false;
+	}
+	
 	
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		String source = "source/sourceClass.java";
+		String sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\Basic.java";
 		AliasAnalyzer t = new AliasAnalyzer();
-		//System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
-		char[] fileContent = t.getFileContent(source).toCharArray();
 
-		parser.setSource(fileContent);
+		//System.out.println(t.getFileContent(source));
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		char[] fileContent = t.getFileContent(sourcePath).toCharArray();
+
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true); //TODO this operation is expensive: do we really need it?
+		parser.setResolveBindings(true);
+		
+		Map options = JavaCore.getOptions();
+		parser.setCompilerOptions(options);
+		
+		parser.setBindingsRecovery(true);
+		
+		String unitName = "Basic.java";
+		parser.setUnitName(unitName);
+		
+		String[] sources = {"D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics" }; 
+		String[] classpath = {"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
+ 
+		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
+		/*parser.setEnvironment( // apply classpath
+	                new String[] { "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasingImpl" }, //
+	                null, null, true);*/
+		parser.setSource(fileContent);
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("sourceClass", "test", 0);
+		v.start("Basic", "test", 0);
 		
 		String g = v.aliasGraph.toGraphViz();
 		Helpers.createDot (g, "test", "source");
 		System.out.println("\nGraphViz: ");
 		System.out.println(g);
-		
-		int[] i = new int[] {10};
-		int[] j = i;
-		i[0] = 1000;
-		System.out.println(i[0]);
-		System.out.println(j[0]);
-		System.out.println(i == j);
-		
-		
-
 	}
 
 }
