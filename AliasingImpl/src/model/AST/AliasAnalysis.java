@@ -334,11 +334,10 @@ public class AliasAnalysis extends ASTVisitor {
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		String sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\Basic.java";
-		AliasAnalyzer t = new AliasAnalyzer();
 
 		//System.out.println(t.getFileContent(source));
 		ASTParser parser = ASTParser.newParser(AST.JLS4);
-		char[] fileContent = t.getFileContent(sourcePath).toCharArray();
+		char[] fileContent = Helpers.getFileContent(sourcePath).toCharArray();
 
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -362,7 +361,7 @@ public class AliasAnalysis extends ASTVisitor {
 		parser.setSource(fileContent);
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("Basic", "test", 0);
+		v.start("Basic", "test1", 0);
 		
 		String g = v.aliasGraph.toGraphViz();
 		Helpers.createDot (g, "test", "source");

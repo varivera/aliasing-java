@@ -13,9 +13,18 @@ public class Basic {
 		z = new T();
 	}
 	
-	public void test () {
+	public void test1 () {
 		v = w;
-		z = y;
+	}
+	
+	public void test2 () {
+		v = w;
+		v = z;
+	}
+	
+	public void test3 () {
+		v = w;
+		z = v;
 	}
 
 }

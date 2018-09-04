@@ -1,7 +1,10 @@
 package structures.helpers;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayDeque;
@@ -104,6 +107,23 @@ public class Helpers {
 			e.printStackTrace();
 			Log.log.push(e);
 		}
+	}
+	
+	/**
+	 * returns the content of filePath, if exists.
+	 * Throw an exception otherwise
+	 */
+	public static String getFileContent (String filePath) throws FileNotFoundException, IOException{
+		BufferedReader br = new BufferedReader (new FileReader (filePath));
+		StringBuilder sb = new StringBuilder();
+		String line = br.readLine();
+		while (line != null) {
+			sb.append(line);
+			sb.append(System.lineSeparator());
+			line = br.readLine();
+		}
+		
+		return sb.toString();
 	}
 
 }

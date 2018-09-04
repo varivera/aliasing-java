@@ -12,27 +12,9 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 public class AliasAnalyzer {
-	
-	
-	/*
-	 * returns the content of filePath, if exists.
-	 * Throw an exception otherwise
-	 */
-	public String getFileContent (String filePath) throws FileNotFoundException, IOException{
-		BufferedReader br = new BufferedReader (new FileReader (filePath));
-		StringBuilder sb = new StringBuilder();
-		String line = br.readLine();
-		while (line != null) {
-			sb.append(line);
-			sb.append(System.lineSeparator());
-			line = br.readLine();
-		}
-		
-		return sb.toString();
-	}
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		String source = "source/sourceClass.java";
+		/*String source = "source/sourceClass.java";
 		AliasAnalyzer t = new AliasAnalyzer();
 		System.out.println(t.getFileContent(source));
 		ASTParser parser = ASTParser.newParser(AST.JLS3);
