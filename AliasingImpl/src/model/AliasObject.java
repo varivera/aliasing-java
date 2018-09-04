@@ -130,7 +130,7 @@ public class AliasObject {
 	
 	//idNode
 	public String idNode;
-	
+		
 	
 	/**
 	 * For Debugging and Testing phases
@@ -139,7 +139,6 @@ public class AliasObject {
 	@SuppressWarnings("unused")
 	public static void main (String[] arg) throws NoSuchFieldException, SecurityException {
 		AliasObject t = new AliasObject("sourceClass");
-		System.out.println(t);
 		
 		/*Field[] fields = t.type.getDeclaredFields();
 		System.out.println (fields.length);

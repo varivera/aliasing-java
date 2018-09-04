@@ -1,5 +1,6 @@
 package model.AST;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -333,11 +334,24 @@ public class AliasAnalysis extends ASTVisitor {
 	
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		String sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\Basic.java";
+		
+		String sourcePath = "";
+		String unitName = "";
+		String[] classpath = null;
+		if (System.getProperty("os.name").contains("Windows")) {
+			sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
+			unitName = "Basic.java";
+			classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
+		}else if (System.getProperty("os.name").contains("Mac")) {
+			sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
+			unitName = "Basic.java";
+			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
+		}
+		
 
 		//System.out.println(t.getFileContent(source));
 		ASTParser parser = ASTParser.newParser(AST.JLS4);
-		char[] fileContent = Helpers.getFileContent(sourcePath).toCharArray();
+		char[] fileContent = Helpers.getFileContent(sourcePath+unitName).toCharArray();
 
 		
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
@@ -348,11 +362,12 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		parser.setBindingsRecovery(true);
 		
-		String unitName = "Basic.java";
+		
 		parser.setUnitName(unitName);
 		
-		String[] sources = {"D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics" }; 
-		String[] classpath = {"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
+		///Users/victor/git/aliasing-java/AliasTestProject/src/Basics/Basic.java
+		String[] sources = {sourcePath}; 
+		
  
 		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
 		/*parser.setEnvironment( // apply classpath
