@@ -4,6 +4,8 @@ import model.AliasObject;
 import model.nodeInfo;
 import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
+import structures.helpers.Id;
+
 import java.util.ArrayList;
 
 /**
@@ -40,7 +42,10 @@ public class AliasDiagram {
 	 * root node. No need to be represented here
 	 */
 	
-	
+	/**
+	 * for id generation
+	 */
+	private Id id;
 	
 	/**
 	 * the graph's root is the current (this) object.
@@ -49,9 +54,10 @@ public class AliasDiagram {
 	 * @param currentClass represents the current class
 	 * 			being analysed. 
 	 */
-	public AliasDiagram (String currentClass) {
+	public AliasDiagram (String currentClass, Id id) {
 		root = new ArrayList <AliasObject>();
-		root.add(new AliasObject (currentClass));
+		this.id = id;
+		root.add(new AliasObject (currentClass, this.id.getId()));
 	}
 	
 
@@ -65,7 +71,7 @@ public class AliasDiagram {
 	 */
 	public void addEdge (String tag, String type) {
 		for (AliasObject ao: root) {
-			ao.addAttribute (tag, type);
+			ao.addMap(tag, type, id.getId());
 		}
 	}
 	
@@ -77,7 +83,7 @@ public class AliasDiagram {
 	 */
 	public void initEdge (String tag, String type) {
 		for (AliasObject ao: root) {
-			ao.initAttribute (tag, type);
+			ao.initValMap(tag, type, id.getId());
 		}
 	}
 	
@@ -97,8 +103,8 @@ public class AliasDiagram {
 	
 	/**
 	 * 
-	 * @param attributeName
-	 * @return the list of objects associated to attributeName, from the
+	 * @param ref reference to update the nodeInfo
+	 * update: the list of objects associated to 'ref.tag', from the
 	 * 			current context
 	 */
 	public void aliasObjects (nodeInfo ref)  {
@@ -108,17 +114,8 @@ public class AliasDiagram {
 		}
 	}
 	
-	/**
-	 * 
-	 * @param tag variable name (in root)
-	 * @return the set of alias objects that were last visited, with tag 'tag'
-	 */
-	public ArrayList<ArrayList<AliasObject>> getLastVisited (String tag){
-		ArrayList<ArrayList<AliasObject>> res = new ArrayList<ArrayList<AliasObject>>(root.size());
-		for (AliasObject r: root) {
-			res.add(r.attributes.get(tag)); //reference to it
-		}
-		return res;
+	public ArrayList<AliasObject> getRoots (){
+		return root;
 	}
 	
 	/**

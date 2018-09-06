@@ -5,10 +5,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import structures.helpers.Id;
+
 /**
  * 
  * AliasObject represents a possible object computation
- * at run-time. AliasObjects are Nodes of the Alias Diagram.
+ * at run-time. AliasObjects are possible Nodes of the 
+ * Alias Diagram.
  * 
  * @author Victor Rivera
  *
@@ -17,80 +20,72 @@ import java.util.Map;
 public class AliasObject {
 	
 	/**
-	 * class attributes of the current AliasObject.
-	 * It could be empty if not variables are used in the
-	 * source code
+	 * mapping of the AliasObject. For example,
+	 * AliasObject could be the variables of a class, or 
+	 * arguments of a routine
 	 */
-	public Map<String, ArrayList<AliasObject>> attributes;
+	public Map<String, ArrayList<AliasObject>> mapping;
 	
 	/**
-	 * type of the AliasObject.
+	 * type of the entity that holds the AliasObject.
+	 * e.g. in case of variables, the type is 'this'
 	 */
 	private String type;
 	
-	public AliasObject(String t) {
-		type = t;
-		attributes = new HashMap<String, ArrayList<AliasObject>>();
+	public AliasObject(String type, int id) {
+		this.type = type;
+		mapping = new HashMap<String, ArrayList<AliasObject>>();
 		setVisited(false);
-		//lastObjectVisited = null;
+		this.id = id;
 	}
 	
 	/**
-	 * class attributes of the current AliasObject.
-	 * It could be empty if not variables are used in the
-	 * source code
+	 * Add 'tag' to the map of the current object
+	 * @param mapName
+	 * @param type  
+	 * @param id 
 	 */
-	//public ArrayList<AliasObject> lastObjectVisited;
-	
-	/**
-	 * Add 'tag' to the list of class attributes of the current
-	 * object
-	 * @param attributeName
-	 * @throws SecurityException 
-	 * @throws NoSuchFieldException 
-	 */
-	public void addAttribute (String attributeName, String type)  {
-		if (!attributes.containsKey(attributeName)) {
-			attributes.put (attributeName, new ArrayList<AliasObject>());
+	public void addMap (String mapName, String type, int id)  {
+		if (!mapping.containsKey(mapName)) {
+			mapping.put (mapName, new ArrayList<AliasObject>());
 		}
-		attributes.get(attributeName).add(new AliasObject (type));
-		//lastObjectVisited = attributes.get(attributeName); 
+		mapping.get(mapName).add(new AliasObject (type, id));
 	}
 	
 	/**
-	 * Add 'tag' to the list of class attributes of the current
+	 * Add 'tag' to the mapping of the current
 	 * object only if it was not there already
-	 * @param attributeName
-	 * @throws NoSuchFieldException 
+	 * @param mapName
+	 * @param type
+	 * @param id 
 	 */
-	public void initAttribute (String attributeName, String type)  {
-		if (!attributes.containsKey(attributeName)) {
-			attributes.put (attributeName, new ArrayList<AliasObject>());
-			attributes.get(attributeName).add(new AliasObject (type));
+	public void initValMap (String mapName, String type, int id)  {
+		if (!mapping.containsKey(mapName)) {
+			mapping.put (mapName, new ArrayList<AliasObject>());
+			mapping.get(mapName).add(new AliasObject (type, id));
 		} 
 	}
 	
 	/**
-	 * Add object 'o' to the map[attributeName] 
+	 * Add object 'o' to the map[mapName] 
 	 * @param o Object
-	 * @param attributeName tag
+	 * @param mapName tag
 	 */
-	public void addObjectAtt (AliasObject o, String attributeName)  {
-		if (!attributes.containsKey(attributeName)) {
-			attributes.put (attributeName, new ArrayList<AliasObject>());
+	public void addObjectAtt (AliasObject o, String mapName)  {
+		if (!mapping.containsKey(mapName)) {
+			mapping.put (mapName, new ArrayList<AliasObject>());
 		}
-		attributes.get(attributeName).add(o);
-		//lastObjectVisited = attributes.get(attributeName); 
+		mapping.get(mapName).add(o); 
 	}
 	
 	/**
 	 * 
-	 * @param attributeName
-	 * @return the list of objects associated to attributeName, from the
+	 * @param mapName
+	 * @return the list of objects associated to mapName, from the
 	 * 			current context
 	 */
-	public ArrayList<AliasObject> getObjects (String attributeName)  {
-		return attributes.get (attributeName);
+	public ArrayList<AliasObject> getObjects (String mapName)  {
+		return mapping.get (mapName);
 	}
 	
 	/**
@@ -129,17 +124,18 @@ public class AliasObject {
 	}
 	
 	//idNode
-	public String idNode;
+	private int id;
+	//Avoiding changes from outside the class
+	public int idNode() {
+		return id;
+	}
 		
 	
 	/**
 	 * For Debugging and Testing phases
 	 */
 	
-	@SuppressWarnings("unused")
 	public static void main (String[] arg) throws NoSuchFieldException, SecurityException {
-		AliasObject t = new AliasObject("sourceClass");
-		
 		/*Field[] fields = t.type.getDeclaredFields();
 		System.out.println (fields.length);
 		for (int i=0;i<fields.length;i++) {

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
@@ -25,7 +26,9 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
@@ -41,7 +44,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import structures.AliasDiagram;
 import structures.graphRep.SetEdges;
+import structures.helpers.Const;
 import structures.helpers.Helpers;
+import structures.helpers.Id;
 
 /**
  * 
@@ -63,7 +68,7 @@ public class AliasAnalysis extends ASTVisitor {
 	/**
 	 * Holds all routine calls.
 	 */
-	private Queue<Routine> stackCall;
+	private Deque<Routine> stackCall;
 	
 	
 	// Compilation Unit
@@ -72,8 +77,14 @@ public class AliasAnalysis extends ASTVisitor {
 	// Method to be analysed
 	String method;
 	
+	/**
+	 * Id generator: to give a unique identifier to Alias Objects
+	 */
+	public final Id idGen;
+	
 	public AliasAnalysis(ASTParser parser) {
 		cu = (CompilationUnit) parser.createAST(null);
+		idGen = new Id();
 	}
 	
 	/**
@@ -84,7 +95,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	public void start (String className, String methodName, int point) {
 		assert (cu != null);
-		aliasGraph = new AliasDiagram (className);
+		aliasGraph = new AliasDiagram (className, idGen);
 		stackCall = new LinkedList <Routine>();
 		method = methodName;
 		cu.accept(this);
@@ -135,7 +146,7 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println ("MethodDeclaration: " + node.getName());
 		
 		// method signature
-		stackCall.add(new Routine (node.getName().toString()));
+		stackCall.add(new Routine (node.getName().toString(), idGen));
 		currentRoutine().setReturnType(node.getReturnType2().toString());
 		
 		
@@ -210,7 +221,10 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("right");
 		nodeInfo right = getNodeInfo(null, node.getRightHandSide());
 		
-		aliasing (left, right);
+		
+		if (left != null && right != null) {
+			aliasing (left, right);
+		}
 		
 		
 		/*System.out.println("left");
@@ -293,17 +307,68 @@ public class AliasAnalysis extends ASTVisitor {
 		nodeInfo res = null;
 		
 		if (node instanceof SimpleName) {
+				// SimpleName can represent class variables, local variables, arguments
 			SimpleName n = (SimpleName) node;
 			ITypeBinding typeBinding = n.resolveTypeBinding();
 			System.out.println("typeBinding: " + typeBinding.getName());
-			// adding information to the alias graph in case it has not been added
-			aliasGraph.initEdge (n.toString(), typeBinding.getName());
 			
-			res = new nodeInfo (n.toString());
-			aliasGraph.aliasObjects(res);
+			// Ignore native types (they are not references e.g. int, float ...)
+			if (typeBinding.isPrimitive()) {
+				
+			}else {
+				
+				Integer type = getTypeNode (n);
+				
+				if (type.equals(Const.ATTRIBUTE)) {
+					// adding information to the alias graph in case it has not been added
+					aliasGraph.initEdge (n.toString(), typeBinding.getName());
+					
+					res = new nodeInfo (n.toString());
+					aliasGraph.aliasObjects(res);
+				}else if (type.equals(Const.LOCAL)){
+					// adding information to the alias graph in case it has not been added
+					currentRoutine().addLocalVariable(n.toString(), typeBinding.getName());
+					
+					res = new nodeInfo (n.toString());
+					currentRoutine().aliasObjectsLocal(res);
+				}else if (type.equals(Const.ARGUMENT)){
+					// adding information to the alias graph in case it has not been added
+					
+					res = new nodeInfo (n.toString());
+					currentRoutine().aliasObjectsArgument(res);
+				}
+			}
 		}
 		
 		return res;
+	}
+	
+	/**
+	 * 
+	 * @param n Node
+	 * @return an identifier: a class variable, local variable or argument.
+	 * TODO: to make use of the AST to get the information. 
+	 */
+	public Integer getTypeNode (SimpleName n) {
+		
+		String name = n.getIdentifier();
+		// check first with the current information
+		if (stackCall.peek().isArgument(name)) {
+			return Const.ARGUMENT;
+		}else if (stackCall.peek().isLocal(name)) {
+			return Const.LOCAL;
+		}else {
+			//FIXME: workaround
+			//-> local variable only one #
+			//-> variable zero #
+			String[] r = n.resolveBinding().getKey().split("#");
+			if (r.length == 2) {
+				return Const.LOCAL;
+			}else if (r.length == 1) {
+				return Const.ATTRIBUTE;
+			}
+		}
+		return null;
 	}
 	
 	/**
@@ -340,6 +405,15 @@ public class AliasAnalysis extends ASTVisitor {
 		return false;
 	}
 	
+	/**
+	 * 
+	 * @return the graph to be used by GraphViz including
+	 * 		signature of methods in stackCall 
+	 */
+	public String toGraphVizAll () {
+		return Helpers.toGraphAll(aliasGraph.getRoots(), stackCall);
+	}
+	
 	
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -359,7 +433,7 @@ public class AliasAnalysis extends ASTVisitor {
 		
 
 		//System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS4);
+		ASTParser parser = ASTParser.newParser(AST.JLS10);
 		char[] fileContent = Helpers.getFileContent(sourcePath+unitName).toCharArray();
 
 		
@@ -379,15 +453,14 @@ public class AliasAnalysis extends ASTVisitor {
 		
  
 		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
-		/*parser.setEnvironment( // apply classpath
-	                new String[] { "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasingImpl" }, //
-	                null, null, true);*/
 		parser.setSource(fileContent);
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("Basic", "test3", 0);
+		//v.start("Basic", "localArg1", 0);
+		v.start("Basic", "localArg2", 0);
 		
-		String g = v.aliasGraph.toGraphViz();
+		//String g = v.aliasGraph.toGraphViz();
+		String g = v.toGraphVizAll();
 		Helpers.createDot (g, "test", "source");
 		System.out.println("\nGraphViz: ");
 		System.out.println(g);

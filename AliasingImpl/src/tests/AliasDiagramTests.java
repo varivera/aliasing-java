@@ -77,6 +77,7 @@ class AliasDiagramTests {
 			
 			v = new AliasAnalysis (parser);
 			
+			
 		} catch (FileNotFoundException e) {
 			fail (e.getMessage());
 		} catch (IOException e) {
@@ -87,24 +88,33 @@ class AliasDiagramTests {
 	@Test
 	void test1() {
 		assertNotNull (v);
-		v.start("Basic", "test1", 0);
-		SetEdges expectedValue = new SetEdges ("[(1, w, 2), (1, v, 2)]");
+		v.start("Basic", "assg1", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, w, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
 	@Test
 	void test2() {
 		assertNotNull (v);
-		v.start("Basic", "test2", 0);
-		SetEdges expectedValue = new SetEdges ("[(1, w, 3), (1, z, 2), (1, v, 2)]");
+		v.start("Basic", "assg2", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 8), (0, w, 6), (0, z, 8)]");
+		System.out.println(v.toSetEdges());
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
 	@Test
 	void test3() {
 		assertNotNull (v);
-		v.start("Basic", "test3", 0);
-		SetEdges expectedValue = new SetEdges ("[(1, w, 2), (1, z, 2), (1, v, 2)]");
+		v.start("Basic", "assg3", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, w, 6), (0, z, 6)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test4() {
+		assertNotNull (v);
+		v.start("Basic", "localArg1", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 8), (0, v, 8)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 }

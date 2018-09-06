@@ -12,10 +12,13 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Set;
 
 import exceptions.Log;
 import model.AliasObject;
+import model.Routine;
 import structures.AliasDiagram;
 import structures.graphRep.Edge;
 import structures.graphRep.SetEdges;
@@ -30,12 +33,11 @@ public class Helpers {
 	 */
 	public static String toGraph (ArrayList<AliasObject> g) {
 		StringBuilder res = new StringBuilder();
-		Cell c = new Cell(1);
+		res.append ("digraph G {\n");
 		for (AliasObject a: g) {
-			res.append ("digraph G {\n");
-			res.append (nodesAndEdges (a, c));
-			res.append("}\n");
+			res.append (nodesAndEdges (a));
 		}
+		res.append("}\n");
 		notVisited (g, 0);
 		return res.toString();
 	}
@@ -43,42 +45,33 @@ public class Helpers {
 	/**
 	 * 
 	 * @param ao root node of the graph
-	 * @param id starting id for nodes
 	 * @return string representation of the diagram (nodes and their
 	 * 		relationship)
 	 */
-	private static String nodesAndEdges (AliasObject ao, Cell id) {
+	private static String nodesAndEdges (AliasObject ao) {
 		ArrayList<String> lines = new ArrayList<String>();
 		
-		Deque <AliasObject> objects = new ArrayDeque <AliasObject>();
+		Queue <AliasObject> objects = new LinkedList <AliasObject>();
 		// workaround
 		HashMap <String, String> nodeIds = new HashMap <String, String>();
 		
-		objects.push(ao);
+		objects.add(ao);
 		
 		while (!objects.isEmpty()) {
-			AliasObject currentObject = objects.pop();
+			AliasObject currentObject = objects.remove();
 			if (!currentObject.isVisited()) {
-				if (currentObject.idNode == null || currentObject.idNode.isEmpty()) {
-					currentObject.idNode = "n"+id.i;
-					id.inc();
-					//nodeIds.put(currentObject.idNode, currentObject.idNode);
-					nodeIds.put(currentObject.idNode, currentObject.printableTypeName());
-				}
-				//nodeIds.put(currentObject.idNode, currentObject.idNode);
+				nodeIds.put("n"+currentObject.idNode(), currentObject.printableTypeName());
+				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.attributes.keySet()){
-					for (AliasObject obj: currentObject.attributes.get(suc)) {
-						objects.push(obj);
-						if (obj.idNode == null || obj.idNode.isEmpty()) {
-							obj.idNode = "n"+id.i;
-							id.inc();
-							//nodeIds.put(obj.idNode, obj.idNode);
-							nodeIds.put(obj.idNode, obj.printableTypeName());
-						}
+				for (String suc: currentObject.mapping.keySet()){
+					for (AliasObject obj: currentObject.mapping.get(suc)) {
+						objects.add(obj);
+						nodeIds.put("n"+obj.idNode(), obj.printableTypeName());
+						
 						
 						// at the beginning of the list
-						lines.add(0, currentObject.idNode+"->"+obj.idNode+" [label=\""+ suc +"\"]");
+						lines.add(0, "n"+currentObject.idNode()+"->n"+obj.idNode()+" [label=\""+ suc +"\"]");
+						
 					}
 				}
 			}
@@ -91,6 +84,35 @@ public class Helpers {
 		for (String s: lines) {
 			res.append(s+"\n");
 		}
+		return res.toString();
+	}
+	
+	/**
+	 * Returns not just the Alias Diagram but also the local variables
+	 * (return values, local variables, arguments) of the current calls 'stackCalls'
+	 * @param g Diagram Graph
+	 * @param stackCall 
+	 * @return string representation of the diagram
+	 * 			to be used by GraphViz
+	 */
+	public static String toGraphAll (ArrayList<AliasObject> g, Deque <Routine> stackCall) {
+		StringBuilder res = new StringBuilder();
+		res.append ("digraph G {\n");
+		
+		for (AliasObject a: g) {
+			res.append (nodesAndEdges (a));
+		}
+		
+		for (Routine r: stackCall) {
+			AliasObject [] sig = r.getSignatureObjects ();
+			assert (sig.length == 3);
+			res.append (nodesAndEdges (sig[0])); // return type
+			res.append (nodesAndEdges (sig[1])); // arguments
+			res.append (nodesAndEdges (sig[2])); // local variables
+		}
+		
+		res.append("}\n");
+		notVisited (g, 0);
 		return res.toString();
 	}
 	
@@ -155,36 +177,23 @@ public class Helpers {
 		SetEdges res = new SetEdges();
 		
 		
-		Deque <AliasObject> objects = new ArrayDeque <AliasObject>();
+		Queue <AliasObject> objects = new LinkedList <AliasObject>();
 		// workaround
 		HashMap <Integer, Integer> nodeIds = new HashMap <Integer, Integer>();
 		
-		objects.push(ao);
+		objects.add(ao);
 		
 		while (!objects.isEmpty()) {
-			AliasObject currentObject = objects.pop();
+			AliasObject currentObject = objects.poll();
 			if (!currentObject.isVisited()) {
-				if (currentObject.idNode == null || currentObject.idNode.isEmpty()) {
-					currentObject.idNode = ""+id.i;
-					id.inc();
-					//nodeIds.put(currentObject.idNode, currentObject.idNode);
-					Integer ii = Integer.parseInt(currentObject.idNode);
-					nodeIds.put(ii, ii);
-				}
-				//nodeIds.put(currentObject.idNode, currentObject.idNode);
+				nodeIds.put(currentObject.idNode(), currentObject.idNode());
+				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.attributes.keySet()){
-					for (AliasObject obj: currentObject.attributes.get(suc)) {
-						objects.push(obj);
-						if (obj.idNode == null || obj.idNode.isEmpty()) {
-							obj.idNode = ""+id.i;
-							id.inc();
-							//nodeIds.put(obj.idNode, obj.idNode);
-							Integer i2 = Integer.parseInt(obj.idNode);
-							nodeIds.put(i2, i2);
-						}
-						
-						res.addEdge(new Edge (Integer.parseInt(currentObject.idNode), suc, Integer.parseInt(obj.idNode)));
+				for (String suc: currentObject.mapping.keySet()){
+					for (AliasObject obj: currentObject.mapping.get(suc)) {
+						objects.add(obj);
+						nodeIds.put(obj.idNode(), obj.idNode());
+						res.addEdge(new Edge (currentObject.idNode(), suc, obj.idNode()));
 					}
 				}
 			}
@@ -210,9 +219,8 @@ public class Helpers {
 		while (ind < visited.size()) {
 			n = visited.get(ind);
 			n.setVisited(false);
-			n.idNode = "";
-			for (String suc: n.attributes.keySet()){
-				for (AliasObject obj: n.attributes.get(suc)) {
+			for (String suc: n.mapping.keySet()){
+				for (AliasObject obj: n.mapping.get(suc)) {
 					if (!isIn (obj, visited)) {
 						visited.add(obj);
 					}

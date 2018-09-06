@@ -1,6 +1,7 @@
 package model;
 
-import java.util.ArrayList;
+
+import structures.helpers.Id;
 
 /**
  * 
@@ -22,22 +23,29 @@ public class Routine {
 	/**
 	 * return type
 	 */
-	private Variable returnType;
+	private AliasObject returnType;
 	
 	/**
 	 * Routine's arguments
 	 */
-	private ArrayList<Variable> arguments;
+	private AliasObject arguments;
+	
+	/**
+	 * for id generation
+	 */
+	private Id id;
 	
 	/**
 	 * Routine's local variables
 	 */
-	private ArrayList<Variable> local;
+	private AliasObject locals;
 	
-	public Routine(String name) {
+	public Routine(String name, Id id) {
 		this.name = name;
-		arguments = new ArrayList <Variable>();
-		local = new ArrayList<Variable>();
+		this.id = id;
+		arguments = new AliasObject(name+" args", this.id.getId());
+		locals = new AliasObject(name+" loc", this.id.getId());
+		returnType = new AliasObject(name+" r", this.id.getId());
 	}
 	
 	/**
@@ -46,7 +54,7 @@ public class Routine {
 	 * @param type of the argument
 	 */
 	public void addArgument (String name, String type) {
-		arguments.add(new Variable (name, type));
+		arguments.initValMap(name, type, id.getId());
 	}
 	
 	/**
@@ -55,7 +63,8 @@ public class Routine {
 	 * @param type of the argument
 	 */
 	public void addLocalVariable (String name, String type) {
-		local.add(new Variable (name, type));
+		//TODO check if there is a need to use 'addMap'
+		locals.initValMap(name, type, id.getId());
 	}
 	
 	/**
@@ -63,7 +72,55 @@ public class Routine {
 	 * @param type of the return value
 	 */
 	public void setReturnType (String type) {
-		returnType = new Variable ("return", type);
+		returnType.addMap("return", type, id.getId());
+	}
+	
+	/**
+	 * 
+	 */
+	public AliasObject[] getSignatureObjects () {
+		return new AliasObject[] {returnType, arguments, locals};
+		
+	}
+	
+	/**
+	 * 
+	 * @param a
+	 * @return true if 'a' is an argument of current routine.
+	 * 		False otherwise 
+	 */
+	public boolean isArgument (String a) {
+		return arguments.mapping.containsKey(a);
+	}
+	
+	/**
+	 * 
+	 * @param a
+	 * @return true if 'a' has been defined as a local variable in
+	 * 		the current routine. False otherwise.
+	 */
+	public boolean isLocal (String a) {
+		return locals.mapping.containsKey(a);
+	}
+	
+	/**
+	 * 
+	 * @param ref reference to update the nodeInfo
+	 * update: the list of objects associated to 'ref.tag', from the
+	 * 			arguments of the current routine
+	 */
+	public void aliasObjectsArgument (nodeInfo ref)  {
+		ref.addObjects(arguments.mapping.get(ref.tag));
+	}
+	
+	/**
+	 * 
+	 * @param ref reference to update the nodeInfo
+	 * update: the list of objects associated to 'ref.tag', from the
+	 * 			locals of the current routine
+	 */
+	public void aliasObjectsLocal (nodeInfo ref)  {
+		ref.addObjects(locals.mapping.get(ref.tag));
 	}
 	
 	/**
@@ -71,13 +128,14 @@ public class Routine {
 	 */
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		res.append(returnType.type + " " + name + " (");
-		for (int i=0;i<arguments.size();i++) {
-			res.append(arguments.get(i));
-			if (i+1<arguments.size()) {
-				res.append(", ");
-			}
+		res.append(returnType.mapping.get("return").get(0).typeName() + " " + name + " (");
+		for (String arg: arguments.mapping.keySet()) {
+			res.append(arguments.mapping.get(arg).get(0).typeName() + " " + arg + ", ");
 		}
+		if (arguments.mapping.size() > 0) {
+			res.replace(res.lastIndexOf(", "), res.lastIndexOf(", ")+2, "");
+		}
+		
 		res.append(")");
 		return res.toString();
 	}
