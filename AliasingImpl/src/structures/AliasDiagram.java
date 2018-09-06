@@ -2,6 +2,7 @@ package structures;
 
 import model.AliasObject;
 import model.nodeInfo;
+import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
 import java.util.ArrayList;
 
@@ -126,6 +127,14 @@ public class AliasDiagram {
 	 */
 	public String toGraphViz () {
 		return Helpers.toGraph(root);
+	}
+	
+	/**
+	 * 
+	 * @return the graph as a set of edges
+	 */
+	public SetEdges toSetEdges () {
+		return Helpers.toSetEdges(root);
 	}
 
 	/**

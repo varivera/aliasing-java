@@ -25,6 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import model.AST.AliasAnalysis;
+import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
 
 class AliasDiagramTests {
@@ -85,14 +86,25 @@ class AliasDiagramTests {
 	
 	@Test
 	void test1() {
-		System.out.println("test1");
 		assertNotNull (v);
 		v.start("Basic", "test1", 0);
-		//assertTrue ("d", true);
+		SetEdges expectedValue = new SetEdges ("[(1, w, 2), (1, v, 2)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
 	@Test
+	void test2() {
+		assertNotNull (v);
+		v.start("Basic", "test2", 0);
+		SetEdges expectedValue = new SetEdges ("[(1, w, 3), (1, z, 2), (1, v, 2)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
 	void test3() {
-		//fail("Not yet implemented");
+		assertNotNull (v);
+		v.start("Basic", "test3", 0);
+		SetEdges expectedValue = new SetEdges ("[(1, w, 2), (1, z, 2), (1, v, 2)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 }

@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import structures.AliasDiagram;
+import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
 
 /**
@@ -313,6 +314,14 @@ public class AliasAnalysis extends ASTVisitor {
 		return stackCall.peek();
 	}
 	
+	/**
+	 * 
+	 * @return the graph as a set of edges
+	 */
+	public SetEdges toSetEdges () {
+		return aliasGraph.toSetEdges();
+	}
+	
 	
 	/***** no visit *****/
 	/**
@@ -376,12 +385,14 @@ public class AliasAnalysis extends ASTVisitor {
 		parser.setSource(fileContent);
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("Basic", "test1", 0);
+		v.start("Basic", "test3", 0);
 		
 		String g = v.aliasGraph.toGraphViz();
 		Helpers.createDot (g, "test", "source");
 		System.out.println("\nGraphViz: ");
 		System.out.println(g);
+		System.out.println("==========");
+		System.out.println(v.aliasGraph.toSetEdges());
 	}
 
 }

@@ -1,4 +1,5 @@
 digraph G {
+n1->n2 [label="z"]
 n1->n2 [label="w"]
 n1->n2 [label="v"]
 n1[label="<Basic>"]
