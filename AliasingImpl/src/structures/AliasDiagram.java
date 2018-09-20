@@ -133,6 +133,17 @@ public class AliasDiagram {
 	public SetEdges toSetEdges () {
 		return Helpers.toSetEdges(root);
 	}
+	
+	public boolean isVariable (String s) {
+		
+		for (AliasObject ao: root) {
+			if (ao.isIn(s)){
+				return true;
+			}
+		}
+		
+		return false;
+	}
 
 	/**
 	 * For Debugging and Testing phases

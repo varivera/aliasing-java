@@ -18,10 +18,20 @@ public class Basic {
 		v = new T(); 
 	}
 	
-	public void creation () {
-		T a = new T(); //local var
+	public void creation2 () {
+		T a = v;
+		T b;
+		//w = a;
 		
-		v = new T();  // class var
+			
+	}
+	
+	public void creation (T b) {
+		T a = new T(); //local var
+		T c; //local var
+		c = new T(); //local var
+		b = new T(); //argument
+		v = new T();  // class var	
 	}
 	
 	public void localArg2 (T b, int ss) {

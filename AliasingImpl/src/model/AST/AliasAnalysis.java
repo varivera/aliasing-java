@@ -18,29 +18,7 @@ import model.Routine;
 import model.nodeInfo;
 
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.ImportDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.ReturnStatement;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
-import org.eclipse.jdt.core.dom.TypeLiteral;
-import org.eclipse.jdt.core.dom.TypeParameter;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.*;
 
 import structures.AliasDiagram;
 import structures.graphRep.SetEdges;
@@ -173,9 +151,24 @@ public class AliasAnalysis extends ASTVisitor {
 		return false;
 	}
 	
+	/**
+	 * Only deals with local variable declaration: the analysis is done
+	 * over methods, methods do not define class fields.
+	 */
 	public boolean visit (VariableDeclarationStatement node) {
 		System.out.println("VariableDeclarationStatement: " + node);
-		return false;
+		//value of the local name variable is not available. The link 
+		//is created and updated down the AST tree.
+		currentRoutine().addLocalVariable("?NoInfo?", node.getType().toString());
+		// Addition of local variable is done down the AST Tree where
+		// all information (name and type) is available
+		System.out.println("\t\tParent Type: " + node.getParent().getClass());
+		return true;
+	}
+	
+	public void endVisit (VariableDeclarationStatement node) {
+		System.out.println("END VariableDeclarationStatement: " + node);
+		
 	}
 	
 	/**
@@ -216,15 +209,26 @@ public class AliasAnalysis extends ASTVisitor {
 		 * and 'w' is an expression 
 		 */
 		
+		nodeInfo left = null;
+		nodeInfo right = null;
+		
 		System.out.println("left");
-		nodeInfo left = getNodeInfo(null, node.getLeftHandSide());
+		left = getNodeInfo(null, node.getLeftHandSide());
 		System.out.println("right");
-		nodeInfo right = getNodeInfo(null, node.getRightHandSide());
+		if (left != null) {
+			right = getNodeInfo(null, node.getRightHandSide());
+		}else {
+			System.out.println("\tright no visited: left was null");
+		}
 		
-		
+			
 		if (left != null && right != null) {
 			aliasing (left, right);
+		}else {
+			System.out.println("\taliasing was not performed: either left or right was null");
 		}
+		
+		
 		
 		
 		/*System.out.println("left");
@@ -242,6 +246,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	public void aliasing (nodeInfo left, nodeInfo right) {
 		assert (left.pointingAt.size() == right.pointingAt.size());
+		assert (left.pointingAt.size() >= 1);
 		/** a = b
 		 * a [[o1, o2]]
 		 * b [[o3]]
@@ -265,7 +270,7 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (SimpleName node) {
 		System.out.println("SimpleName: " + node);
 		
-		return false;
+		return true;
 		
 	}
 	
@@ -282,17 +287,76 @@ public class AliasAnalysis extends ASTVisitor {
 	 * AST for Class Fields
 	 */
 	public boolean visit (VariableDeclarationFragment node) {
-		SimpleName name = node.getName();
-		int lineNumber = cu.getLineNumber(name.getStartPosition());
-		System.out.println("Name: " + name.toString());
-		System.out.println("Line: " + lineNumber);
-		System.out.println("----------------------------");
+		System.out.println("VariableDeclarationFragment: " + node);
+		
+		if (node.getParent() instanceof VariableDeclarationStatement &&
+				currentRoutine().isUpdateNeeded("?NoInfo?")
+				){
+			// the analysis comes from a local declaration
+			System.out.println("\t\tcoming from local declaration");
+			try {
+				currentRoutine().updateKeyLocalVariable("?NoInfo?", node.getName().toString());
+			} catch (AliasException e) {
+				e.printStackTrace();
+				Log.log.add(e);
+			}
+		}
+		
+		// check whether there is a call function, a initialisation or 
+		//a variable
+		if (node.getInitializer() != null) {
+			if (node.getInitializer() instanceof SimpleName) {
+				//variable: either an argument, class field or local 
+				SimpleName n = (SimpleName) node.getInitializer();
+				
+				nodeInfo left = new nodeInfo (node.getName().toString());
+				currentRoutine().aliasObjectsLocal (left);
+				nodeInfo right = new nodeInfo (n.toString());
+				
+				if (currentRoutine().isArgument(right.tag)) {
+					//Argument
+					currentRoutine().aliasObjectsArgument(right);
+				}else if (currentRoutine().isLocal(right.tag)) {
+					//Local
+					currentRoutine().aliasObjectsLocal(right);
+				}else if (aliasGraph.isVariable(right.tag)) {
+					
+				}
+				
+				
+				
+				/*if (type.equals(Const.ATTRIBUTE)) {
+					// adding information to the alias graph in case it has not been added
+					aliasGraph.initEdge (n.toString(), typeBinding.getName());
+					
+					res = new nodeInfo (n.toString());
+					aliasGraph.aliasObjects(res);
+				}else if (type.equals(Const.LOCAL)){
+					// adding information to the alias graph in case it has not been added
+					//currentRoutine().addLocalVariable(n.toString(), typeBinding.getName());
+					//Note: local variables can only be added through variable declaration
+					
+					res = new nodeInfo (n.toString());
+					currentRoutine().aliasObjectsLocal(res);
+				}else if (type.equals(Const.ARGUMENT)){
+					// adding information to the alias graph in case it has not been added
+					
+					res = new nodeInfo (n.toString());
+					currentRoutine().aliasObjectsArgument(res);
+				}
+				asd*/
+			}else {
+				node.getInitializer().accept(this);
+			}
+		}
+		
+		
 		return false;
 	}
 	
 	public boolean visit (TypeDeclarationStatement node) {
 		System.out.println("TypeDeclarationStatement: " + node);
-		return false;
+		return true;
 	}
 	
 	/**
@@ -327,7 +391,8 @@ public class AliasAnalysis extends ASTVisitor {
 					aliasGraph.aliasObjects(res);
 				}else if (type.equals(Const.LOCAL)){
 					// adding information to the alias graph in case it has not been added
-					currentRoutine().addLocalVariable(n.toString(), typeBinding.getName());
+					//currentRoutine().addLocalVariable(n.toString(), typeBinding.getName());
+					//Note: local variables can only be added through variable declaration
 					
 					res = new nodeInfo (n.toString());
 					currentRoutine().aliasObjectsLocal(res);
@@ -405,6 +470,459 @@ public class AliasAnalysis extends ASTVisitor {
 		return false;
 	}
 	
+	
+	
+	
+	/*** START ****/
+	
+	
+	
+	
+	public boolean visit(AnnotationTypeDeclaration node) {
+		System.out.println ("AnnotationTypeDeclaration");
+		return true;
+	}
+
+	public boolean visit(AnnotationTypeMemberDeclaration node) {
+		System.out.println ("AnnotationTypeMemberDeclaration");
+		return true;
+	}
+
+	public boolean visit(AnonymousClassDeclaration node) {
+		System.out.println ("AnonymousClassDeclaration");
+		return true;
+	}
+
+	public boolean visit(ArrayAccess node) {
+		System.out.println ("ArrayAccess");
+		return true;
+	}
+
+	public boolean visit(ArrayCreation node) {
+		System.out.println ("ArrayCreation");
+		return true;
+	}
+
+	public boolean visit(ArrayInitializer node) {
+		System.out.println ("ArrayInitializer");
+		return true;
+	}
+
+	public boolean visit(ArrayType node) {
+		System.out.println ("ArrayType");
+		return true;
+	}
+
+	public boolean visit(AssertStatement node) {
+		System.out.println ("AssertStatement");
+		return true;
+	}
+
+	public boolean visit(BlockComment node) {
+		System.out.println ("BlockComment");
+		return true;
+	}
+
+	public boolean visit(BooleanLiteral node) {
+		System.out.println ("BooleanLiteral");
+		return true;
+	}
+
+	public boolean visit(BreakStatement node) {
+		System.out.println ("BreakStatement");
+		return true;
+	}
+
+	public boolean visit(CastExpression node) {
+		System.out.println ("CastExpression");
+		return true;
+	}
+
+	public boolean visit(CatchClause node) {
+		System.out.println ("CatchClause");
+		return true;
+	}
+
+	public boolean visit(CharacterLiteral node) {
+		System.out.println ("CharacterLiteral");
+		return true;
+	}
+
+	public boolean visit(ClassInstanceCreation node) {
+		System.out.println ("ClassInstanceCreation");
+		return true;
+	}
+
+	public boolean visit(CompilationUnit node) {
+		System.out.println ("CompilationUnit");
+		return true;
+	}
+
+	public boolean visit(ConditionalExpression node) {
+		System.out.println ("ConditionalExpression");
+		return true;
+	}
+
+	public boolean visit(ConstructorInvocation node) {
+		System.out.println ("ConstructorInvocation");
+		return true;
+	}
+
+	public boolean visit(ContinueStatement node) {
+		System.out.println ("ContinueStatement");
+		return true;
+	}
+
+	public boolean visit(CreationReference node) {
+		System.out.println ("CreationReference");
+		return true;
+	}
+
+	public boolean visit(Dimension node) {
+		System.out.println ("Dimension");
+		return true;
+	}
+
+	public boolean visit(DoStatement node) {
+		System.out.println ("DoStatement");
+		return true;
+	}
+
+	public boolean visit(EmptyStatement node) {
+		System.out.println ("EmptyStatement");
+		return true;
+	}
+
+	public boolean visit(EnhancedForStatement node) {
+		System.out.println ("EnhancedForStatement");
+		return true;
+	}
+
+	public boolean visit(EnumConstantDeclaration node) {
+		System.out.println ("EnumConstantDeclaration");
+		return true;
+	}
+
+	public boolean visit(EnumDeclaration node) {
+		System.out.println ("EnumDeclaration");
+		return true;
+	}
+
+	public boolean visit(ExportsDirective node) {
+		System.out.println ("ExportsDirective");
+		return true;
+	}
+
+	public boolean visit(ExpressionMethodReference node) {
+		System.out.println ("ExpressionMethodReference");
+		return true;
+	}
+
+	public boolean visit(FieldAccess node) {
+		System.out.println ("FieldAccess");
+		return true;
+	}
+
+	public boolean visit(FieldDeclaration node) {
+		System.out.println ("FieldDeclaration");
+		return true;
+	}
+
+	public boolean visit(ForStatement node) {
+		System.out.println ("ForStatement");
+		return true;
+	}
+
+	public boolean visit(IfStatement node) {
+		System.out.println ("IfStatement");
+		return true;
+	}
+
+	public boolean visit(InfixExpression node) {
+		System.out.println ("InfixExpression");
+		return true;
+	}
+
+	public boolean visit(Initializer node) {
+		System.out.println ("Initializer");
+		return true;
+	}
+
+	public boolean visit(InstanceofExpression node) {
+		System.out.println ("InstanceofExpression");
+		return true;
+	}
+
+	public boolean visit(IntersectionType node) {
+		System.out.println ("IntersectionType");
+		return true;
+	}
+
+	public boolean visit(LabeledStatement node) {
+		System.out.println ("LabeledStatement");
+		return true;
+	}
+
+
+	public boolean visit(LambdaExpression node) {
+		System.out.println ("LambdaExpression");
+		return true;
+	}
+
+	public boolean visit(LineComment node) {
+		System.out.println ("LineComment");
+		return true;
+	}
+
+
+	public boolean visit(MarkerAnnotation node) {
+		System.out.println ("MarkerAnnotation");
+		return true;
+	}
+
+
+	public boolean visit(MemberRef node) {
+		System.out.println ("MemberRef");
+		return true;
+	}
+
+
+	public boolean visit(MemberValuePair node) {
+		System.out.println ("MemberValuePair");
+		return true;
+	}
+
+
+	public boolean visit(MethodRef node) {
+		System.out.println ("MethodRef");
+		return true;
+	}
+
+
+	public boolean visit(MethodRefParameter node) {
+		System.out.println ("MethodRefParameter");
+		return true;
+	}
+
+
+	public boolean visit(MethodInvocation node) {
+		System.out.println ("MethodInvocation");
+		return true;
+	}
+
+
+	public boolean visit(Modifier node) {
+		System.out.println ("Modifier");
+		return true;
+	}
+
+	public boolean visit(ModuleDeclaration node) {
+		System.out.println ("ModuleDeclaration");
+		return true;
+	}
+
+	public boolean visit(ModuleModifier node) {
+		System.out.println ("ModuleModifier");
+		return true;
+	}
+
+	public boolean visit(NameQualifiedType node) {
+		System.out.println ("NameQualifiedType");
+		return true;
+	}
+
+	public boolean visit(NormalAnnotation node) {
+		System.out.println ("NormalAnnotation");
+		return true;
+	}
+
+	public boolean visit(NullLiteral node) {
+		System.out.println ("NullLiteral");
+		return true;
+	}
+
+	public boolean visit(NumberLiteral node) {
+		System.out.println ("NumberLiteral");
+		return true;
+	}
+
+	public boolean visit(OpensDirective node) {
+		System.out.println ("OpensDirective");
+		return true;
+	}
+
+	public boolean visit(ParameterizedType node) {
+		System.out.println ("ParameterizedType");
+		return true;
+	}
+
+	public boolean visit(ParenthesizedExpression node) {
+		System.out.println ("ParenthesizedExpression");
+		return true;
+	}
+
+	public boolean visit(PostfixExpression node) {
+		System.out.println ("PostfixExpression");
+		return true;
+	}
+
+	public boolean visit(PrefixExpression node) {
+		System.out.println ("PrefixExpression");
+		return true;
+	}
+
+	public boolean visit(ProvidesDirective node) {
+		System.out.println ("ProvidesDirective");
+		return true;
+	}
+
+	public boolean visit(PrimitiveType node) {
+		System.out.println ("PrimitiveType");
+		return true;
+	}
+
+	public boolean visit(QualifiedName node) {
+		System.out.println ("QualifiedName");
+		return true;
+	}
+
+	public boolean visit(QualifiedType node) {
+		System.out.println ("QualifiedType");
+		return true;
+	}
+
+	public boolean visit(RequiresDirective node) {
+		System.out.println ("RequiresDirective");
+		return true;
+	}
+
+	public boolean visit(SimpleType node) {
+		System.out.println ("SimpleType");
+		return true;
+	}
+
+
+	public boolean visit(SingleMemberAnnotation node) {
+		System.out.println ("SingleMemberAnnotation");
+		return true;
+	}
+
+
+	public boolean visit(StringLiteral node) {
+		System.out.println ("StringLiteral");
+		return true;
+	}
+
+	public boolean visit(SuperConstructorInvocation node) {
+		System.out.println ("SuperConstructorInvocation");
+		return true;
+	}
+
+	public boolean visit(SuperFieldAccess node) {
+		System.out.println ("SuperFieldAccess");
+		return true;
+	}
+
+	public boolean visit(SuperMethodInvocation node) {
+		System.out.println ("SuperMethodInvocation");
+		return true;
+	}
+
+	public boolean visit(SuperMethodReference node) {
+		System.out.println ("SuperMethodReference");
+		return true;
+	}
+
+	public boolean visit(SwitchCase node) {
+		System.out.println ("SwitchCase");
+		return true;
+	}
+
+	public boolean visit(SwitchStatement node) {
+		System.out.println ("SwitchStatement");
+		return true;
+	}
+
+	public boolean visit(SynchronizedStatement node) {
+		System.out.println ("SynchronizedStatement");
+		return true;
+	}
+
+
+	public boolean visit(TagElement node) {
+		System.out.println ("TagElement");
+		return true;
+	}
+
+
+	public boolean visit(TextElement node) {
+		System.out.println ("TextElement");
+		return true;
+	}
+
+
+	public boolean visit(ThisExpression node) {
+		System.out.println ("ThisExpression");
+		return true;
+	}
+
+	public boolean visit(ThrowStatement node) {
+		System.out.println ("ThrowStatement");
+		return true;
+	}
+
+	public boolean visit(TryStatement node) {
+		System.out.println ("TryStatement");
+		return true;
+	}
+
+	public boolean visit(TypeLiteral node) {
+		System.out.println ("TypeLiteral");
+		return true;
+	}
+
+	public boolean visit(TypeMethodReference node) {
+		System.out.println ("TypeMethodReference");
+		return true;
+	}
+
+	public boolean visit(TypeParameter node) {
+		System.out.println ("TypeParameter");
+		return true;
+	}
+
+	public boolean visit(UnionType node) {
+		System.out.println ("UnionType");
+		return true;
+	}
+
+	public boolean visit(UsesDirective node) {
+		System.out.println ("UsesDirective");
+		return true;
+	}
+
+	public boolean visit(VariableDeclarationExpression node) {
+		System.out.println ("VariableDeclarationExpression");
+		return true;
+	}
+
+	public boolean visit(WhileStatement node) {
+		System.out.println ("WhileStatement");
+		return true;
+	}
+
+	public boolean visit(WildcardType node) {
+		System.out.println ("WildcardType");
+		return true;
+	}
+	
+	
+	
+	
+	/*** END ****/
+	
+	
+	
 	/**
 	 * 
 	 * @return the graph to be used by GraphViz including
@@ -457,7 +975,7 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		AliasAnalysis v = new AliasAnalysis (parser);
 		//v.start("Basic", "localArg1", 0);
-		v.start("Basic", "localArg2", 0);
+		v.start("Basic", "creation2", 0);
 		
 		//String g = v.aliasGraph.toGraphViz();
 		String g = v.toGraphVizAll();

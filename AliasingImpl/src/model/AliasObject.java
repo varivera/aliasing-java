@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import exceptions.AliasException;
 import structures.helpers.Id;
 
 /**
@@ -89,6 +90,28 @@ public class AliasObject {
 	}
 	
 	/**
+	 * Updates the name of the key
+	 * @param key
+	 * @throws AliasException 
+	 */
+	public void updateInHold (String oldKey, String newKey) throws AliasException {
+		if (!mapping.containsKey(oldKey)) {
+			throw new AliasException("Alias Object is not holding any key: " + oldKey);
+		}
+		ArrayList<AliasObject> val = mapping.get(oldKey);
+		mapping.remove(oldKey);
+		mapping.put(newKey, val);
+	}
+	
+	/**
+	 * Is the Alias Object waiting for info to be updated?
+	 * @param oldKey
+	 * @return
+	 */
+	public boolean isUpdateNeeded (String oldKey) {
+		return mapping.containsKey(oldKey);
+	}
+	/**
 	 * 
 	 * @return string representing the type
 	 */
@@ -121,6 +144,10 @@ public class AliasObject {
 
 	public void setVisited(boolean visited) {
 		this.visited = visited;
+	}
+	
+	public boolean isIn (String tag) {
+		return mapping.containsKey(tag);
 	}
 	
 	//idNode

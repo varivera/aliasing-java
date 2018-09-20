@@ -1,6 +1,7 @@
 package model;
 
 
+import exceptions.AliasException;
 import structures.helpers.Id;
 
 /**
@@ -68,6 +69,25 @@ public class Routine {
 	}
 	
 	/**
+	 * updates the name of the tag, from oldKey to newKey
+	 * @param oldKey to be updated from
+	 * @param newKey to be updated to
+	 * @throws AliasException 
+	 */
+	public void updateKeyLocalVariable (String oldKey, String newKey) throws AliasException {
+		locals.updateInHold(oldKey, newKey);
+	}
+	
+	/**
+	 * Is the Alias Object from localVariables waiting for info to be updated?
+	 * @param oldKey
+	 * @return
+	 */
+	public boolean isUpdateNeeded (String oldKey){
+		return locals.isUpdateNeeded(oldKey);
+	}
+	
+	/**
 	 * adds the return type of the routine
 	 * @param type of the return value
 	 */
@@ -90,7 +110,7 @@ public class Routine {
 	 * 		False otherwise 
 	 */
 	public boolean isArgument (String a) {
-		return arguments.mapping.containsKey(a);
+		return arguments.isIn(a);
 	}
 	
 	/**
@@ -100,7 +120,7 @@ public class Routine {
 	 * 		the current routine. False otherwise.
 	 */
 	public boolean isLocal (String a) {
-		return locals.mapping.containsKey(a);
+		return locals.isIn(a);
 	}
 	
 	/**
