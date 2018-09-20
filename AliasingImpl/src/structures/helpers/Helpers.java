@@ -244,5 +244,13 @@ public class Helpers {
 		Cell (int i){ this.i = i; }
 		public void inc () { i++; };
 	}
+	
+	public static void printStack (Deque<Routine> stackCall) {
+		System.out.println("Stack Call");
+		for (Routine call: stackCall) {
+			System.out.println("\t"+call.name);
+		}
+		System.out.println("======");
+	}
 
 }

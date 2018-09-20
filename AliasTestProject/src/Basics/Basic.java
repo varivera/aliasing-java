@@ -18,12 +18,23 @@ public class Basic {
 		v = new T(); 
 	}
 	
+	public void unq_call_arg() {
+		args (w, 2+3);
+	}
+	
+	public void args (T ar, Integer i) {
+		v = ar;
+	}
+	
+	public void unq_call() {
+		assg1 ();
+	}
+	
 	public void creation2 () {
+		T v = w;
 		T a = v;
-		T b;
-		//w = a;
-		
-			
+		//T b;
+		T w = a;
 	}
 	
 	public void creation (T b) {
@@ -62,5 +73,5 @@ public class Basic {
 	public void assg1 () {
 		v = w;
 	}
-
+	
 }
