@@ -18,7 +18,68 @@ public class Basic {
 		v = new T(); 
 	}
 	
-	public void unq_call_arg(T a) {
+	public void func () {
+		w = get_v();
+	}
+	
+	public T get_v () {
+		return v;
+	}
+	
+	public void methodInvocation() {
+		w = get_v ();
+	}
+	
+	public void methodInvocation2() {
+		methodInvocation ();
+	}
+	
+	
+	//returning an attribute
+	public T return6 () {
+		return return5();
+	}
+	
+	//returning an attribute
+	public T return5 () {
+		return v;
+	}
+	
+	//returning a local 
+	public T return4 () {
+		T local = new T();
+		return local;
+	}
+	
+	//returning an argument
+	public T return3(T a) {
+		return a;
+	}
+	
+	//returning an expression
+	public Integer return2() {
+		return 1+1;
+	}
+	
+	//returning a integer
+	public Integer return1() {
+		return 1;
+	}
+	
+	public void nestedCall () {
+		t2 (z);
+	}
+	
+	public void t2 (T ar) {
+		t3 (ar);
+	}
+	
+	public void t3 (T ar) {
+		args (ar, 2);
+	}
+	
+	
+	public void unq_call_arg() {
 		args (w, 2+3);
 	}
 	

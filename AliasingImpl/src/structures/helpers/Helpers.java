@@ -252,5 +252,13 @@ public class Helpers {
 		}
 		System.out.println("======");
 	}
+	
+	public static void printStackAll (Deque<Routine> stackCall) {
+		System.out.println("Stack Call");
+		for (Routine call: stackCall) {
+			System.out.println("\t"+call);
+		}
+		System.out.println("======================================");
+	}
 
 }

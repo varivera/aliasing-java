@@ -1,9 +1,7 @@
 package model;
 
-
-import java.util.ArrayList;
-
 import exceptions.AliasException;
+import structures.helpers.Const;
 import structures.helpers.Id;
 
 /**
@@ -31,7 +29,7 @@ public class Routine {
 	/**
 	 * Routine's arguments
 	 */
-	private AliasObject arguments;
+	private AliasObject formalArguments;
 	
 	/**
 	 * for id generation
@@ -43,19 +41,12 @@ public class Routine {
 	 */
 	private AliasObject locals;
 	
-	/**
-	 * It is used in case there is a 
-	 * call to another Routine
-	 */
-	public ArrayList<nodeInfo> actualArguments;
-	
 	public Routine(String name, Id id) {
 		this.name = name;
 		this.id = id;
-		arguments = new AliasObject(name+" args", this.id.getId());
+		formalArguments = new AliasObject(name+" args", this.id.getId());
 		locals = new AliasObject(name+" loc", this.id.getId());
 		returnType = new AliasObject(name+" r", this.id.getId());
-		actualArguments = new ArrayList<nodeInfo>();
 	}
 	
 	/**
@@ -64,35 +55,8 @@ public class Routine {
 	 * @param type of the argument
 	 */
 	public void addArgument (String name, String type) {
-		arguments.initValMap(name, type, id.getId());
+		formalArguments.initValMap(name, type, id.getId());
 	}
-	
-	/**
-	 * adds an actual argument for a routine call
-	 * @param name of the argument
-	 */
-	public void addActualArgument (nodeInfo aliasObjects) {
-		actualArguments.add(aliasObjects);
-	}
-	
-	/**
-	 * adds null in case the actual argument for a routine call
-	 * is an expression (cannot be aliased)
-	 * @param name of the argument
-	 */
-	public void addNullActualArgument () {
-		actualArguments.add(null);
-	}
-	
-	/**
-	 * delete actual arguments once the called routine 
-	 * is finished
-	 */
-	public void restoreActualArgument () {
-		actualArguments = new ArrayList<nodeInfo>();
-	}
-	
-	
 	
 	/**
 	 * adds a local variable of the routine
@@ -128,14 +92,14 @@ public class Routine {
 	 * @param type of the return value
 	 */
 	public void setReturnType (String type) {
-		returnType.addMap("return", type, id.getId());
+		returnType.addMap(Const.RETURN, type, id.getId());
 	}
 	
 	/**
 	 * 
 	 */
 	public AliasObject[] getSignatureObjects () {
-		return new AliasObject[] {returnType, arguments, locals};
+		return new AliasObject[] {returnType, formalArguments, locals};
 		
 	}
 	
@@ -146,7 +110,7 @@ public class Routine {
 	 * 		False otherwise 
 	 */
 	public boolean isArgument (String a) {
-		return arguments.isIn(a);
+		return formalArguments.isIn(a);
 	}
 	
 	/**
@@ -161,12 +125,21 @@ public class Routine {
 	
 	/**
 	 * 
+	 * @return True if the current routine is a function.
+	 * 		False otherwise
+	 */
+	public boolean isFunction () {
+		return !returnType.mapping.get(Const.RETURN).equals(Const.VOID);
+	}
+	
+	/**
+	 * 
 	 * @param ref reference to update the nodeInfo
 	 * update: the list of objects associated to 'ref.tag', from the
 	 * 			arguments of the current routine
 	 */
 	public void aliasObjectsArgument (nodeInfo ref)  {
-		ref.addObjects(arguments.mapping.get(ref.tag));
+		ref.addObjects(formalArguments.mapping.get(ref.tag));
 	}
 	
 	/**
@@ -180,15 +153,27 @@ public class Routine {
 	}
 	
 	/**
+	 * 
+	 * @param ref reference to update the nodeInfo
+	 * update: the list of objects associated to 'ref.tag', from the
+	 * 			return value of the current routine
+	 */
+	public void aliasObjectsReturn (nodeInfo ref)  {
+		ref.addObjects(returnType.mapping.get(Const.RETURN));
+	}
+	
+	/**
 	 * printable version of the Routine
 	 */
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		res.append(returnType.mapping.get("return").get(0).typeName() + " " + name + " (");
-		for (String arg: arguments.mapping.keySet()) {
-			res.append(arguments.mapping.get(arg).get(0).typeName() + " " + arg + ", ");
+		res.append(returnType.mapping.get(Const.RETURN).get(0).typeName() + " " + name + " (");
+		for (String arg: formalArguments.mapping.keySet()) {
+			if (formalArguments.mapping.get(arg).size() > 0) {
+				res.append(formalArguments.mapping.get(arg).get(0).typeName() + " " + arg + ", ");
+			}
 		}
-		if (arguments.mapping.size() > 0) {
+		if (formalArguments.mapping.size() > 0 && res.lastIndexOf(", ") >= 0) {
 			res.replace(res.lastIndexOf(", "), res.lastIndexOf(", ")+2, "");
 		}
 		
