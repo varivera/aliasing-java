@@ -18,7 +18,7 @@ public class Basic {
 		v = new T(); 
 	}
 	
-	public void unq_call_arg() {
+	public void unq_call_arg(T a) {
 		args (w, 2+3);
 	}
 	

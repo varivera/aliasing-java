@@ -47,7 +47,7 @@ public class Routine {
 	 * It is used in case there is a 
 	 * call to another Routine
 	 */
-	public ArrayList<String> actualArguments;
+	public ArrayList<nodeInfo> actualArguments;
 	
 	public Routine(String name, Id id) {
 		this.name = name;
@@ -55,7 +55,7 @@ public class Routine {
 		arguments = new AliasObject(name+" args", this.id.getId());
 		locals = new AliasObject(name+" loc", this.id.getId());
 		returnType = new AliasObject(name+" r", this.id.getId());
-		actualArguments = new ArrayList<String>();
+		actualArguments = new ArrayList<nodeInfo>();
 	}
 	
 	/**
@@ -71,8 +71,8 @@ public class Routine {
 	 * adds an actual argument for a routine call
 	 * @param name of the argument
 	 */
-	public void addActualArgument (String name) {
-		actualArguments.add(name);
+	public void addActualArgument (nodeInfo aliasObjects) {
+		actualArguments.add(aliasObjects);
 	}
 	
 	/**
@@ -89,7 +89,7 @@ public class Routine {
 	 * is finished
 	 */
 	public void restoreActualArgument () {
-		actualArguments = new ArrayList<String>();
+		actualArguments = new ArrayList<nodeInfo>();
 	}
 	
 	

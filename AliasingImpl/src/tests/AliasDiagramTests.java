@@ -142,4 +142,15 @@ class AliasDiagramTests {
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
+	@Test
+	void test8() {
+		assertNotNull (v);
+		v.start("Basic", "unq_call_arg", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, w, 6)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	
+	
+	
 }

@@ -129,7 +129,7 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (MethodDeclaration node) {
 		System.out.println ("MethodDeclaration: " + node.getName());
 		
-		ArrayList<String> actualArguments = null;
+		ArrayList<nodeInfo> actualArguments = null;
 		//actual arguments, in case this is not the first call of the Method
 		if (!stackCall.isEmpty()) {
 			actualArguments = currentRoutine().actualArguments;
@@ -153,8 +153,11 @@ public class AliasAnalysis extends ASTVisitor {
 			for (int i=0;i<node.parameters().size();i++) {
 				if (actualArguments.get(i) != null) {
 					//aliased
-					//TODO: treat actualArguments as a list of AliasObject, so the aliasing 
-					//		is immediate
+					
+ 					nodeInfo left = new nodeInfo (((SingleVariableDeclaration) node.parameters().get(i)).getName().toString());
+					currentRoutine().aliasObjectsArgument(left);
+					
+					aliasing (left, actualArguments.get(i));
 				}
 			}
 		}
@@ -270,6 +273,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 * @param right
 	 */
 	public void aliasing (nodeInfo left, nodeInfo right) {
+		assert (left != null && right != null);
 		assert (left.pointingAt.size() == right.pointingAt.size());
 		assert (left.pointingAt.size() >= 1);
 		/** a = b
@@ -439,8 +443,29 @@ public class AliasAnalysis extends ASTVisitor {
 		for (int i=0;i<node.arguments().size();i++){
 			System.out.println(node.arguments().get(i).toString());
 			System.out.println(node.arguments().get(i).getClass());
+			
 			if (node.arguments().get(i) instanceof SimpleName) {
-				currentRoutine().addActualArgument(node.arguments().get(i).toString());
+				//it is either a local variable, an argument or a class attribute
+				String actualArg = node.arguments().get(i).toString();
+				nodeInfo nodeInfo = new nodeInfo(actualArg);
+				if (currentRoutine().isLocal(actualArg)) {
+					//Local
+					currentRoutine().aliasObjectsLocal(nodeInfo);
+				}if (currentRoutine().isArgument(actualArg)) {
+					//Argument
+					currentRoutine().aliasObjectsArgument(nodeInfo);   
+				} else { // it is a variable
+					// adding information to the alias graph in case it has not been added
+					System.out.println ("c: " + node.arguments().get(i).getClass());
+					
+					ITypeBinding typeBinding = ((SimpleName)node.arguments().get(i)).resolveTypeBinding();
+					
+					aliasGraph.initEdge (actualArg, typeBinding.getName());
+					
+					aliasGraph.aliasObjects(nodeInfo);
+				}
+				
+				currentRoutine().addActualArgument(nodeInfo);
 			}else if (node.arguments().get(i) instanceof InfixExpression) {//it cannot be aliased
 				currentRoutine().addNullActualArgument();
 			}else {
