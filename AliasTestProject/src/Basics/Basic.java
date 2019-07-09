@@ -3,14 +3,14 @@ package Basics;
 public class Basic {
 	
 	public int[] arr;
-	T v, w, z, y;
+	T v, w, zz, y;
 	int q, q2;
 	
 	public Basic() {
 		arr = new int[] {1,2};
 		v = new T();
 		w = new T();
-		z = new T();
+		zz = new T();
 	}
 	
 	public void creationAndCall2 () {
@@ -67,7 +67,7 @@ public class Basic {
 	}
 	
 	public void nestedCall () {
-		t2 (z);
+		t2 (zz);
 	}
 	
 	public void t2 (T ar) {
@@ -123,12 +123,12 @@ public class Basic {
 	
 	public void assg3 () {
 		v = w;
-		z = v;
+		zz = v;
 	}
 	
 	public void assg2 () {
 		v = w;
-		v = z;
+		v = zz;
 	}
 	
 	public void assg1 () {

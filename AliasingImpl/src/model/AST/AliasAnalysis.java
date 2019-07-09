@@ -1062,7 +1062,13 @@ public class AliasAnalysis extends ASTVisitor {
 			sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
 			unitName = "Basic.java";
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
+		}else if (System.getProperty("os.name").contains("Linux")) {
+			sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
+			unitName = "Basic.java";
+			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
+		
+		
 		
 
 		//System.out.println(t.getFileContent(source));

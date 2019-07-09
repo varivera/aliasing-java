@@ -1,6 +1,6 @@
 digraph G {
-n0->n10 [label="z"]
 n0->n10 [label="v"]
+n0->n10 [label="zz"]
 n0[label="<Basic>"]
 n10[label="<T>"]
 n3->n4 [label="result"]
