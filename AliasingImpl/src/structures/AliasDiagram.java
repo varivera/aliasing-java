@@ -19,7 +19,7 @@ import java.util.ArrayList;
  *  This is a rooted-directed graph	
  *  
  *  
- *  @author Victor Rivera
+ *  @author Victor Rivera (victor.rivera@anu.edu.au)
  */
 
 public class AliasDiagram {

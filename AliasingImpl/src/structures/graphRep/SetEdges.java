@@ -11,7 +11,7 @@ import model.AliasObject;
  * The class implements a mechanism to get the SetEdges from
  * an AliasDiagram
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 

@@ -5,7 +5,7 @@ package model;
  * Types are stored as Strings (this implementation
  * relies on the Java Type System
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 

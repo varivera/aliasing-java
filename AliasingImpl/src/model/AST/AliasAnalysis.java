@@ -25,9 +25,9 @@ import structures.helpers.Id;
 /**
  * 
  * Implements a Visitor for Java code AST. It attaches information
- * to a Alias Diagram after visiting each instruction in the code
+ * to the Alias Diagram after visiting each instruction in the code
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 
@@ -109,6 +109,7 @@ public class AliasAnalysis extends ASTVisitor {
 				aliasing (left, right);
 			}else {
 				System.out.println ("Either left or right was null");
+				assert false;
 			}
 		}
 		
@@ -165,7 +166,7 @@ public class AliasAnalysis extends ASTVisitor {
 	 * all method (i.e. point is equal to method exit)
 	 */
 	public void start (String className, String methodName, int point) {
-		assert (cu != null);
+		assert cu != null;
 		aliasGraph = new AliasDiagram (className, idGen);
 		stackCall = new ArrayDeque <Routine>();
 		method = methodName;
@@ -296,7 +297,8 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 			aliasing (left, right);
 		}else if(node.getExpression() instanceof MethodInvocation) {
-			
+			right = getNodeInfo (null, node.getExpression());
+			aliasing (left, right);
 		}else {
 			//TODO: check others
 		}
@@ -332,6 +334,7 @@ public class AliasAnalysis extends ASTVisitor {
 		if (left != null) {
 			right = getNodeInfo(null, node.getRightHandSide());
 		}else {
+			//ignore this case: no reference type
 			System.out.println("\tright no visited: left was null");
 		}
 		
@@ -497,6 +500,7 @@ public class AliasAnalysis extends ASTVisitor {
 			currentRoutine().aliasObjectsArgument(res);
 		}else {
 			System.out.println("AST node no supported yet: " + node.getClass() + " (" + node + ")" );
+			assert false;
 		}
 		
 		return res;
@@ -1050,7 +1054,6 @@ public class AliasAnalysis extends ASTVisitor {
 	
 	
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		
 		String sourcePath = "";
 		String unitName = "";
 		String[] classpath = null;
@@ -1094,10 +1097,12 @@ public class AliasAnalysis extends ASTVisitor {
 		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
 		parser.setSource(fileContent);
 		
+		//Init
+		long start = System.currentTimeMillis();
 		AliasAnalysis v = new AliasAnalysis (parser);
-		//v.start("Basic", "localArg1", 0);
-		v.start("Basic", "nestedCall", 0);
-		
+		v.start("Basic", "creationAndCall2", 0);
+		//End
+		long end = System.currentTimeMillis();
 		//String g = v.aliasGraph.toGraphViz();
 		String g = v.toGraphVizAll();
 		Helpers.createDot (g, "test", "source");
@@ -1105,6 +1110,8 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println(g);
 		System.out.println("==========");
 		System.out.println(v.aliasGraph.toSetEdges());
+		float sec = (end - start) / 100F; 
+		System.out.println("Time Analysis: "+sec + " seconds");
 		
 	}
 

@@ -3,11 +3,11 @@ package model;
 import java.util.ArrayList;
 
 /**
- * It contains relevant information about a node that
- * will be used in assignments.
+ * It contains relevant information about a node to
+ * be used in assignments.
  * 
  *  
- *  @author Victor Rivera
+ *  @author Victor Rivera (victor.rivera@anu.edu.au)
  */
 
 public class nodeInfo {

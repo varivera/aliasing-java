@@ -12,7 +12,7 @@ import exceptions.Log;
  * AliasObject represents a possible object computation
  * at run-time. AliasObjects are Nodes of the Alias Diagram.
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 

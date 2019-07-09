@@ -7,7 +7,7 @@ import java.util.Deque;
  * 
  * Log 
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au) 
  *
  */
 

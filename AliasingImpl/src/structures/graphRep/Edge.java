@@ -5,7 +5,7 @@ package structures.graphRep;
  * Implements an edge from the Alias Diagram. It is used by
  * SetEdges only.
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 

@@ -4,7 +4,7 @@ package exceptions;
  * This class captures all exceptions during the computation.	
  *  
  *  
- *  @author Victor Rivera
+ *  @author Victor Rivera (victor.rivera@anu.edu.au)
  */
 
 public class ASTException extends Exception{

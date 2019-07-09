@@ -10,7 +10,7 @@ import structures.helpers.Id;
  * the routine being analysed. Name, signature,
  * Local variables, changes on the graph
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 

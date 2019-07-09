@@ -1,10 +1,10 @@
 package exceptions;
 
 /**
- * This class captures all exceptions during the computation.	
+ * This class captures all exceptions during an Alias Analysis computation.	
  *  
  *  
- *  @author Victor Rivera
+ *  @author Victor Rivera (victor.rivera@anu.edu.au)
  */
 
 public class AliasException extends Exception{
