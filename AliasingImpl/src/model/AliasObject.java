@@ -14,7 +14,7 @@ import structures.helpers.Id;
  * at run-time. AliasObjects are possible Nodes of the 
  * Alias Diagram.
  * 
- * @author Victor Rivera
+ * @author Victor Rivera 
  *
  */
 
