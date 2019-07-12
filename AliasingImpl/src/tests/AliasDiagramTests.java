@@ -6,7 +6,7 @@ import static org.junit.Assert.assertTrue;
  * 
  * Testing the Alias Diagrams
  * 
- * @author Victor Rivera
+ * @author Victor Rivera (victor.rivera@anu.edu.au)
  *
  */
 
@@ -19,8 +19,6 @@ import java.util.Map;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,6 +29,7 @@ import structures.helpers.Helpers;
 class AliasDiagramTests {
 	AliasAnalysis v;
 	
+	@SuppressWarnings({ "deprecation", "unchecked" })
 	@BeforeEach
 	void InitClass() {
 		System.out.println("Init Alias Analysis");
@@ -46,6 +45,10 @@ class AliasDiagramTests {
 				sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
 				unitName = "Basic.java";
 				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
+			}else if (System.getProperty("os.name").contains("Linux")) {
+				sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
+				unitName = "Basic.java";
+				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 			}
 			
 
@@ -57,6 +60,7 @@ class AliasDiagramTests {
 			parser.setKind(ASTParser.K_COMPILATION_UNIT);
 			parser.setResolveBindings(true);
 			
+			@SuppressWarnings("rawtypes")
 			Map options = JavaCore.getOptions();
 			parser.setCompilerOptions(options);
 			
@@ -98,7 +102,6 @@ class AliasDiagramTests {
 		assertNotNull (v);
 		v.start("Basic", "assg2", 0);
 		SetEdges expectedValue = new SetEdges ("[(0, w, 6), (0, v, 8), (0, z, 8)]");
-		System.out.println(v.toSetEdges());
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -149,7 +152,7 @@ class AliasDiagramTests {
 		SetEdges expectedValue = new SetEdges ("[(0, v, 11), (0, w, 11)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
-	
+
 	@Test
 	void test9() {
 		assertNotNull (v);
@@ -158,4 +161,115 @@ class AliasDiagramTests {
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}	
 	
+	@Test
+	void test10() {
+		assertNotNull (v);
+		v.start("Basic", "localArg2", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 8), (0, w, 8)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test11() {
+		assertNotNull (v);
+		v.start("Basic", "args", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test12() {
+		assertNotNull (v);
+		v.start("Basic", "t3", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test13() {
+		assertNotNull (v);
+		v.start("Basic", "t2", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test14() {
+		assertNotNull (v);
+		v.start("Basic", "return1", 0);
+		SetEdges expectedValue = new SetEdges ("[]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test15() {
+		assertNotNull (v);
+		v.start("Basic", "return2", 0);
+		SetEdges expectedValue = new SetEdges ("[]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test16() {
+		assertNotNull (v);
+		v.start("Basic", "return3", 0);
+		SetEdges expectedValue = new SetEdges ("[]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test17() {
+		assertNotNull (v);
+		v.start("Basic", "return4", 0);
+		SetEdges expectedValue = new SetEdges ("[]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test18() {
+		assertNotNull (v);
+		v.start("Basic", "return5", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test19() {
+		assertNotNull (v);
+		v.start("Basic", "return6", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 9)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test20() {
+		assertNotNull (v);
+		v.start("Basic", "methodInv", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 10), (0, v, 10)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test21() {
+		assertNotNull (v);
+		v.start("Basic", "methodInv2", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 14), (0, v, 14)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test22() {
+		assertNotNull (v);
+		v.start("Basic", "get_v", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test23() {
+		assertNotNull (v);
+		v.start("Basic", "func", 0);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 10), (0, v, 10)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
 }

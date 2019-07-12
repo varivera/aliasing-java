@@ -32,45 +32,95 @@ import structures.helpers.Id;
  */
 
 public class AliasAnalysis extends ASTVisitor {
-	
+
 	/**
 	 * holds the alias diagram. It will be updated
 	 * according to the Literature. refer to RiveraMeyer:18:JSS
 	 */
 	private AliasDiagram aliasGraph;
-	
+
 	/**
 	 * Holds all routine calls.
 	 */
 	private Deque<Routine> stackCall;
-	
-	
+
+
 	// Compilation Unit
 	private CompilationUnit cu;
-	
+
 	// Method to be analysed
 	String method;
-	
+
 	/**
 	 * For each class used in the analysis, methods declaration
 	 * will be stored. This is in case of a (un)qualified call.
 	 * JDT might have some mechanisms to manage this differently
 	 */
 	HashMap<String, 
-		HashMap<String, MethodDeclaration>> methodsClass;
-	
+	HashMap<String, MethodDeclaration>> methodsClass;
+
 	/**
 	 * Id generator: to give a unique identifier to Alias Objects
 	 */
 	public final Id idGen;
-	
+
 	/**
 	 * Method to be read line by line. It constructs the 
 	 * 	Alias Graph accordingly
 	 */
 	public boolean visit (MethodDeclaration node) {
 		System.out.println ("MethodDeclaration: " + node.getName());
+		
+		//to delete
+		
+		//node.getBody()
+		//to delete
+		
 		return false;
+	}
+
+
+	/**
+	 * Handles the call invocation to a routine. Handles the cases
+	 * of qualified calls
+	 * @param call
+	 * @return the node Information
+	 */
+	public nodeInfo methodInvocation(MethodInvocation call) {
+		System.out.println("methodInvocation: " + call);
+		System.out.println(call.getName());
+		System.out.println(call.getExpression());
+		//System.out.println(call.getExpression().toString());
+		
+
+		// TODO: How to realise: x.m (no method call)
+		// TODO: How to realise: x().m (x is a method - function)
+
+		nodeInfo ne = null;
+		if (call.getExpression() == null) {//Unqualified call
+			ne = methodCall(call);
+		}else {
+			// TODO: change roots only if it is 'x.m()'
+
+			nodeInfo ni = getNodeInfo(null, call.getExpression()); // to be sure the edge is in the graph
+			// TODO: factor the previous line out (improvement)
+			aliasGraph.changeRoot(ni.pointingAt);
+			// update methodsClass field
+			
+			for (int i=0;i<=call.getExpression().getClass().getDeclaredMethods().length;i++){
+				System.out.println(call.getClass().getDeclaredMethods()[i].getName());
+			}
+			
+			/*if (!methodsClass.containsKey(className)) {
+				methodsClass.put(node.getName().toString(), new HashMap<String, MethodDeclaration>());
+				for (int i=0;i<node.getMethods().length;i++) {
+					methodsClass.get(className).put(node.getMethods()[i].getName().toString(), node.getMethods()[i]);
+				}
+			}*/
+			
+ 			ne = methodCall(call);
+		}
+		return ne;
 	}
 
 	/**
@@ -82,58 +132,64 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	public nodeInfo methodCall (MethodInvocation call) {
 		System.out.println("methodCall: " + call);
-		assert (!stackCall.isEmpty()); // at least initial call should be already placed
+		assert !stackCall.isEmpty(); // at the least initial call should be already placed
+
+		
+		// to delete
+		
+		
+		//to delete
+		
 		
 		// Unqualified call
-		MethodDeclaration method = methodsClass.get(call.resolveMethodBinding().getDeclaringClass().getName().toString()).get(call.resolveMethodBinding().getName());
-		
-		
+		MethodDeclaration method = methodsClass.get(
+				call.resolveMethodBinding().getDeclaringClass().getName().toString()).get(call.resolveMethodBinding().getName());
+
 		/**
 		 * Handling Arguments
 		 */
 		assert (call.arguments().size() == method.parameters().size());
-		
+
 		// method signature
 		Routine routineCall = routineSignature (method);
-		
+
 		for (int i=0;i<method.parameters().size();i++) {
 			System.out.println(((SingleVariableDeclaration)method.parameters().get(i)).getName() + " <<<");
 			nodeInfo left = new nodeInfo(((SingleVariableDeclaration)method.parameters().get(i)).getName().toString());
 			routineCall.aliasObjectsArgument(left);
-					
-//					getNodeInfo (null, (SingleVariableDeclaration)method.parameters().get(i));
-			
+
+			//					getNodeInfo (null, (SingleVariableDeclaration)method.parameters().get(i));
+
 			nodeInfo right = getNodeInfo (null, (ASTNode)call.arguments().get(i));
-			
+
 			if (left != null && right != null) {
 				aliasing (left, right);
 			}else {
 				System.out.println ("Either left or right was null");
-				assert false;
 			}
 		}
-		
-		
+
+
 		stackCall.push(routineCall);
-		
+
 		Helpers.printStackAll (stackCall);
-		
+
 		//method.accept(this);
 		method.getBody().accept(this);
-		
+
 		assert (stackCall.size() > 1);
-		
+
 		nodeInfo res = null;
 		if (currentRoutine().isFunction()) {
 			res = new nodeInfo(Const.RETURN);
 			currentRoutine().aliasObjectsReturn (res);
 		}
-		
+
 		stackCall.pop();
-		
-		
+
+
 		System.out.println ("(END) MethodDeclaration: " + method.getName());
-	
+
 		return res; 
 	}
 
@@ -141,7 +197,7 @@ public class AliasAnalysis extends ASTVisitor {
 		cu = (CompilationUnit) parser.createAST(null);
 		idGen = new Id();
 	}
-	
+
 	/**
 	 * @param method to be added the Stack Call
 	 * @return the routine and its signature to be added to the Stack Call
@@ -149,16 +205,16 @@ public class AliasAnalysis extends ASTVisitor {
 	public Routine routineSignature (MethodDeclaration method) {
 		Routine res = new Routine (method.getName().toString(), idGen);
 		res.setReturnType(method.getReturnType2().toString());
-		
+
 		for (int i=0;i<method.parameters().size();i++) {
 			res.addArgument(
 					((SingleVariableDeclaration) method.parameters().get(i)).getName().toString(), 
 					((SingleVariableDeclaration) method.parameters().get(i)).getType().toString());
-			
+
 		}
 		return res;
 	}
-	
+
 	/**
 	 * Starts the analysis of method 'methodName' in class
 	 * 'className' stopping at point 'point'.
@@ -173,7 +229,7 @@ public class AliasAnalysis extends ASTVisitor {
 		methodsClass = new HashMap<String,HashMap<String, MethodDeclaration>>();
 		cu.accept(this);
 	}
-	
+
 	/**
 	 * TypeDeclaration is visited initially. It initialises 
 	 * 	the aliasGraph as it contains the name of the
@@ -186,6 +242,8 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (TypeDeclaration node) {
 		//it is called only once
 		System.out.println ("TypeDeclaration: " + node.getName().toString());
+		
+
 		String className = node.getName().toString();
 		if (!methodsClass.containsKey(className)) {
 			methodsClass.put(node.getName().toString(), new HashMap<String, MethodDeclaration>());
@@ -193,15 +251,15 @@ public class AliasAnalysis extends ASTVisitor {
 				methodsClass.get(className).put(node.getMethods()[i].getName().toString(), node.getMethods()[i]);
 			}
 		}
-		
-		
+
+
 		// finding the right method
 		MethodDeclaration m = methodsClass.get(className).get(method);
 		if (m != null) {
 			//stackCall.push(new Routine (m.getName().toString(), idGen));
 			stackCall.push(routineSignature (m));
 			Helpers.printStackAll(stackCall);
-			m.getBody().accept(this);			
+			m.getBody().accept(this);
 		}else {
 			try {
 				throw new ASTException ("Method " + method + " was not found in the class");
@@ -210,11 +268,11 @@ public class AliasAnalysis extends ASTVisitor {
 				Log.log.push(e);
 			}
 		}
-		
-		
+
+
 		return false;
 	}
-	
+
 	/**
 	 * AST for the body of the routine.
 	 * It goes down in the AST for each expression
@@ -227,7 +285,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Only deals with local variable declaration: the analysis is done
 	 * over methods, methods do not define class fields.
@@ -242,22 +300,24 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("\t\tParent Type: " + node.getParent().getClass());
 		return true;
 	}
-	
+
 	public void endVisit (VariableDeclarationStatement node) {
 		System.out.println("END VariableDeclarationStatement: " + node);
-		
+
 	}
-	
+
 	/**
 	 * Expression
 	 */
 	public boolean visit (ExpressionStatement node) {
 		System.out.println("ExpressionStatement " + node);
-		//node.getExpression().accept(this);
-		getNodeInfo (null, node.getExpression());
+
+		// back
+		 getNodeInfo (null, node.getExpression());
+		// back
 		return false;
 	}
-	
+
 	/**
 	 * Return statement
 	 */
@@ -265,22 +325,22 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("ReturnStatement " + node);
 		System.out.println(">> " + node.getExpression());
 		System.out.println(">> " + node.getExpression().getClass());
-		
+
 		/**
 		 * "return exp;" is treated as "return = exp;"
 		 */
 		nodeInfo left = new nodeInfo (Const.RETURN);
 		currentRoutine().aliasObjectsReturn(left);
-		
+
 		nodeInfo right = null;
-		
+
 		if (node.getExpression() instanceof SimpleName) {
 			//variable: either an argument, class field or local 
-			
+
 			SimpleName n = (SimpleName) node.getExpression();
-			
+
 			right = new nodeInfo (n.toString());
-			
+
 			if (currentRoutine().isLocal(right.tag)) {
 				//Local
 				currentRoutine().aliasObjectsLocal(right);
@@ -290,9 +350,9 @@ public class AliasAnalysis extends ASTVisitor {
 			}else { // it is indeed a variable
 				// adding information to the alias graph in case it has not been added
 				ITypeBinding typeBinding = n.resolveTypeBinding();
-				
+
 				aliasGraph.initEdge (n.toString(), typeBinding.getName());
-				
+
 				aliasGraph.aliasObjects(right);
 			}
 			aliasing (left, right);
@@ -304,7 +364,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
 	/**
 	 * AST for assignments
 	 * This is the most crucial part of the implementation,
@@ -324,10 +384,10 @@ public class AliasAnalysis extends ASTVisitor {
 		 * v = w; where 'v' is a variable (could be a path)
 		 * and 'w' is an expression 
 		 */
-		
+
 		nodeInfo left = null;
 		nodeInfo right = null;
-		
+
 		System.out.println("left");
 		left = getNodeInfo(null, node.getLeftHandSide());
 		System.out.println("right");
@@ -337,17 +397,17 @@ public class AliasAnalysis extends ASTVisitor {
 			//ignore this case: no reference type
 			System.out.println("\tright no visited: left was null");
 		}
-		
-			
+
+
 		if (left != null && right != null) {
 			aliasing (left, right);
 		}else {
 			System.out.println("\taliasing was not performed: either left or right was null");
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Basic operation of Aliasing
 	 * @param left
@@ -364,7 +424,7 @@ public class AliasAnalysis extends ASTVisitor {
 		for (ArrayList<AliasObject> l: left.pointingAt) {
 			l.clear();
 		}
-		
+
 		for (int i=0;i<right.pointingAt.size();i++) {
 			for (AliasObject ao: right.pointingAt.get(i)) {
 				left.pointingAt.get(i).add(ao);
@@ -372,18 +432,18 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		System.out.println("Aliased: " + left.tag + ":" + right.tag);
 	}
-	
+
 	/**
 	 * Taking SimpleName as class variables 
 	 * arguments.
 	 */
 	public boolean visit (SimpleName node) {
 		System.out.println("SimpleName: " + node);
-		
+
 		return true;
-		
+
 	}
-	
+
 	/**
 	 * It is visited for each argument a routine contains
 	 */
@@ -391,7 +451,7 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("SingleVariableDeclaration: " + node.getName());
 		return false;
 	}
-	
+
 	/**
 	 * AST for Class Fields
 	 */
@@ -404,23 +464,23 @@ public class AliasAnalysis extends ASTVisitor {
 			System.out.println("\t\tcoming from local declaration");
 			try {
 				currentRoutine().updateKeyLocalVariable("?NoInfo?", node.getName().toString());
-				
+
 			} catch (AliasException e) {
 				e.printStackTrace();
 				Log.log.add(e);
 			}
 		}
-		
+
 		// check whether there is a call function, a initialisation or 
 		//a variable
 		if (node.getInitializer() != null) {
 			if (node.getInitializer() instanceof SimpleName) {
 				//variable: either an argument, class field or local 
 				SimpleName n = (SimpleName) node.getInitializer();
-				
+
 				nodeInfo left = new nodeInfo (node.getName().toString());
 				currentRoutine().aliasObjectsLocal(left);
-				
+
 				nodeInfo right = getNodeInfo (null, n);
 				aliasing (left, right);
 			}else {
@@ -428,16 +488,16 @@ public class AliasAnalysis extends ASTVisitor {
 				node.getInitializer().accept(this);
 			}
 		}
-		
-		
+
+
 		return false;
 	}
-	
+
 	public boolean visit (TypeDeclarationStatement node) {
 		System.out.println("TypeDeclarationStatement: " + node);
 		return true;
 	}
-	
+
 	/**
 	 * 
 	 * @param target represents qualified calls (null otherwise)
@@ -448,16 +508,21 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	public nodeInfo getNodeInfo (AliasObject target, ASTNode node) {
 		nodeInfo res = null;
-		
+
 		if (node instanceof NumberLiteral) {
 			//Ignore
 		}else if (node instanceof SimpleName) {
 			System.out.println("\tSimpleName");
-				// SimpleName can represent class variables, local variables, arguments
+			// SimpleName can represent class variables, local variables, arguments
 			SimpleName n = (SimpleName) node;
 			ITypeBinding typeBinding = n.resolveTypeBinding();
 			System.out.println("typeBinding: " + typeBinding.getName());
 			
+			//to delete
+			
+			//typeBinding
+			
+			//to delete 
 			
 			// Ignore native types (they are not references e.g. int, float ...)
 			if (typeBinding.isPrimitive()) {
@@ -468,25 +533,25 @@ public class AliasAnalysis extends ASTVisitor {
 					// adding information to the alias graph in case it has not been added
 					//currentRoutine().addLocalVariable(n.toString(), typeBinding.getName());
 					//Note: local variables can only be added through variable declaration
-					
+
 					res = new nodeInfo (n.toString());
 					currentRoutine().aliasObjectsLocal(res);
 				}else if (type.equals(Const.ARGUMENT)){
 					// adding information to the alias graph in case it has not been added
-					
+
 					res = new nodeInfo (n.toString());
 					currentRoutine().aliasObjectsArgument(res);
 				}else if (type.equals(Const.ATTRIBUTE)) {
 					// adding information to the alias graph in case it has not been added
 					aliasGraph.initEdge (n.toString(), typeBinding.getName());
-					
+
 					res = new nodeInfo (n.toString());
 					aliasGraph.aliasObjects(res);
 				} 
 			}
 		}else if (node instanceof MethodInvocation) {
 			System.out.println("\tMethodInvocation");
-			res = methodCall((MethodInvocation)node);
+			res = methodInvocation((MethodInvocation)node);
 		}else if (node instanceof Assignment) {
 			System.out.println("\tAssignment");
 			node.accept(this);
@@ -500,44 +565,52 @@ public class AliasAnalysis extends ASTVisitor {
 			currentRoutine().aliasObjectsArgument(res);
 		}else {
 			System.out.println("AST node no supported yet: " + node.getClass() + " (" + node + ")" );
-			assert false;
+
 		}
-		
+
 		return res;
 	}
-	
+
 	public boolean visit(ClassInstanceCreation node) {
 		System.out.println ("ClassInstanceCreation");
 		return true;
 	}
-	
+
 	public boolean visit(SimpleType node) {
 		System.out.println ("SimpleType");
 		System.out.println (node.getName());
-		
+
 		return true;
 	}
-	
+
 	public boolean visit(MethodInvocation node) {
 		System.out.println ("AST MethodInvocation");
-		// Unqualified call
-		MethodDeclaration method = methodsClass.get(node.resolveMethodBinding().getDeclaringClass().getName().toString()).get(node.resolveMethodBinding().getName());
 		
+		
+		// to delete
+		//node.getExpression().ge
+		
+		// to delete
+		// Unqualified call
+		MethodDeclaration method = methodsClass.get(
+				node.resolveMethodBinding().getDeclaringClass().getName().toString())
+				.get(node.resolveMethodBinding().getName());
+
 		//store the value of actual arguments to be aliased in 
 		//MethodDeclaration
 		for (int i=0;i<node.arguments().size();i++){
 			System.out.println(node.arguments().get(i).toString());
 			System.out.println(node.arguments().get(i).getClass());
-			
+
 			//currentRoutine().addActualArgument(getNodeInfo (null, (ASTNode)node.arguments().get(i)));
 		}
-		
+
 		method.accept(this);
 		// delete the actual arguments
 		//currentRoutine().restoreActualArgument();
 		return false;
 	}
-	
+
 	/**
 	 * 
 	 * @param n Node
@@ -545,11 +618,11 @@ public class AliasAnalysis extends ASTVisitor {
 	 * TODO: to make use of the AST to get the information. 
 	 */
 	public Integer getTypeNode (SimpleName n) {
-		
+
 		String name = n.getIdentifier();
-		
+
 		System.out.println("name: " + name);
-		
+
 		// check first with the current information
 		if (stackCall.peek().isArgument(name)) {
 			System.out.println("Argument");
@@ -571,7 +644,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		return null;
 	}
-	
+
 	/**
 	 * 
 	 * @return the current routine being analysed
@@ -579,7 +652,7 @@ public class AliasAnalysis extends ASTVisitor {
 	public Routine currentRoutine () {
 		return stackCall.peek();
 	}
-	
+
 	/**
 	 * 
 	 * @return the graph as a set of edges
@@ -587,8 +660,8 @@ public class AliasAnalysis extends ASTVisitor {
 	public SetEdges toSetEdges () {
 		return aliasGraph.toSetEdges();
 	}
-	
-	
+
+
 	/***** no visit *****/
 	/**
 	 * AST for Package Declaration
@@ -597,7 +670,7 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("PackageDeclaration: " + node + " doNothing");
 		return false;
 	}
-	
+
 	/**
 	 * AST for Package Declaration
 	 */
@@ -605,15 +678,15 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("ImportDeclaration: " + node + " doNothing");
 		return false;
 	}
-	
-	
-	
-	
+
+
+
+
 	/*** START ****/
-	
-	
-	
-	
+
+
+
+
 	public boolean visit(AnnotationTypeDeclaration node) {
 		System.out.println ("AnnotationTypeDeclaration");
 		return true;
@@ -1034,14 +1107,14 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println ("WildcardType");
 		return true;
 	}
-	
-	
-	
-	
+
+
+
+
 	/*** END ****/
-	
-	
-	
+
+
+
 	/**
 	 * 
 	 * @return the graph to be used by GraphViz including
@@ -1050,9 +1123,9 @@ public class AliasAnalysis extends ASTVisitor {
 	public String toGraphVizAll () {
 		return Helpers.toGraphAll(aliasGraph.getRoots(), stackCall);
 	}
-	
-	
-	
+
+
+
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 		String sourcePath = "";
 		String unitName = "";
@@ -1067,40 +1140,41 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}else if (System.getProperty("os.name").contains("Linux")) {
 			sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
-			unitName = "Basic.java";
+			unitName = "QualifiedCall.java";
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
-		
-		
-		
+
+
+
 
 		//System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS10);
+		ASTParser parser = ASTParser.newParser(AST.JLS11);
 		char[] fileContent = Helpers.getFileContent(sourcePath+unitName).toCharArray();
 
-		
+
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setResolveBindings(true);
-		
+
 		Map options = JavaCore.getOptions();
 		parser.setCompilerOptions(options);
-		
+
 		parser.setBindingsRecovery(true);
-		
-		
+
+
 		parser.setUnitName(unitName);
-		
+
 		///Users/victor/git/aliasing-java/AliasTestProject/src/Basics/Basic.java
 		String[] sources = {sourcePath}; 
-		
- 
+
+
 		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
 		parser.setSource(fileContent);
-		
+
+		long start1 = System.currentTimeMillis();
 		//Init
-		long start = System.currentTimeMillis();
 		AliasAnalysis v = new AliasAnalysis (parser);
-		v.start("Basic", "creationAndCall2", 0);
+		long start2 = System.currentTimeMillis();
+		v.start("QualifiedCall", "unq1", 0);
 		//End
 		long end = System.currentTimeMillis();
 		//String g = v.aliasGraph.toGraphViz();
@@ -1110,9 +1184,10 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println(g);
 		System.out.println("==========");
 		System.out.println(v.aliasGraph.toSetEdges());
-		float sec = (end - start) / 100F; 
-		System.out.println("Time Analysis: "+sec + " seconds");
-		
+		float time1 = (end - start1) / 100F;
+		float time2 = (end - start2) / 100F;
+		System.out.println("Time Analysis (with AST generation): "+time1 + " seconds");
+		System.out.println("Time Analysis (AST as input): "+time2+ " seconds");
 	}
 
 }

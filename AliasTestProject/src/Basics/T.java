@@ -10,5 +10,9 @@ public class T {
 		a = v;
 	}
 	
+	void remoteCall() {
+		a = b;
+	}
+	
 
 }

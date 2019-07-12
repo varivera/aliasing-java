@@ -3,20 +3,42 @@ package Basics;
 public class Basic {
 	
 	public int[] arr;
-	T v, w, zz, y;
+	T v, w, z, y;
 	int q, q2;
 	
 	public Basic() {
 		arr = new int[] {1,2};
 		v = new T();
 		w = new T();
-		zz = new T();
+		z = new T();
 	}
 	
-	public void creationAndCall2 () {
+	public void creation3c () {
+		this.v = this.w;
+	}
+	
+	public void creation3b () {
+		v = this.w;
+	}
+	
+	
+	public void creation3a () {
+		//this.v = w;
+		this.v = w;
+	}
+	
+	public void creationAndCall1 () {
 		assg2();
 		v = new T(); 
 	}
+	
+	public void creationAndCall2 () {
+		v = z;
+		v = new T(); 
+	}
+	
+	//here
+	//public void 
 	
 	public void func () {
 		w = get_v();
@@ -26,14 +48,13 @@ public class Basic {
 		return v;
 	}
 	
-	public void methodInvocation() {
+	public void methodInv2() {
+		methodInv ();
+	}
+	
+	public void methodInv() {
 		w = get_v ();
 	}
-	
-	public void methodInvocation2() {
-		methodInvocation ();
-	}
-	
 	
 	//returning an attribute
 	public T return6 () {
@@ -67,7 +88,7 @@ public class Basic {
 	}
 	
 	public void nestedCall () {
-		t2 (zz);
+		t2 (z);
 	}
 	
 	public void t2 (T ar) {
@@ -123,12 +144,12 @@ public class Basic {
 	
 	public void assg3 () {
 		v = w;
-		zz = v;
+		z = v;
 	}
 	
 	public void assg2 () {
 		v = w;
-		v = zz;
+		v = z;
 	}
 	
 	public void assg1 () {

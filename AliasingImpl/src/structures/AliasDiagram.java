@@ -6,7 +6,9 @@ import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
 import structures.helpers.Id;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 
 /**
  * AliasDiagram is the implementation of a graph where
@@ -27,15 +29,15 @@ public class AliasDiagram {
 	/**
 	 * the graph is rooted.
 	 * 'root' represents the graph's root. It cannot be
-	 * externally modified, but AliasDiagram will change 
+	 * externally modified. The AliasDiagram will change 
 	 * the root accordingly (moving the context of different
-	 * computation)
+	 * computation) (hence the Stack).
 	 * 
-	 * It can be more than one root (all representing the same
-	 * computation in different scenarios)
+	 * It can be more than one root, all representing the same
+	 * computation in different scenarios (hence the List).
 	 * 
 	 */
-	private ArrayList<AliasObject> root;
+	private Deque<ArrayList<AliasObject>> root;
 	
 	/**
 	 * edges of the graph are represented by the variables of the
@@ -55,9 +57,13 @@ public class AliasDiagram {
 	 * 			being analysed. 
 	 */
 	public AliasDiagram (String currentClass, Id id) {
-		root = new ArrayList <AliasObject>();
+		
+		root = new ArrayDeque<ArrayList <AliasObject>>();
+		// There is an initial root (representing the root of the computation e.g. 'this')
+		root.push(new ArrayList <AliasObject>());
+		
 		this.id = id;
-		root.add(new AliasObject (currentClass, this.id.getId()));
+		getRoots().add(new AliasObject (currentClass, this.id.getId()));
 	}
 	
 
@@ -70,7 +76,7 @@ public class AliasDiagram {
 	 * @param type type of the class attribute
 	 */
 	public void addEdge (String tag, String type) {
-		for (AliasObject ao: root) {
+		for (AliasObject ao: getRoots()) {
 			ao.addMap(tag, type, id.getId());
 		}
 	}
@@ -82,7 +88,7 @@ public class AliasDiagram {
 	 * @param type type of the class attribute
 	 */
 	public void initEdge (String tag, String type) {
-		for (AliasObject ao: root) {
+		for (AliasObject ao: getRoots()) {
 			ao.initValMap(tag, type, id.getId());
 		}
 	}
@@ -96,7 +102,7 @@ public class AliasDiagram {
 	 * @param tag is the name of the class attribute
 	 */
 	public void addEdge (AliasObject o, String tag) {
-		for (AliasObject ao: root) {
+		for (AliasObject ao: getRoots()) {
 			ao.addObjectAtt (o, tag);
 		}
 	}
@@ -104,18 +110,18 @@ public class AliasDiagram {
 	/**
 	 * 
 	 * @param ref reference to update the nodeInfo
-	 * update: the list of objects associated to 'ref.tag', from the
+	 * update the list of objects associated to 'ref.tag', from the
 	 * 			current context
 	 */
 	public void aliasObjects (nodeInfo ref)  {
-		for (AliasObject ao: root) {
+		for (AliasObject ao: getRoots()) {
 			//TODO: check if it exists
 			ref.addObjects(ao.getObjects(ref.tag));
 		}
 	}
 	
 	public ArrayList<AliasObject> getRoots (){
-		return root;
+		return root.peek();
 	}
 	
 	/**
@@ -123,7 +129,8 @@ public class AliasDiagram {
 	 * @return the graph to be used by GraphViz
 	 */
 	public String toGraphViz () {
-		return Helpers.toGraph(root);
+		assert root.size() == 1;
+		return Helpers.toGraph(getRoots ());
 	}
 	
 	/**
@@ -131,12 +138,13 @@ public class AliasDiagram {
 	 * @return the graph as a set of edges
 	 */
 	public SetEdges toSetEdges () {
-		return Helpers.toSetEdges(root);
+		assert root.size() == 1;
+		return Helpers.toSetEdges(getRoots ());
 	}
 	
 	public boolean isVariable (String s) {
 		
-		for (AliasObject ao: root) {
+		for (AliasObject ao: getRoots ()) {
 			if (ao.isIn(s)){
 				return true;
 			}
@@ -144,6 +152,35 @@ public class AliasDiagram {
 		
 		return false;
 	}
+	
+	/**
+	 * In OO computations, it is common to use the dot notation 
+	 * to express that a feature will be apply to an object. e.g.
+	 * 'x.getVal()' means, apply feature 'getVal()' to object 'x'.
+	 * When this happens, the context of the computation is changed.
+	 * 'changeRoot' implements such a change of computation 
+	 * @param newRoots the new roots of the graph
+	 */
+	public void changeRoot (ArrayList <ArrayList<AliasObject>> newRoots){ 
+		//TODO: to consider: newRoots is sent (indirectly) from nodeInfo. Maybe, there is not need
+		//					for using an array of arrays. Issue: https://github.com/varivera/aliasing-java/issues/18
+		// forall r: Roots
+		//		i) check if source exists in r. If not, add it (UPDATE: being done before)
+		//		ii) retrieve r.get (source) <- list of new roots
+		//	iii) add the new roots to 'root' stack
+		
+		root.add(new ArrayList<AliasObject>());
+		for (ArrayList<AliasObject> r: newRoots) {	
+			root.peek().addAll(r);
+		}
+	}
+	
+	//TODO
+	public void changeBackRoot() {
+		
+	}
+
+
 
 	/**
 	 * For Debugging and Testing phases
@@ -152,17 +189,5 @@ public class AliasDiagram {
 }
 
 /** TODO: to be implemented
- * **
-	 * In OO computations, it is common to use the dot notation 
-	 * to express that a feature will be apply to an object. e.g.
-	 * 'x.getVal ()' means, apply feature 'getVal ()' to object 'x'.
-	 * When this happens, the context of the computation is changed.
-	 * 'changeRoot' implements such a change of computation 
-	 * @param newRoots what are the new roots of the graph
-	 *
-	public void changeRoot (ArrayList <AliasObject> newRoots){ 
-		// newRoots should be
-	}
-
- *
+ 
 */
