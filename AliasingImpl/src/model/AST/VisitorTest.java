@@ -39,7 +39,7 @@ public class VisitorTest extends ASTVisitor {
 
 	public boolean visit (MethodDeclaration node) {
 		System.out.println ("MethodDeclaration: " + node.getName());
-
+		
 		node.getBody().accept(this);
 		return false;
 	}
@@ -179,7 +179,7 @@ public class VisitorTest extends ASTVisitor {
 		System.out.println ("AST MethodInvocation");
 		System.out.println (">> " + (node.getExpression()==null));
 		if (node.getExpression() != null) {
-
+			
 
 			//ASTNode d = cu.findDeclaringNode(
 			//		node.getExpression().resolveTypeBinding());

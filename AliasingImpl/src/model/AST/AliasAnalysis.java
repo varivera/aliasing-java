@@ -7,6 +7,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import exceptions.ASTException;
 import exceptions.AliasException;
@@ -48,16 +49,17 @@ public class AliasAnalysis extends ASTVisitor {
 	// Compilation Unit
 	private CompilationUnit cu;
 
-	// Method to be analysed
-	String method;
+	// CompilationUnit of all classes involved
+	private HashMap<String, CompilationUnit> cus;
 
-	/**
-	 * For each class used in the analysis, methods declaration
-	 * will be stored. This is in case of a (un)qualified call.
-	 * JDT might have some mechanisms to manage this differently
-	 */
-	HashMap<String, 
-	HashMap<String, MethodDeclaration>> methodsClass;
+	// Method to be analysed
+	String methodName;
+
+	// Class to be analysed
+	String className;
+	
+	// Actual Remote Arguments sent from source
+	nodeInfo[] actualremoteArgs;
 
 	/**
 	 * Id generator: to give a unique identifier to Alias Objects
@@ -68,134 +70,48 @@ public class AliasAnalysis extends ASTVisitor {
 	 * Method to be read line by line. It constructs the 
 	 * 	Alias Graph accordingly
 	 */
-	public boolean visit (MethodDeclaration node) {
-		System.out.println ("MethodDeclaration: " + node.getName());
-		
-		//to delete
-		
-		//node.getBody()
-		//to delete
-		
+	public boolean visit (MethodDeclaration method) {
+		System.out.println ("MethodDeclaration: " + method.getName());
+
+
+
+
 		return false;
 	}
 
+	//TODO unitName: should be only the sourcePath. 
+	//TODO: 	(i) retrieve all .java files from sourcePath
+	public AliasAnalysis(String sourcePath, String[] unitName, String[] classpath,
+			String rootName) throws FileNotFoundException, IOException {
+		cus = new HashMap<String, CompilationUnit>();
+		for (String javaSource: unitName) {
 
-	/**
-	 * Handles the call invocation to a routine. Handles the cases
-	 * of qualified calls
-	 * @param call
-	 * @return the node Information
-	 */
-	public nodeInfo methodInvocation(MethodInvocation call) {
-		System.out.println("methodInvocation: " + call);
-		System.out.println(call.getName());
-		System.out.println(call.getExpression());
-		//System.out.println(call.getExpression().toString());
-		
+			//System.out.println(t.getFileContent(source));
+			ASTParser parser = ASTParser.newParser(AST.JLS11);
+			char[] fileContent = Helpers.getFileContent(sourcePath+javaSource).toCharArray();
 
-		// TODO: How to realise: x.m (no method call)
-		// TODO: How to realise: x().m (x is a method - function)
 
-		nodeInfo ne = null;
-		if (call.getExpression() == null) {//Unqualified call
-			ne = methodCall(call);
-		}else {
-			// TODO: change roots only if it is 'x.m()'
+			parser.setKind(ASTParser.K_COMPILATION_UNIT);
+			parser.setResolveBindings(true);
 
-			nodeInfo ni = getNodeInfo(null, call.getExpression()); // to be sure the edge is in the graph
-			// TODO: factor the previous line out (improvement)
-			aliasGraph.changeRoot(ni.pointingAt);
-			// update methodsClass field
-			
-			for (int i=0;i<=call.getExpression().getClass().getDeclaredMethods().length;i++){
-				System.out.println(call.getClass().getDeclaredMethods()[i].getName());
-			}
-			
-			/*if (!methodsClass.containsKey(className)) {
-				methodsClass.put(node.getName().toString(), new HashMap<String, MethodDeclaration>());
-				for (int i=0;i<node.getMethods().length;i++) {
-					methodsClass.get(className).put(node.getMethods()[i].getName().toString(), node.getMethods()[i]);
-				}
-			}*/
-			
- 			ne = methodCall(call);
+			Map options = JavaCore.getOptions();
+			parser.setCompilerOptions(options);
+
+			parser.setBindingsRecovery(true);
+
+
+			parser.setUnitName(javaSource);
+
+			String[] sources = {sourcePath}; 
+
+
+			parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
+			parser.setSource(fileContent);
+			cus.put(javaSource.replace(".java", ""), (CompilationUnit) parser.createAST(null));
 		}
-		return ne;
-	}
-
-	/**
-	 * Handles the call to routine. It is necessary to catch it before
-	 * the AST since there are some information needed before the 
-	 * Routine is popped out of the Stack
-	 * @param call
-	 * @return the node Information
-	 */
-	public nodeInfo methodCall (MethodInvocation call) {
-		System.out.println("methodCall: " + call);
-		assert !stackCall.isEmpty(); // at the least initial call should be already placed
-
-		
-		// to delete
-		
-		
-		//to delete
-		
-		
-		// Unqualified call
-		MethodDeclaration method = methodsClass.get(
-				call.resolveMethodBinding().getDeclaringClass().getName().toString()).get(call.resolveMethodBinding().getName());
-
-		/**
-		 * Handling Arguments
-		 */
-		assert (call.arguments().size() == method.parameters().size());
-
-		// method signature
-		Routine routineCall = routineSignature (method);
-
-		for (int i=0;i<method.parameters().size();i++) {
-			System.out.println(((SingleVariableDeclaration)method.parameters().get(i)).getName() + " <<<");
-			nodeInfo left = new nodeInfo(((SingleVariableDeclaration)method.parameters().get(i)).getName().toString());
-			routineCall.aliasObjectsArgument(left);
-
-			//					getNodeInfo (null, (SingleVariableDeclaration)method.parameters().get(i));
-
-			nodeInfo right = getNodeInfo (null, (ASTNode)call.arguments().get(i));
-
-			if (left != null && right != null) {
-				aliasing (left, right);
-			}else {
-				System.out.println ("Either left or right was null");
-			}
-		}
-
-
-		stackCall.push(routineCall);
-
-		Helpers.printStackAll (stackCall);
-
-		//method.accept(this);
-		method.getBody().accept(this);
-
-		assert (stackCall.size() > 1);
-
-		nodeInfo res = null;
-		if (currentRoutine().isFunction()) {
-			res = new nodeInfo(Const.RETURN);
-			currentRoutine().aliasObjectsReturn (res);
-		}
-
-		stackCall.pop();
-
-
-		System.out.println ("(END) MethodDeclaration: " + method.getName());
-
-		return res; 
-	}
-
-	public AliasAnalysis(ASTParser parser) {
-		cu = (CompilationUnit) parser.createAST(null);
+		stackCall = new ArrayDeque <Routine>();
 		idGen = new Id();
+		aliasGraph = new AliasDiagram (rootName, idGen);
 	}
 
 	/**
@@ -221,12 +137,15 @@ public class AliasAnalysis extends ASTVisitor {
 	 * Initial implementation will consider the analysis of 
 	 * all method (i.e. point is equal to method exit)
 	 */
-	public void start (String className, String methodName, int point) {
-		assert cu != null;
-		aliasGraph = new AliasDiagram (className, idGen);
-		stackCall = new ArrayDeque <Routine>();
-		method = methodName;
-		methodsClass = new HashMap<String,HashMap<String, MethodDeclaration>>();
+	public void start (String className, String methodName, int point, AliasAnalysis current, nodeInfo[] actualremoteArgs) {
+		this.methodName = methodName;
+		this.className = className;
+		if (current != null) { //no root
+			aliasGraph = current.aliasGraph;
+			stackCall = current.stackCall;
+			this.actualremoteArgs = actualremoteArgs;
+		}
+		cu = cus.get(className);
 		cu.accept(this);
 	}
 
@@ -242,33 +161,60 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit (TypeDeclaration node) {
 		//it is called only once
 		System.out.println ("TypeDeclaration: " + node.getName().toString());
-		
 
-		String className = node.getName().toString();
-		if (!methodsClass.containsKey(className)) {
-			methodsClass.put(node.getName().toString(), new HashMap<String, MethodDeclaration>());
-			for (int i=0;i<node.getMethods().length;i++) {
-				methodsClass.get(className).put(node.getMethods()[i].getName().toString(), node.getMethods()[i]);
+
+		MethodDeclaration m = null;
+		
+		//TODO: it can be done similarly to:
+		//MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
+		
+		
+		//TODO: find another way to do this: no need to iterate over all methods
+		for (int j=0;j<node.getMethods().length;j++) {
+			if (node.getMethods()[j].getName().toString().equals(this.methodName)) {
+				m = node.getMethods()[j];
+				stackCall.push(routineSignature (m));
+				Helpers.printStackAll(stackCall);
+				
+				//check if the method is called from another object
+				if (this.actualremoteArgs != null) {
+					assert actualremoteArgs.length == m.parameters().size();
+					/**
+					 * Handling Arguments
+					 */
+					// Get method's signature (used for the routineStack)
+					//link formal to actual arguments (if any)
+					for (int i=0;i< m.parameters().size();i++) {
+						System.out.println("Formal Argument " + (i+1) + " : " + m.parameters().get(i));
+						System.out.println("Actual Argument " + (i+1) + " : " + actualremoteArgs [i]);
+
+						nodeInfo formal = new nodeInfo(((SingleVariableDeclaration)m.parameters().get(i)).getName().toString());
+						stackCall.peek().aliasObjectsArgument(formal);
+						
+						if (formal != null && actualremoteArgs[i] != null) {
+							aliasing (formal, actualremoteArgs[i]);
+						}else {
+							System.out.println ("Either left or right was null");
+
+						}
+					}
+
+					this.actualremoteArgs = null;
+				}
+				
+				m.getBody().accept(this);
+				break;
 			}
 		}
 
-
-		// finding the right method
-		MethodDeclaration m = methodsClass.get(className).get(method);
-		if (m != null) {
-			//stackCall.push(new Routine (m.getName().toString(), idGen));
-			stackCall.push(routineSignature (m));
-			Helpers.printStackAll(stackCall);
-			m.getBody().accept(this);
-		}else {
+		if (m == null) {
 			try {
-				throw new ASTException ("Method " + method + " was not found in the class");
+				throw new ASTException ("Method " + methodName + " was not found in the class");
 			} catch (ASTException e) {
 				e.printStackTrace();
 				Log.log.push(e);
 			}
 		}
-
 
 		return false;
 	}
@@ -313,9 +259,9 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("ExpressionStatement " + node);
 
 		// back
-		 getNodeInfo (null, node.getExpression());
+		//getNodeInfo (null, node.getExpression());
 		// back
-		return false;
+		return true;
 	}
 
 	/**
@@ -357,7 +303,9 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 			aliasing (left, right);
 		}else if(node.getExpression() instanceof MethodInvocation) {
-			right = getNodeInfo (null, node.getExpression());
+			visit ((MethodInvocation)node.getExpression());
+			right = nodeInfoLastRoutine;
+			assert right != null;
 			aliasing (left, right);
 		}else {
 			//TODO: check others
@@ -512,17 +460,11 @@ public class AliasAnalysis extends ASTVisitor {
 		if (node instanceof NumberLiteral) {
 			//Ignore
 		}else if (node instanceof SimpleName) {
-			System.out.println("\tSimpleName");
+			System.out.println("\tgetNodeInfo>SimpleName");
 			// SimpleName can represent class variables, local variables, arguments
 			SimpleName n = (SimpleName) node;
 			ITypeBinding typeBinding = n.resolveTypeBinding();
 			System.out.println("typeBinding: " + typeBinding.getName());
-			
-			//to delete
-			
-			//typeBinding
-			
-			//to delete 
 			
 			// Ignore native types (they are not references e.g. int, float ...)
 			if (typeBinding.isPrimitive()) {
@@ -550,16 +492,18 @@ public class AliasAnalysis extends ASTVisitor {
 				} 
 			}
 		}else if (node instanceof MethodInvocation) {
-			System.out.println("\tMethodInvocation");
-			res = methodInvocation((MethodInvocation)node);
+			System.out.println("\tgetNodeInfo>MethodInvocation");
+			
+			visit ((MethodInvocation)node);
+			res = nodeInfoLastRoutine;
 		}else if (node instanceof Assignment) {
-			System.out.println("\tAssignment");
+			System.out.println("\tgetNodeInfo>Assignment");
 			node.accept(this);
 		}else if (node instanceof ClassInstanceCreation) {
-			System.out.println("\tClassInstanceCreation");
+			System.out.println("\tgetNodeInfo>ClassInstanceCreation");
 			node.accept(this);
 		}else if(node instanceof SingleVariableDeclaration){
-			System.out.println("\tSingleVariableDeclaration");
+			System.out.println("\tgetNodeInfo>SingleVariableDeclaration");
 			// Formal argument
 			res = new nodeInfo (((SingleVariableDeclaration)node).getName().toString());
 			currentRoutine().aliasObjectsArgument(res);
@@ -583,31 +527,111 @@ public class AliasAnalysis extends ASTVisitor {
 		return true;
 	}
 
-	public boolean visit(MethodInvocation node) {
-		System.out.println ("AST MethodInvocation");
-		
-		
-		// to delete
-		//node.getExpression().ge
-		
-		// to delete
-		// Unqualified call
-		MethodDeclaration method = methodsClass.get(
-				node.resolveMethodBinding().getDeclaringClass().getName().toString())
-				.get(node.resolveMethodBinding().getName());
+	//nodeInfo before the last Routine is popped out of the Routine Stack
+	nodeInfo nodeInfoLastRoutine;
+	public boolean visit(MethodInvocation call) {
+		System.out.println ("MethodInvocation");
 
-		//store the value of actual arguments to be aliased in 
-		//MethodDeclaration
-		for (int i=0;i<node.arguments().size();i++){
-			System.out.println(node.arguments().get(i).toString());
-			System.out.println(node.arguments().get(i).getClass());
+		
+		
+		if (call.getExpression() == null) {//Unqualified call
+			// Get the Declaring Method
+			MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
 
-			//currentRoutine().addActualArgument(getNodeInfo (null, (ASTNode)node.arguments().get(i)));
+			/**
+			 * Handling Arguments
+			 */
+			// Get method's signature (used for the routineStack)
+			// method signature
+			Routine methodCall = routineSignature (method);
+
+
+			//link formal to actual arguments (if any)
+			for (int i=0;i<method.parameters().size();i++) {
+				System.out.println("Formal Argument " + (i+1) + " : " + method.parameters().get(i));
+				System.out.println("Actual Argument " + (i+1) + " : " + call.arguments().get(i));
+
+				nodeInfo formal = new nodeInfo(((SingleVariableDeclaration)method.parameters().get(i)).getName().toString());
+				methodCall.aliasObjectsArgument(formal);
+				nodeInfo actual = getNodeInfo (null, (ASTNode)call.arguments().get(i));
+
+				if (formal != null && actual != null) {
+					aliasing (formal, actual);
+				}else {
+					System.out.println ("Either left or right was null");
+					
+				}
+			}
+
+			stackCall.push(methodCall);
+
+			Helpers.printStackAll (stackCall);
+			method.getBody().accept(this);
+
+			assert stackCall.size() > 1;
+
+			nodeInfoLastRoutine = null;
+			if (currentRoutine().isFunction()) {
+				nodeInfoLastRoutine = new nodeInfo(Const.RETURN);
+				currentRoutine().aliasObjectsReturn (nodeInfoLastRoutine);
+			}
+
+			stackCall.pop();
+		}else {//Qualified call
+			// TODO: change roots only if it is 'x.m()'
+			// TODO: How to realise: x.m (no method call)
+			// TODO: How to realise: x().m (x is a method - function)
+			System.out.println("\tQualified Call");
+			
+			
+			/**
+			 * According to the Rule: when analysing 
+			 * void t(){
+			 * 		v.w (a)
+			 * } ...
+			 * class T2{
+			 * 	T b;
+			 * 	void w (T v){
+			 * 		b = v;
+			 * 	}
+			 * }
+			 * 
+			 *   (i) make sure 'v' is in the alias diagram
+			 *  (ii) retrieve the objects 'v' is pointing at
+			 * (iii) get w's information (i.e. formal arguments)
+			 *  (iv) link formal to actual arguments
+			 *  		(iii and iv are being performed later on)
+			 *   (v) reroot the diagram to 'v'
+			 *  (vi) Analyse w
+			 * (vii) reroot back 
+			 */
+			
+			// 'getNodeInfo' adds call.getExpression() to the Alias Diagram in case it does not
+			//		exist. It also gets the 'pointingAt needed to change roots
+			nodeInfo ni = getNodeInfo(null, call.getExpression()); // (i) and (ii)
+			
+			nodeInfo[] actual = new nodeInfo[call.arguments().size()];
+			//Get actual arguments
+			for (int i=0;i<call.arguments().size();i++) {
+				System.out.println("Actual Argument " + (i+1) + " : " + call.arguments().get(i));
+
+				actual[i] = getNodeInfo (null, (ASTNode)call.arguments().get(i));
+			}
+			
+			// Change roots in the Alias Diagram
+			aliasGraph.changeRoot(ni.pointingAt);
+			
+			System.out.println("|getName>> " + call.getName());
+			System.out.println("|getExpression>> " + call.getExpression());
+			//ni.pointingAt
+			
+			start ("T", call.getName().toString(), 0, this, actual);
+			
+			stackCall.pop();
+			// Change roots back in the Alias Diagram
+			aliasGraph.changeBackRoot();
+			Helpers.printStackAll(stackCall);
 		}
-
-		method.accept(this);
-		// delete the actual arguments
-		//currentRoutine().restoreActualArgument();
 		return false;
 	}
 
@@ -1127,54 +1151,32 @@ public class AliasAnalysis extends ASTVisitor {
 
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
+
 		String sourcePath = "";
-		String unitName = "";
-		String[] classpath = null;
+		String[] unitName = new String[] {};
+		String[] classpath = new String[] {};
 		if (System.getProperty("os.name").contains("Windows")) {
 			sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
-			unitName = "Basic.java";
+			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 		}else if (System.getProperty("os.name").contains("Mac")) {
 			sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
-			unitName = "Basic.java";
+			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}else if (System.getProperty("os.name").contains("Linux")) {
 			sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
-			unitName = "QualifiedCall.java";
+			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-
-
-
-		//System.out.println(t.getFileContent(source));
-		ASTParser parser = ASTParser.newParser(AST.JLS11);
-		char[] fileContent = Helpers.getFileContent(sourcePath+unitName).toCharArray();
-
-
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-
-		Map options = JavaCore.getOptions();
-		parser.setCompilerOptions(options);
-
-		parser.setBindingsRecovery(true);
-
-
-		parser.setUnitName(unitName);
-
-		///Users/victor/git/aliasing-java/AliasTestProject/src/Basics/Basic.java
-		String[] sources = {sourcePath}; 
-
-
-		parser.setEnvironment(classpath, sources, new String[] { "UTF-8"}, true);
-		parser.setSource(fileContent);
+		String classAnalyse = "QualifiedCall";
+		String methodAnalyse = "unq1";
 
 		long start1 = System.currentTimeMillis();
 		//Init
-		AliasAnalysis v = new AliasAnalysis (parser);
+		AliasAnalysis v = new AliasAnalysis (sourcePath, unitName, classpath, classAnalyse);
 		long start2 = System.currentTimeMillis();
-		v.start("QualifiedCall", "unq1", 0);
+		v.start(classAnalyse, methodAnalyse, 0, null, null);
 		//End
 		long end = System.currentTimeMillis();
 		//String g = v.aliasGraph.toGraphViz();

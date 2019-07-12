@@ -175,9 +175,11 @@ public class AliasDiagram {
 		}
 	}
 	
-	//TODO
+	/**
+	 * Once a qualified call is done, the Alias Diagram is root back
+	 */
 	public void changeBackRoot() {
-		
+		root.pop();
 	}
 
 
