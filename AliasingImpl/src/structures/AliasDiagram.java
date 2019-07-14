@@ -121,6 +121,9 @@ public class AliasDiagram {
 	}
 	
 	public ArrayList<AliasObject> getRoots (){
+		// to delete
+		printRoots();
+		// to delete
 		return root.peek();
 	}
 	
@@ -169,10 +172,15 @@ public class AliasDiagram {
 		//		ii) retrieve r.get (source) <- list of new roots
 		//	iii) add the new roots to 'root' stack
 		
-		root.add(new ArrayList<AliasObject>());
+		root.push(new ArrayList<AliasObject>());
 		for (ArrayList<AliasObject> r: newRoots) {	
 			root.peek().addAll(r);
 		}
+		
+		// to delete
+		System.out.println(root.size());
+		printRoots();
+		//to delete
 	}
 	
 	/**
@@ -181,15 +189,18 @@ public class AliasDiagram {
 	public void changeBackRoot() {
 		root.pop();
 	}
-
-
-
+	
 	/**
 	 * For Debugging and Testing phases
 	 */
-
+	
+	private void printRoots() {
+		
+		for (ArrayList <AliasObject> a: root) {
+			System.out.println (">>");
+			for (AliasObject b: a) {
+				System.out.println (b.typeName() + "\t" + b.idNode());
+			}
+		}
+	}
 }
-
-/** TODO: to be implemented
- 
-*/

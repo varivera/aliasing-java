@@ -37,4 +37,9 @@ public class nodeInfo {
 	public void addObjects (ArrayList<AliasObject> objs) {
 		pointingAt.add(objs);
 	}
+	
+	@Override
+	public String toString() {
+		return tag;
+	}
 }

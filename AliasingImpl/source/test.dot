@@ -1,4 +1,11 @@
 digraph G {
+n10->n17 [label="b"]
+n10->n17 [label="a"]
+n0->n10 [label="v"]
+n0->n10 [label="t"]
+n0[label="<QualifiedCall>"]
+n17[label="<T>"]
+n10[label="<T>"]
 n3->n4 [label="result"]
 n3[label="<unq1 r>"]
 n4[label="<void>"]

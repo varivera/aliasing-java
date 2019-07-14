@@ -9,7 +9,7 @@ public class QualifiedCall {
 	}
 	
 	public void unq1() {
-		//Call();
+		Call();
 		t.remoteCall();
 	}
 	

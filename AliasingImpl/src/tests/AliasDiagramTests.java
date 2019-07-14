@@ -14,22 +14,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.Map;
-
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
 import model.AST.AliasAnalysis;
 import structures.graphRep.SetEdges;
-import structures.helpers.Helpers;
 
 class AliasDiagramTests {
 	AliasAnalysis v;
 	
-	@SuppressWarnings({ "deprecation", "unchecked" })
 	@BeforeEach
 	void InitClass() {
 		System.out.println("Init Alias Analysis");

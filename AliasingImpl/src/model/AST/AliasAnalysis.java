@@ -144,6 +144,7 @@ public class AliasAnalysis extends ASTVisitor {
 			aliasGraph = current.aliasGraph;
 			stackCall = current.stackCall;
 			this.actualremoteArgs = actualremoteArgs;
+			Helpers.printStackAll(stackCall);
 		}
 		cu = cus.get(className);
 		cu.accept(this);
@@ -609,7 +610,7 @@ public class AliasAnalysis extends ASTVisitor {
 			// 'getNodeInfo' adds call.getExpression() to the Alias Diagram in case it does not
 			//		exist. It also gets the 'pointingAt needed to change roots
 			nodeInfo ni = getNodeInfo(null, call.getExpression()); // (i) and (ii)
-			
+			System.out.println(ni);
 			nodeInfo[] actual = new nodeInfo[call.arguments().size()];
 			//Get actual arguments
 			for (int i=0;i<call.arguments().size();i++) {
@@ -623,9 +624,12 @@ public class AliasAnalysis extends ASTVisitor {
 			
 			System.out.println("|getName>> " + call.getName());
 			System.out.println("|getExpression>> " + call.getExpression());
-			//ni.pointingAt
 			
-			start ("T", call.getName().toString(), 0, this, actual);
+			assert ni.pointingAt.size() != 0;
+			assert ni.pointingAt.get(0).size() != 0;
+			//TODO: is it always the same type?
+			//TODO: safer to go to 'call.getExpression()' and retrieve the type
+			start (ni.pointingAt.get(0).get(0).typeName(), call.getName().toString(), 0, this, actual);
 			
 			stackCall.pop();
 			// Change roots back in the Alias Diagram
