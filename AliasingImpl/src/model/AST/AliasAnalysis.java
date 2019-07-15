@@ -508,6 +508,9 @@ public class AliasAnalysis extends ASTVisitor {
 			// Formal argument
 			res = new nodeInfo (((SingleVariableDeclaration)node).getName().toString());
 			currentRoutine().aliasObjectsArgument(res);
+		}else if (node instanceof QualifiedName) {
+			System.out.println("\tgetNodeInfo>QualifiedName");
+			node.accept(this);
 		}else {
 			System.out.println("AST node no supported yet: " + node.getClass() + " (" + node + ")" );
 
@@ -527,6 +530,15 @@ public class AliasAnalysis extends ASTVisitor {
 
 		return true;
 	}
+	
+	public boolean visit(QualifiedName node) {
+		System.out.println ("QualifiedName");
+		System.out.println (">> " + node.getFullyQualifiedName());
+		System.out.println (">> " + node.getName());
+		System.out.println (">> " + node.getQualifier());
+		
+		return true;
+	}
 
 	//nodeInfo before the last Routine is popped out of the Routine Stack
 	nodeInfo nodeInfoLastRoutine;
@@ -536,6 +548,7 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		
 		if (call.getExpression() == null) {//Unqualified call
+			System.out.println("\tUnqualified Call");
 			// Get the Declaring Method
 			MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
 
@@ -630,6 +643,13 @@ public class AliasAnalysis extends ASTVisitor {
 			//TODO: is it always the same type?
 			//TODO: safer to go to 'call.getExpression()' and retrieve the type
 			start (ni.pointingAt.get(0).get(0).typeName(), call.getName().toString(), 0, this, actual);
+			
+			
+			nodeInfoLastRoutine = null;
+			if (currentRoutine().isFunction()) {
+				nodeInfoLastRoutine = new nodeInfo(Const.RETURN);
+				currentRoutine().aliasObjectsReturn (nodeInfoLastRoutine);
+			}
 			
 			stackCall.pop();
 			// Change roots back in the Alias Diagram
@@ -1006,11 +1026,6 @@ public class AliasAnalysis extends ASTVisitor {
 		return true;
 	}
 
-	public boolean visit(QualifiedName node) {
-		System.out.println ("QualifiedName");
-		return true;
-	}
-
 	public boolean visit(QualifiedType node) {
 		System.out.println ("QualifiedType");
 		return true;
@@ -1174,7 +1189,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "QualifiedCall";
-		String methodAnalyse = "unq1";
+		String methodAnalyse = "unq4";
 
 		long start1 = System.currentTimeMillis();
 		//Init

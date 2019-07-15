@@ -14,5 +14,13 @@ public class T {
 		a = b;
 	}
 	
+	void remoteArg(T v) {
+		a = v;
+	}
+
+	public T getA() {
+		return a;
+	}
+	
 
 }

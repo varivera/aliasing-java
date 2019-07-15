@@ -121,9 +121,6 @@ public class AliasDiagram {
 	}
 	
 	public ArrayList<AliasObject> getRoots (){
-		// to delete
-		printRoots();
-		// to delete
 		return root.peek();
 	}
 	
