@@ -175,7 +175,7 @@ public class VisitorTest extends ASTVisitor {
 		return true;
 	}
 
-	public boolean visit(MethodInvocation node) {
+	public boolean visit2(MethodInvocation node) {
 		System.out.println ("AST MethodInvocation");
 		System.out.println (">> " + (node.getExpression()==null));
 		if (node.getExpression() != null) {
@@ -229,13 +229,20 @@ public class VisitorTest extends ASTVisitor {
 		}
 		return false;
 	}
+	
+	public boolean visit(MethodInvocation node) {
+		System.out.println ("AST MethodInvocation");
+		System.out.println (">> " + (node.getExpression()==null));
+		cu.findDeclaringNode((IBinding) node.getName()).accept(this);;
+		System.out.println("<<UC|");
+		return false;
+	}
+	
+	
 
 
 	public boolean visit (SimpleName node) {
 		System.out.println("SimpleName: " + node);
-		ASTNode d = cu.findDeclaringNode(node.resolveBinding());
-		d.accept(this);
-		System.out.println(">>>> " + d);
 		return false;
 
 	}
