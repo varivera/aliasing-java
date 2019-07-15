@@ -7,7 +7,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import exceptions.ASTException;
 import exceptions.AliasException;
@@ -111,7 +110,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		stackCall = new ArrayDeque <Routine>();
 		idGen = new Id();
-		aliasGraph = new AliasDiagram (rootName, idGen);
+		aliasGraph = new AliasDiagram (idGen);
 	}
 
 	/**
@@ -120,12 +119,11 @@ public class AliasAnalysis extends ASTVisitor {
 	 */
 	public Routine routineSignature (MethodDeclaration method) {
 		Routine res = new Routine (method.getName().toString(), idGen);
-		res.setReturnType(method.getReturnType2().toString());
+		res.setReturnType();
 
 		for (int i=0;i<method.parameters().size();i++) {
 			res.addArgument(
-					((SingleVariableDeclaration) method.parameters().get(i)).getName().toString(), 
-					((SingleVariableDeclaration) method.parameters().get(i)).getType().toString());
+					((SingleVariableDeclaration) method.parameters().get(i)).getName().toString());
 
 		}
 		return res;
@@ -241,7 +239,7 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println("VariableDeclarationStatement: " + node);
 		//value of the local name variable is not available. The link 
 		//is created and updated down the AST tree.
-		currentRoutine().addLocalVariable("?NoInfo?", node.getType().toString());
+		currentRoutine().addLocalVariable("?NoInfo?");
 		// Addition of local variable is done down the AST Tree where
 		// all information (name and type) is available
 		System.out.println("\t\tParent Type: " + node.getParent().getClass());
@@ -298,7 +296,7 @@ public class AliasAnalysis extends ASTVisitor {
 				// adding information to the alias graph in case it has not been added
 				ITypeBinding typeBinding = n.resolveTypeBinding();
 
-				aliasGraph.initEdge (n.toString(), typeBinding.getName());
+				aliasGraph.initEdge (n.toString());
 
 				aliasGraph.aliasObjects(right);
 			}
@@ -486,7 +484,7 @@ public class AliasAnalysis extends ASTVisitor {
 					currentRoutine().aliasObjectsArgument(res);
 				}else if (type.equals(Const.ATTRIBUTE)) {
 					// adding information to the alias graph in case it has not been added
-					aliasGraph.initEdge (n.toString(), typeBinding.getName());
+					aliasGraph.initEdge (n.toString());
 
 					res = new nodeInfo (n.toString());
 					aliasGraph.aliasObjects(res);
@@ -642,7 +640,7 @@ public class AliasAnalysis extends ASTVisitor {
 			assert ni.pointingAt.get(0).size() != 0;
 			//TODO: is it always the same type?
 			//TODO: safer to go to 'call.getExpression()' and retrieve the type
-			start (ni.pointingAt.get(0).get(0).typeName(), call.getName().toString(), 0, this, actual);
+			start ("T", call.getName().toString(), 0, this, actual);
 			
 			
 			nodeInfoLastRoutine = null;

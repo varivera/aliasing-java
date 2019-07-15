@@ -60,13 +60,13 @@ public class Helpers {
 		while (!objects.isEmpty()) {
 			AliasObject currentObject = objects.remove();
 			if (!currentObject.isVisited()) {
-				nodeIds.put("n"+currentObject.idNode(), currentObject.printableTypeName());
+				nodeIds.put("n"+currentObject.idNode(), ""+currentObject.idNode());
 				
 				currentObject.setVisited(true);
 				for (String suc: currentObject.mapping.keySet()){
 					for (AliasObject obj: currentObject.mapping.get(suc)) {
 						objects.add(obj);
-						nodeIds.put("n"+obj.idNode(), obj.printableTypeName());
+						nodeIds.put("n"+obj.idNode(), ""+obj.idNode());
 						
 						
 						// at the beginning of the list

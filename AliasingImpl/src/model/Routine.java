@@ -44,28 +44,26 @@ public class Routine {
 	public Routine(String name, Id id) {
 		this.name = name;
 		this.id = id;
-		formalArguments = new AliasObject(name+" args", this.id.getId());
-		locals = new AliasObject(name+" loc", this.id.getId());
-		returnType = new AliasObject(name+" r", this.id.getId());
+		formalArguments = new AliasObject(this.id.getId());
+		locals = new AliasObject(this.id.getId());
+		returnType = new AliasObject(this.id.getId());
 	}
 	
 	/**
 	 * adds an argument of the routine
 	 * @param name of the argument
-	 * @param type of the argument
 	 */
-	public void addArgument (String name, String type) {
-		formalArguments.initValMap(name, type, id.getId());
+	public void addArgument (String name) {
+		formalArguments.initValMap(name, id.getId());
 	}
 	
 	/**
 	 * adds a local variable of the routine
 	 * @param name of the argument
-	 * @param type of the argument
 	 */
-	public void addLocalVariable (String name, String type) {
+	public void addLocalVariable (String name) {
 		//TODO check if there is a need to use 'addMap'
-		locals.initValMap(name, type, id.getId());
+		locals.initValMap(name, id.getId());
 	}
 	
 	/**
@@ -91,8 +89,8 @@ public class Routine {
 	 * adds the return type of the routine
 	 * @param type of the return value
 	 */
-	public void setReturnType (String type) {
-		returnType.addMap(Const.RETURN, type, id.getId());
+	public void setReturnType () {
+		returnType.addMap(Const.RETURN, id.getId());
 	}
 	
 	/**
@@ -167,10 +165,10 @@ public class Routine {
 	 */
 	public String toString() {
 		StringBuilder res = new StringBuilder();
-		res.append(returnType.mapping.get(Const.RETURN).get(0).typeName() + " " + name + " (");
+		res.append("T " + name + " (");
 		for (String arg: formalArguments.mapping.keySet()) {
 			if (formalArguments.mapping.get(arg).size() > 0) {
-				res.append(formalArguments.mapping.get(arg).get(0).typeName() + " " + arg + ", ");
+				res.append(" " + arg + ", ");
 			}
 		}
 		if (formalArguments.mapping.size() > 0 && res.lastIndexOf(", ") >= 0) {

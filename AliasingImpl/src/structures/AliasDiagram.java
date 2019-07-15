@@ -51,19 +51,17 @@ public class AliasDiagram {
 	
 	/**
 	 * the graph's root is the current (this) object.
-	 * It's class attributes will not be present, they will
+	 * Its class attributes will not be present, they will
 	 * be added when they are present in the source code
-	 * @param currentClass represents the current class
-	 * 			being analysed. 
 	 */
-	public AliasDiagram (String currentClass, Id id) {
+	public AliasDiagram (Id id) {
 		
 		root = new ArrayDeque<ArrayList <AliasObject>>();
 		// There is an initial root (representing the root of the computation e.g. 'this')
 		root.push(new ArrayList <AliasObject>());
 		
 		this.id = id;
-		getRoots().add(new AliasObject (currentClass, this.id.getId()));
+		getRoots().add(new AliasObject (this.id.getId()));
 	}
 	
 
@@ -73,11 +71,10 @@ public class AliasDiagram {
 	 * attribute 'tag'. If not, it throws an exception.
 	 * If so, it creates the edge.  
 	 * @param tag is the name of the class attribute
-	 * @param type type of the class attribute
 	 */
-	public void addEdge (String tag, String type) {
+	public void addEdge (String tag) {
 		for (AliasObject ao: getRoots()) {
-			ao.addMap(tag, type, id.getId());
+			ao.addMap(tag, id.getId());
 		}
 	}
 	
@@ -85,11 +82,10 @@ public class AliasDiagram {
 	 * checks whether 'tag' is already in the graph
 	 * if not, it adds it
 	 * @param tag is the name of the class attribute
-	 * @param type type of the class attribute
 	 */
-	public void initEdge (String tag, String type) {
+	public void initEdge (String tag) {
 		for (AliasObject ao: getRoots()) {
-			ao.initValMap(tag, type, id.getId());
+			ao.initValMap(tag, id.getId());
 		}
 	}
 	
@@ -196,7 +192,7 @@ public class AliasDiagram {
 		for (ArrayList <AliasObject> a: root) {
 			System.out.println (">>");
 			for (AliasObject b: a) {
-				System.out.println (b.typeName() + "\t" + b.idNode());
+				System.out.println (b.idNode());
 			}
 		}
 	}

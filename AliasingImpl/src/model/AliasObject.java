@@ -4,9 +4,7 @@ package model;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
 import exceptions.AliasException;
-import structures.helpers.Id;
 
 /**
  * 
@@ -27,14 +25,7 @@ public class AliasObject {
 	 */
 	public Map<String, ArrayList<AliasObject>> mapping;
 	
-	/**
-	 * type of the entity that holds the AliasObject.
-	 * e.g. in case of variables, the type is 'this'
-	 */
-	private String type;
-	
-	public AliasObject(String type, int id) {
-		this.type = type;
+	public AliasObject(int id) {
 		mapping = new HashMap<String, ArrayList<AliasObject>>();
 		setVisited(false);
 		this.id = id;
@@ -43,27 +34,25 @@ public class AliasObject {
 	/**
 	 * Add 'tag' to the map of the current object
 	 * @param mapName
-	 * @param type  
 	 * @param id 
 	 */
-	public void addMap (String mapName, String type, int id)  {
+	public void addMap (String mapName, int id)  {
 		if (!mapping.containsKey(mapName)) {
 			mapping.put (mapName, new ArrayList<AliasObject>());
 		}
-		mapping.get(mapName).add(new AliasObject (type, id));
+		mapping.get(mapName).add(new AliasObject (id));
 	}
 	
 	/**
 	 * Add 'tag' to the mapping of the current
 	 * object only if it was not there already
 	 * @param mapName
-	 * @param type
 	 * @param id 
 	 */
-	public void initValMap (String mapName, String type, int id)  {
+	public void initValMap (String mapName, int id)  {
 		if (!mapping.containsKey(mapName)) {
 			mapping.put (mapName, new ArrayList<AliasObject>());
-			mapping.get(mapName).add(new AliasObject (type, id));
+			mapping.get(mapName).add(new AliasObject (id));
 		} 
 	}
 	
@@ -111,21 +100,7 @@ public class AliasObject {
 	public boolean isUpdateNeeded (String oldKey) {
 		return mapping.containsKey(oldKey);
 	}
-	/**
-	 * 
-	 * @return string representing the type
-	 */
-	public String typeName () {
-		return type;
-	}
 	
-	/**
-	 * 
-	 * @return printable type name
-	 */
-	public String printableTypeName () {
-		return "<"+typeName()+">";
-	}
 	
 	public String toString() {
 		return "#" + this.hashCode();

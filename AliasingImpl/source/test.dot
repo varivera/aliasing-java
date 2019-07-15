@@ -1,10 +1,10 @@
 digraph G {
 n0->n5 [label="v"]
-n0[label="<QualifiedCall>"]
-n5[label="<T>"]
+n0[label="0"]
+n5[label="5"]
 n3->n4 [label="result"]
-n3[label="<unq4 r>"]
-n4[label="<void>"]
-n1[label="<unq4 args>"]
-n2[label="<unq4 loc>"]
+n3[label="3"]
+n4[label="4"]
+n1[label="1"]
+n2[label="2"]
 }
