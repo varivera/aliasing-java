@@ -145,6 +145,12 @@ public class AliasAnalysis extends ASTVisitor {
 			stackCall = current.stackCall;
 			this.actualremoteArgs = actualremoteArgs;
 			Helpers.printStackAll(stackCall);
+			//to delete here
+			//method.getBody().accept(this);
+			//MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
+			//System.out.println(call.getName());
+			//start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
+			//to delete
 		}
 		cu = cus.get(className);
 		cu.accept(this);
@@ -512,6 +518,8 @@ public class AliasAnalysis extends ASTVisitor {
 		}else if (node instanceof ClassInstanceCreation) {
 			System.out.println("\tgetNodeInfo>ClassInstanceCreation");
 			node.accept(this);
+			assert nodeInfoLastRoutine != null;
+			res = nodeInfoLastRoutine;
 		}else if(node instanceof SingleVariableDeclaration){
 			System.out.println("\tgetNodeInfo>SingleVariableDeclaration");
 			// Formal argument
@@ -541,13 +549,55 @@ public class AliasAnalysis extends ASTVisitor {
 
 	public boolean visit(ClassInstanceCreation node) {
 		System.out.println ("ClassInstanceCreation");
-		return true;
+		System.out.println(node.getExpression());
+		System.out.println(node.getType());
+		
+		/**
+		 * new T();
+		 * 
+		 *   (i) create a new Alias Object (node in the graph)
+		 *  (ii) get T's information (i.e. actual arguments)
+		 * (iii) reroot to (i)
+		 *  (iv) Analyse T()
+		 * (vii) reroot back
+		 *  (vi) create nodeInfo 
+		 */
+		AliasObject n = new AliasObject(idGen.getId()); // (i) 
+				
+		nodeInfo[] actual = new nodeInfo[node.arguments().size()];
+		//Get actual arguments
+		for (int i=0;i<node.arguments().size();i++) {
+			System.out.println("Actual Argument " + (i+1) + " : " + node.arguments().get(i));
+
+			actual[i] = getNodeInfo (false, (ASTNode)node.arguments().get(i));
+		}
+
+		ArrayList <ArrayList<AliasObject>> tmpRoot = new ArrayList <ArrayList<AliasObject>>();
+		tmpRoot.add(new ArrayList<AliasObject>());
+		tmpRoot.get(0).add(n);
+		// Change roots in the Alias Diagram
+		aliasGraph.changeRoot(tmpRoot);
+
+		//String[] r = n.resolveBinding().getKey().split("#");
+
+
+		start (node.getType().toString(), node.getType().toString(), 0, this, actual);
+
+		nodeInfoLastRoutine = null;
+		nodeInfoLastRoutine = new nodeInfo("");
+		nodeInfoLastRoutine.pointingAt = tmpRoot;
+		
+		stackCall.pop();
+		// Change roots back in the Alias Diagram
+		aliasGraph.changeBackRoot();
+		Helpers.printStackAll(stackCall);
+		
+		return false;
 	}
 
 	public boolean visit(SimpleType node) {
 		System.out.println ("SimpleType");
 		System.out.println (node.getName());
-
 		return true;
 	}
 
@@ -604,6 +654,7 @@ public class AliasAnalysis extends ASTVisitor {
 			// Get the Declaring Method
 
 			MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
+			
 
 			/**
 			 * Handling Arguments
@@ -634,6 +685,7 @@ public class AliasAnalysis extends ASTVisitor {
 
 			Helpers.printStackAll (stackCall);
 			method.getBody().accept(this);
+			
 
 			assert stackCall.size() > 1;
 
@@ -694,8 +746,8 @@ public class AliasAnalysis extends ASTVisitor {
 
 			System.out.println("||>> " );
 
-			//TODO: is it always the same type?
-			//TODO: safer to go to 'call.getExpression()' and retrieve the type
+			
+			System.out.println(call.getName());
 			start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
 
 			nodeInfoLastRoutine = null;
@@ -1239,8 +1291,8 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "QualifiedCall";
-		String methodAnalyse = "q15";
+		String classAnalyse = "Basic";
+		String methodAnalyse = "whichmethod";
 
 		long start1 = System.currentTimeMillis();
 		//Init

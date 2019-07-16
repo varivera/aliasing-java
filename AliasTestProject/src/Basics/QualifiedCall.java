@@ -9,6 +9,19 @@ public class QualifiedCall {
 		t = new T();
 	}
 	
+	public void qThis18 () {
+		this.v = this.v2;
+	}
+	
+	public void qThis17 () {
+		v = this.t;
+	}
+	
+	
+	public void qThis16 () {
+		this.v = t;
+	}
+	
 	public void q15 (T v) {
 		q14 (t.a);
 	}

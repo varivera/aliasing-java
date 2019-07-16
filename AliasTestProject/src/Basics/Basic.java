@@ -2,30 +2,25 @@ package Basics;
 
 public class Basic {
 	
-	public int[] arr;
 	T v, w, z, y;
 	int q, q2;
 	
 	public Basic() {
-		arr = new int[] {1,2};
 		v = new T();
 		w = new T();
 		z = new T();
 	}
 	
-	public void creation3c () {
-		this.v = this.w;
+	public void creation3 () {
+		v = z;
+		v = new T(w); 
 	}
 	
-	public void creation3b () {
-		v = this.w;
+	public void whichmethod() {
+		v.m(3);
 	}
 	
-	
-	public void creation3a () {
-		//this.v = w;
-		this.v = w;
-	}
+	//here
 	
 	public void creationAndCall1 () {
 		assg2();
@@ -36,9 +31,6 @@ public class Basic {
 		v = z;
 		v = new T(); 
 	}
-	
-	//here
-	//public void 
 	
 	public void func () {
 		w = get_v();
@@ -106,6 +98,7 @@ public class Basic {
 	
 	public void args (T ar, Integer i) {
 		v = ar;
+		q = i;
 	}
 	
 	public void unq_call() {

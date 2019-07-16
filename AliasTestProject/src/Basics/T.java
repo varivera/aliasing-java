@@ -22,5 +22,13 @@ public class T {
 		return a;
 	}
 	
+	void m(boolean b) {
+		a = c;
+	}
+	
+	void m(int i) {
+		a = b;
+	}
+	
 
 }

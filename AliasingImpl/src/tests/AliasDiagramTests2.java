@@ -62,6 +62,9 @@ class AliasDiagramTests2 {
 		v.start(classAnalyse, "q1", 0, null, null);
 		SetEdges expectedValue = new SetEdges ("[(10, b, 17), (0, t, 10), (10, a, 17), (0, v, 10)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
+		
+		System.out.println("1>> "+ v.toSetEdges());
+		System.out.println("2>> "+ expectedValue);
 	}
 	
 	@Test
@@ -174,6 +177,30 @@ class AliasDiagramTests2 {
 		assertNotNull (v);
 		v.start(classAnalyse, "q15", 0, null, null);
 		SetEdges expectedValue = new SetEdges ("[(0, t, 11), (11, a, 12), (0, v, 12)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test16() {
+		assertNotNull (v);
+		v.start(classAnalyse, "qThis16", 0, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, t, 6)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test17() {
+		assertNotNull (v);
+		v.start(classAnalyse, "qThis17", 0, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, t, 6)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test18() {
+		assertNotNull (v);
+		v.start(classAnalyse, "qThis18", 0, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, v, 6), (0, v2, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
