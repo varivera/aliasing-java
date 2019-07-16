@@ -9,6 +9,18 @@ public class QualifiedCall {
 		t = new T();
 	}
 	
+	public void q15 (T v) {
+		q14 (t.a);
+	}
+	
+	public void q14 (T v) {
+		this.v = v;
+	}
+	
+	public void q13() {
+		v.remoteArg(t.a);
+	}
+	
 	public void q12() {
 		v = t.getA().a;
 	}
