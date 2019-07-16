@@ -130,6 +130,10 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		return res;
 	}
+	
+	// to delete
+	MethodInvocation m;
+	//to delete
 
 	/**
 	 * Starts the analysis of method 'methodName' in class
@@ -146,8 +150,10 @@ public class AliasAnalysis extends ASTVisitor {
 			this.actualremoteArgs = actualremoteArgs;
 			Helpers.printStackAll(stackCall);
 			//to delete here
-			//method.getBody().accept(this);
-			//MethodDeclaration method = (MethodDeclaration) cu.findDeclaringNode(call.getName().resolveBinding());
+			
+			MethodDeclaration mm = (MethodDeclaration) cus.get(className).findDeclaringNode(current.m.getName().resolveBinding());
+			mm.getBody().accept(this);
+			//
 			//System.out.println(call.getName());
 			//start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
 			//to delete
@@ -748,6 +754,9 @@ public class AliasAnalysis extends ASTVisitor {
 
 			
 			System.out.println(call.getName());
+			//to delete
+			m = call;
+			//to delete
 			start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
 
 			nodeInfoLastRoutine = null;
