@@ -151,8 +151,8 @@ public class AliasAnalysis extends ASTVisitor {
 			Helpers.printStackAll(stackCall);
 			//to delete here
 			
-			MethodDeclaration mm = (MethodDeclaration) cus.get(className).findDeclaringNode(current.m.getName().resolveBinding());
-			mm.getBody().accept(this);
+			//MethodDeclaration mm = (MethodDeclaration) cus.get(className).findDeclaringNode(current.m.getName().resolveBinding());
+			//mm.getBody().accept(this);
 			//
 			//System.out.println(call.getName());
 			//start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
@@ -1291,7 +1291,7 @@ public class AliasAnalysis extends ASTVisitor {
 			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 		}else if (System.getProperty("os.name").contains("Mac")) {
-			sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
+			sourcePath = "/Users/victor/git/aliasing-java2/AliasTestProject/src/Basics/";
 			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}else if (System.getProperty("os.name").contains("Linux")) {
@@ -1301,7 +1301,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "Basic";
-		String methodAnalyse = "whichmethod";
+		String methodAnalyse = "creationAndCall1";
 
 		long start1 = System.currentTimeMillis();
 		//Init
