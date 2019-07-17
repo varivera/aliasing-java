@@ -22,12 +22,14 @@ public class T {
 		return a;
 	}
 	
-	void m(boolean b) {
+	void m(int i, boolean b, 
+			String v, T w) {
 		a = c;
 	}
-	
-	void m(int i) {
-		a = b;
+
+	void m(int i, boolean b, 
+			T v, T w) {
+		a = this.b;
 	}
 	
 

@@ -17,7 +17,7 @@ public class Basic {
 	}
 	
 	public void whichmethod() {
-		v.m(3);
+		v.m(3, true, "", null);
 	}
 	
 	//here
