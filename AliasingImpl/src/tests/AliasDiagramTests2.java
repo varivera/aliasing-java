@@ -28,19 +28,16 @@ class AliasDiagramTests2 {
 		System.out.println("Init Alias Analysis");
 		try {
 			String sourcePath = "";
-			String[] unitName = new String[] {};
+			String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java"};
 			String[] classpath = new String[] {};
 			if (System.getProperty("os.name").contains("Windows")) {
 				sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 				classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 			}else if (System.getProperty("os.name").contains("Mac")) {
-				sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
+				sourcePath = "/Users/victor/git/aliasing-java2/AliasTestProject/src/Basics/";
 				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 			}else if (System.getProperty("os.name").contains("Linux")) {
 				sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 			}
 			

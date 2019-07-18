@@ -134,10 +134,6 @@ public class AliasAnalysis extends ASTVisitor {
 		return res;
 	}
 
-	// to delete
-	MethodInvocation m;
-	//to delete
-
 	/**
 	 * Starts the analysis of method 'methodName' in class
 	 * 'className' stopping at point 'point'.
@@ -153,14 +149,6 @@ public class AliasAnalysis extends ASTVisitor {
 			this.actualremoteArgs = actualremoteArgs;
 			this.actualremoteTypes = actualremoteTypes;
 			Helpers.printStackAll(stackCall);
-			//to delete here
-
-			//MethodDeclaration mm = (MethodDeclaration) cus.get(className).findDeclaringNode(current.m.getName().resolveBinding());
-			//mm.getBody().accept(this);
-			//
-			//System.out.println(call.getName());
-			//start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual);
-			//to delete
 		}
 		cu = cus.get(className);
 		cu.accept(this);
@@ -610,9 +598,15 @@ public class AliasAnalysis extends ASTVisitor {
 		//Get actual arguments
 		for (int i=0;i<node.arguments().size();i++) {
 			System.out.println("Actual Argument " + (i+1) + " : " + node.arguments().get(i));
-
+			// TODO: get rid of this workaround https://github.com/varivera/aliasing-java/issues/23
 			actual[i] = getNodeInfo (false, (ASTNode)node.arguments().get(i));
-			actualTypes[i] = node.arguments().get(i).toString();
+			if (node.arguments().get(i) instanceof QualifiedName) {
+				actualTypes[i] = ((QualifiedName)node.arguments().get(i)).getQualifier().resolveBinding().toString()
+						.split(" ")[0];
+				
+			}else {
+				actualTypes[i] = ((Expression)node.arguments().get(i)).resolveTypeBinding().getName();
+			}
 		}
 
 		ArrayList <ArrayList<AliasObject>> tmpRoot = new ArrayList <ArrayList<AliasObject>>();
@@ -799,12 +793,6 @@ public class AliasAnalysis extends ASTVisitor {
 
 			System.out.println("||>> " );
 
-			System.out.println(call.getName().getParent());
-			System.out.println(call.resolveMethodBinding());
-			//to delete
-			m = call;
-
-			//to delete
 			start (call.getExpression().resolveTypeBinding().getName(), call.getName().toString(), 0, this, actual, actualTypes);
 
 			nodeInfoLastRoutine = null;
@@ -1332,24 +1320,21 @@ public class AliasAnalysis extends ASTVisitor {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 		String sourcePath = "";
-		String[] unitName = new String[] {};
+		String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java"};
 		String[] classpath = new String[] {};
 		if (System.getProperty("os.name").contains("Windows")) {
 			sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
-			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 		}else if (System.getProperty("os.name").contains("Mac")) {
 			sourcePath = "/Users/victor/git/aliasing-java2/AliasTestProject/src/Basics/";
-			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}else if (System.getProperty("os.name").contains("Linux")) {
 			sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
-			unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "QualifiedCall";
-		String methodAnalyse = "q13";
+		String classAnalyse = "AAPaper";
+		String methodAnalyse = "assignment";
 
 		long start1 = System.currentTimeMillis();
 		//Init

@@ -2,6 +2,12 @@ package Basics;
 
 public class T {
 	T a,b, c;
+	
+	T right;
+	
+	public T(int i) {
+	}
+	
 	public T() {
 		a = b;
 	}

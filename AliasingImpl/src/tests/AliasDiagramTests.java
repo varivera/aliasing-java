@@ -27,19 +27,16 @@ class AliasDiagramTests {
 		System.out.println("Init Alias Analysis");
 		try {
 			String sourcePath = "";
-			String[] unitName = new String[] {};
+			String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java"};
 			String[] classpath = new String[] {};
 			if (System.getProperty("os.name").contains("Windows")) {
 				sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 				classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 			}else if (System.getProperty("os.name").contains("Mac")) {
-				sourcePath = "/Users/victor/git/aliasing-java/AliasTestProject/src/Basics/";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
+				sourcePath = "/Users/victor/git/aliasing-java2/AliasTestProject/src/Basics/";
 				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 			}else if (System.getProperty("os.name").contains("Linux")) {
 				sourcePath = "/home/varivera/Desktop/VR/work/research/aliasing-java/AliasTestProject/src/Basics/";
-				unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java"};
 				classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 			}
 			
@@ -91,7 +88,7 @@ class AliasDiagramTests {
 	void test5() {
 		assertNotNull (v);
 		v.start("Basic", "creation", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(30, b, 36), (0, v, 30), (30, a, 36)]");
+		SetEdges expectedValue = new SetEdges ("[(0, v, 30), (30, a, 36), (30, b, 36)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -252,6 +249,38 @@ class AliasDiagramTests {
 		assertNotNull (v);
 		v.start("Basic", "creationAndCall1", 0, null, null, null);
 		SetEdges expectedValue = new SetEdges ("[(14, b, 20), (0, w, 10), (14, a, 20), (0, z, 12), (0, v, 14)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test26() {
+		assertNotNull (v);
+		v.start("Basic", "whichmethod", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(5, a, 15), (5, c, 15), (0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test27() {
+		assertNotNull (v);
+		v.start("Basic", "whichmethod2", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(5, b, 16), (0, z, 6), (5, a, 16), (0, v, 5)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test28() {
+		assertNotNull (v);
+		v.start("Basic", "creation3", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 9), (8, a, 9), (0, v, 8), (0, z, 6)]");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+	}
+	
+	@Test
+	void test29() {
+		assertNotNull (v);
+		v.start("Basic", "Basic", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, w, 14), (14, a, 20), (22, b, 28), (6, a, 12), (22, a, 28), (0, v, 6), (6, b, 12), (14, b, 20), (0, z, 22)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 }

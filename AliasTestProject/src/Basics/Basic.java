@@ -16,11 +16,14 @@ public class Basic {
 		v = new T(w); 
 	}
 	
+	
+	public void whichmethod2() {
+		v.m(3, true, z, null);
+	}
+	
 	public void whichmethod() {
 		v.m(3, true, "", null);
 	}
-	
-	//here
 	
 	public void creationAndCall1 () {
 		assg2();
