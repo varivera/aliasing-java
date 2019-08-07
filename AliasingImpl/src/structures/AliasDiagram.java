@@ -8,7 +8,10 @@ import structures.helpers.Id;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * AliasDiagram is the implementation of a graph where
@@ -215,6 +218,60 @@ public class AliasDiagram {
 		}
 	}
 	
+	
+	/**
+	 * 	Sanity check for predecessor
+	 */
+	
+	/**
+	 * 
+	 * @return true if the alias diagram's predecessors are well-defined.
+	 * 			false otherwise
+	 */
+	public boolean predecesorsOK () {
+		for (AliasObject a: getRoots()) {
+			if (!predOk (a)) {
+				return false;
+			}
+		}
+		Helpers.notVisited (getRoots(), 0);
+		return true;
+	}
+	
+	/**
+	 * 
+	 * @param ao root node of the graph
+	 * @return true is the predecessors of root 'ao' are well-defined 
+	 */
+	private boolean predOk (AliasObject ao) {
+		Queue <AliasObject> objects = new LinkedList <AliasObject>();
+		
+		objects.add(ao);
+		
+		while (!objects.isEmpty()) {
+			AliasObject currentObject = objects.remove();
+			if (!currentObject.isVisited()) {
+				currentObject.setVisited(true);
+				for (String suc: currentObject.succ.keySet()){
+					for (AliasObject obj: currentObject.succ.get(suc)) {
+						if (!obj.pred.get(suc).contains(currentObject)) {
+							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
+							return false;
+						}else {
+							System.out.println("predecessor found. Node: " + obj.idNode());
+							for (AliasObject p: obj.pred.get(suc)) {
+								System.out.println(p.idNode());
+							}
+						}
+						objects.add(obj);
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	
 	public static void main(String[] args) {
 		System.out.println("start");
 		Id id = new Id();
@@ -249,12 +306,7 @@ public class AliasDiagram {
 			System.out.println("Alias Object: " + succ.idNode());
 		}*/
 		
-		for (String k: o.succ.keySet()) {
-			System.out.println("key: " + k);
-			for (AliasObject k2: o.succ.get(k)) {
-				System.out.println("vals: " + k2.idNode());
-			}
-		}
+		System.out.println("well-defined predecessor: " + g.predecesorsOK ());
 		
 		String s = Helpers.toGraphAll (g.getRoots());
 		Helpers.createDot (s, "testingAliasDiagram", "source");
