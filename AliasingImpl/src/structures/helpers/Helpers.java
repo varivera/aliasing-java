@@ -63,8 +63,8 @@ public class Helpers {
 				nodeIds.put("n"+currentObject.idNode(), ""+currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.mapping.keySet()){
-					for (AliasObject obj: currentObject.mapping.get(suc)) {
+				for (String suc: currentObject.succ.keySet()){
+					for (AliasObject obj: currentObject.succ.get(suc)) {
 						objects.add(obj);
 						nodeIds.put("n"+obj.idNode(), ""+obj.idNode());
 						
@@ -109,6 +109,25 @@ public class Helpers {
 			res.append (nodesAndEdges (sig[0])); // return type
 			res.append (nodesAndEdges (sig[1])); // arguments
 			res.append (nodesAndEdges (sig[2])); // local variables
+		}
+		
+		res.append("}\n");
+		notVisited (g, 0);
+		return res.toString();
+	}
+	
+	/**
+	 * Returns the Alias Diagram using GraphViz representation
+	 * @param g Diagram Graph
+	 * @return string representation of the diagram
+	 * 			to be used by GraphViz
+	 */
+	public static String toGraphAll (ArrayList<AliasObject> g) {
+		StringBuilder res = new StringBuilder();
+		res.append ("digraph G {\n");
+		
+		for (AliasObject a: g) {
+			res.append (nodesAndEdges (a));
 		}
 		
 		res.append("}\n");
@@ -189,8 +208,8 @@ public class Helpers {
 				nodeIds.put(currentObject.idNode(), currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.mapping.keySet()){
-					for (AliasObject obj: currentObject.mapping.get(suc)) {
+				for (String suc: currentObject.succ.keySet()){
+					for (AliasObject obj: currentObject.succ.get(suc)) {
 						objects.add(obj);
 						nodeIds.put(obj.idNode(), obj.idNode());
 						res.addEdge(new Edge (currentObject.idNode(), suc, obj.idNode()));
@@ -219,8 +238,8 @@ public class Helpers {
 		while (ind < visited.size()) {
 			n = visited.get(ind);
 			n.setVisited(false);
-			for (String suc: n.mapping.keySet()){
-				for (AliasObject obj: n.mapping.get(suc)) {
+			for (String suc: n.succ.keySet()){
+				for (AliasObject obj: n.succ.get(suc)) {
 					if (!isIn (obj, visited)) {
 						visited.add(obj);
 					}

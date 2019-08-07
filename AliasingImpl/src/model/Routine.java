@@ -127,7 +127,7 @@ public class Routine {
 	 * 		False otherwise
 	 */
 	public boolean isFunction () {
-		return !returnType.mapping.get(Const.RETURN).equals(Const.VOID);
+		return !returnType.succ.get(Const.RETURN).equals(Const.VOID);
 	}
 	
 	/**
@@ -137,7 +137,7 @@ public class Routine {
 	 * 			arguments of the current routine
 	 */
 	public void aliasObjectsArgument (nodeInfo ref)  {
-		ref.addObjects(formalArguments.mapping.get(ref.tag));
+		ref.addObjects(formalArguments.succ.get(ref.tag));
 	}
 	
 	/**
@@ -147,7 +147,7 @@ public class Routine {
 	 * 			locals of the current routine
 	 */
 	public void aliasObjectsLocal (nodeInfo ref)  {
-		ref.addObjects(locals.mapping.get(ref.tag));
+		ref.addObjects(locals.succ.get(ref.tag));
 	}
 	
 	/**
@@ -157,7 +157,7 @@ public class Routine {
 	 * 			return value of the current routine
 	 */
 	public void aliasObjectsReturn (nodeInfo ref)  {
-		ref.addObjects(returnType.mapping.get(Const.RETURN));
+		ref.addObjects(returnType.succ.get(Const.RETURN));
 	}
 	
 	/**
@@ -166,12 +166,12 @@ public class Routine {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append("T " + name + " (");
-		for (String arg: formalArguments.mapping.keySet()) {
-			if (formalArguments.mapping.get(arg).size() > 0) {
+		for (String arg: formalArguments.succ.keySet()) {
+			if (formalArguments.succ.get(arg).size() > 0) {
 				res.append(" " + arg + ", ");
 			}
 		}
-		if (formalArguments.mapping.size() > 0 && res.lastIndexOf(", ") >= 0) {
+		if (formalArguments.succ.size() > 0 && res.lastIndexOf(", ") >= 0) {
 			res.replace(res.lastIndexOf(", "), res.lastIndexOf(", ")+2, "");
 		}
 		

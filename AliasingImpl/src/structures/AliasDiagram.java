@@ -5,10 +5,10 @@ import model.nodeInfo;
 import structures.graphRep.SetEdges;
 import structures.helpers.Helpers;
 import structures.helpers.Id;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.Map;
 
 /**
  * AliasDiagram is the implementation of a graph where
@@ -121,6 +121,28 @@ public class AliasDiagram {
 	}
 	
 	/**
+	 * @param o is a node in the Alias Diagram
+	 * @return o's successors 
+	 */
+	public Map<String, ArrayList<AliasObject>> succ(AliasObject o) {
+		
+		
+		return null;
+	}
+	
+	/**
+	 * @param e edges
+	 * @return printable edges
+	 */
+	public String printEdges (Map<String, ArrayList<AliasObject>> e) {
+		
+		
+		return null;
+	}
+	
+	
+	
+	/**
 	 * 
 	 * @return the graph to be used by GraphViz
 	 */
@@ -170,10 +192,6 @@ public class AliasDiagram {
 			root.peek().addAll(r);
 		}
 		
-		// to delete
-		System.out.println(root.size());
-		printRoots();
-		//to delete
 	}
 	
 	/**
@@ -195,5 +213,51 @@ public class AliasDiagram {
 				System.out.println (b.idNode());
 			}
 		}
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("start");
+		Id id = new Id();
+		AliasDiagram g = new AliasDiagram(id);
+		
+		AliasObject o;
+		
+		g.addEdge("a");
+		o = new AliasObject (id.getId());
+		g.addEdge(o, "b");
+		g.addEdge("x");
+		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
+		l1.add(o);
+		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge("t");
+		g.changeBackRoot();
+		o = new AliasObject (id.getId());
+		g.addEdge(o,"y");
+		g.addEdge(o,"w");
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge("t");
+		g.addEdge("t2");
+		g.changeBackRoot();
+		
+		/*for (AliasObject succ: g.succ(o)) {
+			System.out.println("Alias Object: " + succ.idNode());
+		}*/
+		
+		for (String k: o.succ.keySet()) {
+			System.out.println("key: " + k);
+			for (AliasObject k2: o.succ.get(k)) {
+				System.out.println("vals: " + k2.idNode());
+			}
+		}
+		
+		String s = Helpers.toGraphAll (g.getRoots());
+		Helpers.createDot (s, "testingAliasDiagram", "source");
+		System.out.println("done");
 	}
 }

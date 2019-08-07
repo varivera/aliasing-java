@@ -19,14 +19,21 @@ import exceptions.AliasException;
 public class AliasObject {
 	
 	/**
+	 * Successors of the AliasObject
 	 * mapping of the AliasObject. For example,
 	 * AliasObject could be the variables of a class, or 
 	 * arguments of a routine
 	 */
-	public Map<String, ArrayList<AliasObject>> mapping;
+	public Map<String, ArrayList<AliasObject>> succ;
+	
+	/**
+	 * Predecessor of the AliasObject
+	 */
+	public Map<String, ArrayList<AliasObject>> pred;
 	
 	public AliasObject(int id) {
-		mapping = new HashMap<String, ArrayList<AliasObject>>();
+		succ = new HashMap<String, ArrayList<AliasObject>>();
+		pred = new HashMap<String, ArrayList<AliasObject>>();
 		setVisited(false);
 		this.id = id;
 	}
@@ -37,10 +44,14 @@ public class AliasObject {
 	 * @param id 
 	 */
 	public void addMap (String mapName, int id)  {
-		if (!mapping.containsKey(mapName)) {
-			mapping.put (mapName, new ArrayList<AliasObject>());
+		if (!succ.containsKey(mapName)) {
+			succ.put (mapName, new ArrayList<AliasObject>());
 		}
-		mapping.get(mapName).add(new AliasObject (id));
+		AliasObject newO = new AliasObject (id);
+		succ.get(mapName).add(newO);
+		//update predecessor
+		newO.pred.put(mapName, new ArrayList<AliasObject>());
+		newO.pred.get(mapName).add(this);
 	}
 	
 	/**
@@ -50,9 +61,13 @@ public class AliasObject {
 	 * @param id 
 	 */
 	public void initValMap (String mapName, int id)  {
-		if (!mapping.containsKey(mapName)) {
-			mapping.put (mapName, new ArrayList<AliasObject>());
-			mapping.get(mapName).add(new AliasObject (id));
+		if (!succ.containsKey(mapName)) {
+			succ.put (mapName, new ArrayList<AliasObject>());
+			AliasObject newO = new AliasObject (id);
+			succ.get(mapName).add(newO);
+			//update predecessor
+			newO.pred.put(mapName, new ArrayList<AliasObject>());
+			newO.pred.get(mapName).add(this);
 		} 
 	}
 	
@@ -62,10 +77,15 @@ public class AliasObject {
 	 * @param mapName tag
 	 */
 	public void addObjectAtt (AliasObject o, String mapName)  {
-		if (!mapping.containsKey(mapName)) {
-			mapping.put (mapName, new ArrayList<AliasObject>());
+		if (!succ.containsKey(mapName)) {
+			succ.put (mapName, new ArrayList<AliasObject>());
 		}
-		mapping.get(mapName).add(o); 
+		succ.get(mapName).add(o); 
+		//update predecessor
+		if (!o.pred.containsKey(mapName)) {
+			o.pred.put(mapName, new ArrayList<AliasObject>());
+		}
+		o.pred.get(mapName).add(this);
 	}
 	
 	/**
@@ -75,7 +95,7 @@ public class AliasObject {
 	 * 			current context
 	 */
 	public ArrayList<AliasObject> getObjects (String mapName)  {
-		return mapping.get (mapName);
+		return succ.get (mapName);
 	}
 	
 	/**
@@ -84,12 +104,13 @@ public class AliasObject {
 	 * @throws AliasException 
 	 */
 	public void updateInHold (String oldKey, String newKey) throws AliasException {
-		if (!mapping.containsKey(oldKey)) {
+		if (!succ.containsKey(oldKey)) {
 			throw new AliasException("Alias Object is not holding any key: " + oldKey);
 		}
-		ArrayList<AliasObject> val = mapping.get(oldKey);
-		mapping.remove(oldKey);
-		mapping.put(newKey, val);
+		ArrayList<AliasObject> val = succ.get(oldKey);
+		succ.remove(oldKey);
+		succ.put(newKey, val);
+		// TODO: update pred of each element in val: delete the previous one and update to the new one
 	}
 	
 	/**
@@ -98,7 +119,7 @@ public class AliasObject {
 	 * @return
 	 */
 	public boolean isUpdateNeeded (String oldKey) {
-		return mapping.containsKey(oldKey);
+		return succ.containsKey(oldKey);
 	}
 	
 	
@@ -122,7 +143,7 @@ public class AliasObject {
 	}
 	
 	public boolean isIn (String tag) {
-		return mapping.containsKey(tag);
+		return succ.containsKey(tag);
 	}
 	
 	//idNode
