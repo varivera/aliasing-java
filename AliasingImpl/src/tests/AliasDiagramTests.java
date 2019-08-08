@@ -14,6 +14,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import model.AST.AliasAnalysis;
@@ -50,6 +52,11 @@ class AliasDiagramTests {
 		} catch (IOException e) {
 			fail (e.getMessage());
 		}
+	}
+	
+	@AfterEach
+	public void sanityCehckPredecessor() {
+		//assertTrue(v.predCheck());
 	}
 	
 	@Test

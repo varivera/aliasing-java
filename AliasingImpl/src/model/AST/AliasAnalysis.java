@@ -405,13 +405,24 @@ public class AliasAnalysis extends ASTVisitor {
 		 * a [[o1, o2]]
 		 * b [[o3]]
 		 */
+		
+		AliasObject pred = left.pointingAt.get(0).get(0).pred.get(left.tag).get(0);
+
 		for (ArrayList<AliasObject> l: left.pointingAt) {
 			l.clear();
 		}
-
+		
+		
 		for (int i=0;i<right.pointingAt.size();i++) {
 			for (AliasObject ao: right.pointingAt.get(i)) {
 				left.pointingAt.get(i).add(ao);
+				
+				// ao has a new predecessor
+				if (!ao.pred.containsKey(left.tag)) {
+					ao.pred.put(left.tag, new ArrayList<AliasObject>());
+				}
+				assert pred != null;
+				ao.pred.get(left.tag).add(0, pred);
 			}
 		}
 		System.out.println("Aliased: " + left.tag + ":" + right.tag);
@@ -1314,7 +1325,14 @@ public class AliasAnalysis extends ASTVisitor {
 	public String toGraphVizAll () {
 		return Helpers.toGraphAll(aliasGraph.getRoots(), stackCall);
 	}
-
+	
+	
+	/**
+	 * SanityCheck on Alias Diagram predecessors
+	 */
+	public boolean predCheck() {
+		return aliasGraph.predecesorsOK();
+	}
 
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -1333,8 +1351,8 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "AAPaper";
-		String methodAnalyse = "assignment";
+		String classAnalyse = "QualifiedCall";
+		String methodAnalyse = "q2";
 
 		long start1 = System.currentTimeMillis();
 		//Init
@@ -1343,6 +1361,10 @@ public class AliasAnalysis extends ASTVisitor {
 		v.start(classAnalyse, methodAnalyse, 0, null, null, null);
 		//End
 		long end = System.currentTimeMillis();
+		
+		//test pred
+		System.out.println("pred Check: " + v.predCheck());
+		//end test pred
 		//String g = v.aliasGraph.toGraphViz();
 		String g = v.toGraphVizAll();
 		Helpers.createDot (g, "test", "source");
@@ -1354,6 +1376,7 @@ public class AliasAnalysis extends ASTVisitor {
 		float time2 = (end - start2) / 100F;
 		System.out.println("Time Analysis (with AST generation): "+time1 + " seconds");
 		System.out.println("Time Analysis (AST as input): "+time2+ " seconds");
+		
 	}
 
 }

@@ -110,7 +110,12 @@ public class AliasObject {
 		ArrayList<AliasObject> val = succ.get(oldKey);
 		succ.remove(oldKey);
 		succ.put(newKey, val);
-		//No need to update predecessors as only the edge's name changes
+		// update the oldKey in the predecessors
+		for (AliasObject p: val) {
+			ArrayList<AliasObject> val2 = p.pred.get(oldKey);
+			p.pred.remove(oldKey);
+			p.pred.put(newKey, val2);
+		}
 	}
 	
 	/**

@@ -1,7 +1,9 @@
 digraph G {
-n0->n6 [label="b"]
-n0->n6 [label="a"]
+n5->n6 [label="a"]
+n0->n6 [label="v"]
+n0->n5 [label="t"]
 n0[label="0"]
+n5[label="5"]
 n6[label="6"]
 n3->n4 [label="result"]
 n3[label="3"]

@@ -229,12 +229,13 @@ public class AliasDiagram {
 	 * 			false otherwise
 	 */
 	public boolean predecesorsOK () {
+		Helpers.notVisited (getRoots());
 		for (AliasObject a: getRoots()) {
 			if (!predOk (a)) {
 				return false;
 			}
 		}
-		Helpers.notVisited (getRoots(), 0);
+		Helpers.notVisited (getRoots());
 		return true;
 	}
 	
@@ -245,7 +246,6 @@ public class AliasDiagram {
 	 */
 	private boolean predOk (AliasObject ao) {
 		Queue <AliasObject> objects = new LinkedList <AliasObject>();
-		
 		objects.add(ao);
 		
 		while (!objects.isEmpty()) {
@@ -254,14 +254,15 @@ public class AliasDiagram {
 				currentObject.setVisited(true);
 				for (String suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
+						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
 						if (!obj.pred.get(suc).contains(currentObject)) {
 							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
 							return false;
 						}else {
-							System.out.println("predecessor found. Node: " + obj.idNode());
+							/*System.out.println("predecessor found. Node: " + obj.idNode());
 							for (AliasObject p: obj.pred.get(suc)) {
 								System.out.println(p.idNode());
-							}
+							}*/
 						}
 						objects.add(obj);
 					}

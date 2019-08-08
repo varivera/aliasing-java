@@ -38,7 +38,7 @@ public class Helpers {
 			res.append (nodesAndEdges (a));
 		}
 		res.append("}\n");
-		notVisited (g, 0);
+		notVisited (g);
 		return res.toString();
 	}
 	
@@ -112,7 +112,7 @@ public class Helpers {
 		}
 		
 		res.append("}\n");
-		notVisited (g, 0);
+		notVisited (g);
 		return res.toString();
 	}
 	
@@ -131,7 +131,7 @@ public class Helpers {
 		}
 		
 		res.append("}\n");
-		notVisited (g, 0);
+		notVisited (g);
 		return res.toString();
 	}
 	
@@ -183,7 +183,7 @@ public class Helpers {
 		for (AliasObject a: graph) {
 			res.union(toSetEdges (a, c));
 		}
-		notVisited (graph, 0);
+		notVisited (graph);
 		return res;
 	}
 	
@@ -226,7 +226,7 @@ public class Helpers {
 	 * sets all nodes to visited False 
 	 * @param g the graph to be visited
 	 */
-	public static void notVisited (ArrayList<AliasObject> g, int i) {
+	public static void notVisitedOld (ArrayList<AliasObject> g, int i) {
 		if (i<0 || i >= g.size()) return;
 		AliasObject n = g.get (i);
 		ArrayList<AliasObject> visited = new ArrayList<AliasObject>();
@@ -247,7 +247,32 @@ public class Helpers {
 			}
 			ind++;
 		}
-		notVisited (g,i+1);
+		notVisitedOld (g,i+1);
+	}
+	
+	
+	/**
+	 * sets all nodes to visited False 
+	 * @param g the graph to be visited
+	 */
+	public static void notVisited (ArrayList<AliasObject> g) {
+		ArrayList<AliasObject> already = new ArrayList<AliasObject>();
+		Queue <AliasObject> q = new LinkedList <AliasObject>();
+		
+		q.addAll(g);
+		
+		while (!q.isEmpty()) {
+			AliasObject tmp = q.remove();
+			tmp.setVisited(false);
+			already.add(tmp);
+			for (String suc: tmp.succ.keySet()){
+				for (AliasObject obj: tmp.succ.get(suc)) {
+					if (!already.contains(obj)) {
+						q.add(obj);
+					}
+				}
+			}
+		}
 	}
 	
 	public static boolean isIn (AliasObject a, ArrayList<AliasObject> l) {
