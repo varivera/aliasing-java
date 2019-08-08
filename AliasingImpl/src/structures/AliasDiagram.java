@@ -204,6 +204,26 @@ public class AliasDiagram {
 		root.pop();
 	}
 	
+	
+	/**
+	 * @param p path in the Alias Diagram
+	 * @return the set of Paths that are aliased to p. Empty if none
+	 */
+	public ArrayList<Path> alias (Path p) {
+		// TODO 3
+		return null;
+	}
+	
+	/**
+	 * @param p1 path in the Alias Diagram
+	 * @param p2 path in the Alias Diagram
+	 * @return true if p1 is aliased to p2. False otherwise
+	 */
+	public boolean areAliased (Path p1, Path p2) {
+		// TODO 2
+		return false;
+	}
+	
 	/**
 	 * For Debugging and Testing phases
 	 */
@@ -216,6 +236,14 @@ public class AliasDiagram {
 				System.out.println (b.idNode());
 			}
 		}
+	}
+	
+	/**
+	 * @param p path possibly in the Alias Diagram
+	 * @return true if p is a path on the Alias Diagram. False otherwise
+	 */
+	public boolean isInGraph (Path p) {
+		return p.exists();
 	}
 	
 	
