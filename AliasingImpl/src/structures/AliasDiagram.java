@@ -220,8 +220,8 @@ public class AliasDiagram {
 	 * @return true if p1 is aliased to p2. False otherwise
 	 */
 	public boolean areAliased (Path p1, Path p2) {
-		// TODO 2
-		return false;
+		// if both path exists and point to the same node, they are aliased 
+		return p1.exists() && p2.exists() && Path.intersect(p1.getTarget(), p2.getTarget());
 	}
 	
 	/**
@@ -306,37 +306,82 @@ public class AliasDiagram {
 		Id id = new Id();
 		AliasDiagram g = new AliasDiagram(id);
 		
-		AliasObject o;
+		AliasObject o1 = new AliasObject (id.getId());
+		AliasObject o2 = new AliasObject (id.getId());
+		AliasObject o3 = new AliasObject (id.getId());
 		
-		g.addEdge("a");
-		o = new AliasObject (id.getId());
-		g.addEdge(o, "b");
-		g.addEdge("x");
+		g.addEdge(o1, "a");
+		g.addEdge(o1, "d");
+		g.addEdge(o2, "e");
+		
 		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
-		l1.add(o);
+		l1.add(o1);
 		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge("t");
-		g.changeBackRoot();
-		o = new AliasObject (id.getId());
-		g.addEdge(o,"y");
-		g.addEdge(o,"w");
+		g.addEdge(o2, "b");
+		g.addEdge(o3, "f");
+		
 		l1 = new ArrayList<AliasObject>();
-		l1.add(o);
+		l1.add(o2);
 		l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge("t");
-		g.addEdge("t2");
-		g.changeBackRoot();
+		g.addEdge(o3, "c");
 		
-		/*for (AliasObject succ: g.succ(o)) {
-			System.out.println("Alias Object: " + succ.idNode());
-		}*/
+		g.changeBackRoot();
+		g.changeBackRoot();
 		
 		System.out.println("well-defined predecessor: " + g.predecesorsOK ());
 		
+		
+		
+		Path p1 = new Path(
+				new ArrayList<String>() { 
+		            { 
+		                add("a"); 
+		                add("b"); 
+		            }}, 
+				new ArrayList <ArrayList<AliasObject>>() { 
+			            { 
+			            	add (g.getRoots());
+			                add(new  ArrayList<AliasObject>() {
+			                	{
+			                	add (o1);
+			                }});
+			                add(new  ArrayList<AliasObject>() {
+			                	{
+			                	add (o2);
+			                }});
+			            }});
+		
+		Path p2 = new Path(
+				new ArrayList<String>() { 
+		            { 
+		                add("a");
+		                add("b");
+		                add("c");
+		            }}, 
+				new ArrayList <ArrayList<AliasObject>>() { 
+			            { 
+			            	add (g.getRoots());
+			                add(new  ArrayList<AliasObject>() {
+			                	{
+			                	add (o1);
+			                }});
+			                add(new  ArrayList<AliasObject>() {
+			                	{
+			                	add (o2);
+			                }});
+			                add(new  ArrayList<AliasObject>() {
+			                	{
+			                	add (o3);
+			                }});
+			            }});
+		
+		System.out.println(p1);
+		System.out.println(p2);
+		System.out.println("p1:p2?: " + g.areAliased(p1, p2));
 		String s = Helpers.toGraphAll (g.getRoots());
 		Helpers.createDot (s, "testingAliasDiagram", "source");
 		System.out.println("done");
