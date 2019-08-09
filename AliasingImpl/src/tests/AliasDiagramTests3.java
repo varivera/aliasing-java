@@ -64,7 +64,7 @@ class AliasDiagramTests3 {
 	void test1() {
 		assertNotNull (v);
 		v.start(classAnalyse, "assignment", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, w, 6), (0, v, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
@@ -72,7 +72,7 @@ class AliasDiagramTests3 {
 	void test2() {
 		assertNotNull (v);
 		v.start(classAnalyse, "composition", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, w, 6), (0, v, 8), (0, z, 8)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a, 6), (0, x, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -80,7 +80,7 @@ class AliasDiagramTests3 {
 	void test3() {
 		assertNotNull (v);
 		v.start(classAnalyse, "creation", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, w, 6), (0, v, 6), (0, z, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, x, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -104,7 +104,7 @@ class AliasDiagramTests3 {
 	void test6() {
 		assertNotNull (v);
 		v.start(classAnalyse, "unqualifiedCall", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, w, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, x, 10), (0, a, 10)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
@@ -112,7 +112,7 @@ class AliasDiagramTests3 {
 	void test7() {
 		assertNotNull (v);
 		v.start(classAnalyse, "callSiteSensitivity", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, v, 10), (0, w, 10)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b, 17), (0, a, 10), (0, x, 17)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -120,7 +120,7 @@ class AliasDiagramTests3 {
 	void test8() {
 		assertNotNull (v);
 		v.start(classAnalyse, "qualifiedCall", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, v, 11), (0, w, 11)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a2, 5), (5, x, 6)]");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 }

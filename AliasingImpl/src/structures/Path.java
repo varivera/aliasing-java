@@ -16,60 +16,69 @@ import structures.helpers.Id;
  */
 
 public class Path {
+	/**
+	 * representation of the path. Path 'a.b.c' is
+	 * represented by list [a, b, c]
+	 */
 	private	ArrayList <String> tags;
+	
+	/**
+	 * nodeTags stores possible path of nodes that takes
+	 * from the source to the target
+	 * Constraint: there exist at least one path
+	 * Constraint: for all paths p in nodeTags, p.size() == tags.size+1
+	 */
 	private ArrayList <ArrayList<AliasObject>> nodeTags;
 	
 	public Path(ArrayList <String> tags, ArrayList <ArrayList<AliasObject>> nodeTags) {
-		assert tags.size() == nodeTags.size()-1;
+		assert nodeTags != null && tags != null;
 		this.tags = tags;
 		this.nodeTags = nodeTags;
+		
+		assert correctNumberOfNodes();
 	}
 	
 	public Path(AliasDiagram g, ArrayList<String> path) {
-		//TODO
+		// TODO
+		assert this.tags != null;
+		assert this.nodeTags != null;
+		assert correctNumberOfNodes();
 	}
 	
 	/**
-	 * @return the source of the path
+	 * @return the possible source nodes of the path
 	 */
 	public ArrayList<AliasObject> getSource(){
 		assert nodeTags.size() > 0;
-		return nodeTags.get(0);
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>(nodeTags.size());
+		for (ArrayList<AliasObject> ao: nodeTags) {
+			res.add(ao.get(0));
+		}
+		return res;
 	}
 	
 	/**
-	 * @return the source of the path
+	 * @return all possible target nodes of the path
 	 */
 	public ArrayList<AliasObject> getTarget(){
 		assert nodeTags.size() > 0;
-		return nodeTags.get(nodeTags.size()-1);
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>(nodeTags.size());
+		for (ArrayList<AliasObject> ao: nodeTags) {
+			res.add(ao.get(ao.size()-1));
+		}
+		return res;
 	}
 	
 	/**
-	 * @return true is the path is in the Alias Diagram. False otherwise
+	 * @return true if the path all path are in the Alias Diagram. False otherwise
 	 */
 	public boolean exists() {
-		assert tags.size() == nodeTags.size()-1;
-		for (int i=0; i<tags.size();i++) {
-			for (AliasObject ao: nodeTags.get(i)) {
-				String tag = tags.get(i);
-				if (!ao.succ.containsKey(tag) || !issubset(nodeTags.get(i+1), ao.succ.get(tag))) {
+		for(ArrayList<AliasObject> p: nodeTags) {
+			assert p.size() == tags.size()+1;
+			for (int i=0; i<tags.size();i++) {
+				if (!p.get(i).succ.containsKey(tags.get(i)) || !p.get(i).succ.get(tags.get(i)).contains(p.get(i+1))) {
 					return false;
 				}
-			}
-		}
-		return true;
-	}
-	
-	/**
-	 * @param s1
-	 * @param s2
-	 * @return s1.subset(s2)?
-	 */
-	private boolean issubset (ArrayList<AliasObject> s1, ArrayList<AliasObject> s2) {
-		for (AliasObject oa: s1) {
-			if (!s2.contains(oa)) {
-				return false;
 			}
 		}
 		return true;
@@ -89,6 +98,20 @@ public class Path {
 		return false;
 	}
 	
+	/**
+	 * @param node starting point in the diagram
+	 * @param path to be considered
+	 * @return the corresponding path of nodes in g, following path 'path'
+	 */
+	private ArrayList <ArrayList<AliasObject>> getPath(AliasObject node, ArrayList<String> path) {
+		
+		if (path.size() == 0) {// no more elements in the path to look up
+			//return 
+		}
+		
+		return null;
+	}
+	
 	
 	/**
 	 * Returns the path in the form
@@ -103,10 +126,10 @@ public class Path {
 		}
 		res.deleteCharAt(res.length()-1);
 		res.append("\n<");
-		for (ArrayList<AliasObject> nt1: nodeTags) {
+		for (ArrayList<AliasObject> paths: nodeTags) {
 			res.append("<");
-			for (AliasObject ao: nt1) {
-				res.append(ao.idNode());
+			for (AliasObject ao: paths) {
+				res.append(ao.idNode()+",");
 			}
 			res.append(">");
 		}
@@ -114,6 +137,17 @@ public class Path {
 		
 		
 		return res.toString();
+	}
+	
+	/**
+	 * For testing purposes
+	 */
+	private boolean correctNumberOfNodes() {
+		int n = tags.size() + 1;
+		for (ArrayList<AliasObject> paths: nodeTags) {
+			if (paths.size()!=n) return false;
+		}
+		return true;
 	}
 	
 	public static void main(String[] args) {
@@ -161,20 +195,16 @@ public class Path {
 		            }}, 
 				new ArrayList <ArrayList<AliasObject>>() { 
 			            { 
-			            	add (g.getRoots());
-			                add(new  ArrayList<AliasObject>() {
+			            	add(new  ArrayList<AliasObject>() {
 			                	{
-			                	add (o1);
-			                }});
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o2);
-			                }});
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o3);
+			                		add (g.getRoots().get(0));
+			                		add (o1);
+			                		add (o2);
+			                		add (o3);
 			                }});
 			            }});
+		
+		
 		
 		System.out.println(p);
 		System.out.println("is path p ok?: " + p.exists());

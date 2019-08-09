@@ -39,7 +39,8 @@ public class AAPaper {
 		}else {
 			b = x;
 		}
-		
+		// a:x and b:x
+		// NO: a:b
 		/**
 		 * {(n0, a, n3), (n0, x, n3), (n0, b, n2),
 		 * 

@@ -18,6 +18,7 @@ import model.nodeInfo;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 import structures.AliasDiagram;
+import structures.ControlStructures;
 import structures.graphRep.SetEdges;
 import structures.helpers.Const;
 import structures.helpers.Helpers;
@@ -44,7 +45,11 @@ public class AliasAnalysis extends ASTVisitor {
 	 * Holds all routine calls.
 	 */
 	private Deque<Routine> stackCall;
-
+	
+	/**
+	 * Stores information from conditionals, loops, recursion.
+	 */
+	private Deque<ControlStructures> stackControlStructures;
 
 	// Compilation Unit
 	private CompilationUnit cu;
@@ -113,6 +118,7 @@ public class AliasAnalysis extends ASTVisitor {
 
 		}
 		stackCall = new ArrayDeque <Routine>();
+		stackControlStructures = new ArrayDeque<ControlStructures>();
 		idGen = new Id();
 		aliasGraph = new AliasDiagram (idGen);
 	}
@@ -405,6 +411,12 @@ public class AliasAnalysis extends ASTVisitor {
 		 * a [[o1, o2]]
 		 * b [[o3]]
 		 */
+		
+		//check if the aliasing happens inside a control structure. If so,
+		//store the instruction
+		if (stackControlStructures.size()>0) {
+			stackControlStructures.peek().add(left.pointingAt, right.pointingAt, left.tag);
+		}
 		
 		AliasObject pred = left.pointingAt.get(0).get(0).pred.get(left.tag).get(0);
 
@@ -872,6 +884,36 @@ public class AliasAnalysis extends ASTVisitor {
 	public SetEdges toSetEdges () {
 		return aliasGraph.toSetEdges();
 	}
+	
+	public boolean visit(IfStatement node) {
+		System.out.println ("IfStatement");
+		
+		// the conditional is ignore
+		//node.getExpression().accept(this);
+		
+		// (i) start a new Control Structure in the Stack
+		// (ii) Execute then statement (storing thing in the Stack)
+		// (iii) before executing the else statement: recover the Alias Diagram 
+		// (iv) Execute else statement (storing thing in the Stack)
+		// (v) recover the Alias Diagram 
+		// (vi) Implement algorithm to handle Conditionals
+		// (vii) remove the ControlStructure from the Stack (transfer information if needed)
+		
+		stackControlStructures.add(new ControlStructures());//(i)
+		stackControlStructures.peek().step();
+		node.getThenStatement().accept(this); // (ii)
+		
+		//to delete
+		System.out.println(stackControlStructures.peek());
+		//to delete
+		
+		//stackControlStructures.peek().step();
+		//node.getElseStatement();
+		
+		//TODO: transfer if needed
+		stackControlStructures.remove(); // (vii)
+		return false;
+	}
 
 
 	/***** no visit *****/
@@ -1041,11 +1083,6 @@ public class AliasAnalysis extends ASTVisitor {
 
 	public boolean visit(ForStatement node) {
 		System.out.println ("ForStatement");
-		return true;
-	}
-
-	public boolean visit(IfStatement node) {
-		System.out.println ("IfStatement");
 		return true;
 	}
 
@@ -1338,7 +1375,7 @@ public class AliasAnalysis extends ASTVisitor {
 	public static void main(String[] args) throws FileNotFoundException, IOException {
 
 		String sourcePath = "";
-		String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java"};
+		String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java", "ControlStruc.java"};
 		String[] classpath = new String[] {};
 		if (System.getProperty("os.name").contains("Windows")) {
 			sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
@@ -1351,8 +1388,8 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "QualifiedCall";
-		String methodAnalyse = "q2";
+		String classAnalyse = "ControlStruc";
+		String methodAnalyse = "cond1";
 
 		long start1 = System.currentTimeMillis();
 		//Init
