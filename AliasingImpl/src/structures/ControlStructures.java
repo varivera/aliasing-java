@@ -42,62 +42,74 @@ public class ControlStructures {
 	 */
 	public void add(ArrayList <ArrayList<AliasObject>> oldT, ArrayList <ArrayList<AliasObject>> newT, String tag) {
 		assert oldT.size() == newT.size();
-		ArrayList<ArrayList<AliasObject>> source = new ArrayList<ArrayList<AliasObject>>();
-		ArrayList<ArrayList<AliasObject>> target = new ArrayList<ArrayList<AliasObject>>();
 		
-		for (ArrayList<AliasObject> t: oldT) {
-			source.add(new ArrayList<AliasObject>());
-			target.add(new ArrayList<AliasObject>());
-			
-			for (AliasObject ao: t) {
-				if (!target.get(target.size()-1).contains(ao)) {
-					target.get(target.size()-1).add(ao);
-				}
+		ArrayList<ArrayList<AliasObject>> oldSource = new ArrayList<ArrayList<AliasObject>>(oldT.size());
+		
+		for (ArrayList<AliasObject> r: oldT) {
+			oldSource.add(new ArrayList<AliasObject>());
+			for (AliasObject ao: r) {
 				for (AliasObject pred: ao.pred.get(tag)) {
-					if (!source.get(target.size()-1).contains(pred)) {
-						source.get(source.size()-1).add(pred);
-					}
+					oldSource.get(oldSource.size()-1).add(pred);
+					Edge e = new Edge (pred, tag, ao);
+					deletions.get(deletions.size()-1).add(e);
+					//to delete
+					System.out.println("deletions e: " + e);
+					//to delete
 				}
 			}
 		}
-		
-		
-
-		Edge e = new Edge(source, target, tag);
-		System.out.println("e1: " + e);
-		additions.get(additions.size()-1).add(e);
-		
-		e = new Edge(source, target, tag);
-		System.out.println("e2: " + e);
-		deletions.get(deletions.size()-1).add(e);
+		assert newT.size() == oldSource.size();
+		for (int i=0;i<newT.size();i++) {
+			for (AliasObject ao: newT.get(i)) {
+				for (AliasObject pred: oldSource.get(i)) {
+					Edge e = new Edge (pred, tag, ao);
+					additions.get(additions.size()-1).add(e);
+					//to delete
+					System.out.println("additions e: " + e);
+					//to delete
+				}
+			}
+		}
+	}
+	
+	public ArrayList<Edge> getLastAdded(){
+		return additions.get(additions.size()-1);
+	}
+	
+	public ArrayList<Edge> getLastRemoved(){
+		return deletions.get(deletions.size()-1);
 	}
 	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		
-		res.append("*****************\nAdditions:");
+		res.append("*****************\nAdditions:\n");
 		
 		for (int i=0;i<additions.size();i++) {
 			res.append((i+1) + ". <");
-			for (int j=0;j<additions.get(i).size()-1;j++) {
+			for (int j=0;j<additions.get(i).size();j++) {
 				res.append(additions.get(i).get(j));
 				if (j<additions.get(i).size()-1) {
 					res.append(", ");
 				}
 			}
-			res.append(">\n");
+			if (i<additions.size()-1) {
+				res.append(">\n");
+			}
 		}
 		
-		res.append(">\n\nDeletions:");
+		res.append(">\n\nDeletions:\n");
 		for (int i=0;i<deletions.size();i++) {
 			res.append((i+1) + ". <");
-			for (int j=0;j<deletions.get(i).size()-1;j++) {
+			for (int j=0;j<deletions.get(i).size();j++) {
 				res.append(deletions.get(i).get(j));
 				if (j<deletions.get(i).size()-1) {
 					res.append(", ");
 				}
 			}
-			res.append(">\n");
+			if (i<deletions.size()-1) {
+				res.append(">\n");
+			}
 		}
 		res.append(">\n*****************\n");
 		return res.toString();

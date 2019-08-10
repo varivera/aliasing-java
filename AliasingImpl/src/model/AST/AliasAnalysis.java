@@ -899,16 +899,29 @@ public class AliasAnalysis extends ASTVisitor {
 		// (vi) Implement algorithm to handle Conditionals
 		// (vii) remove the ControlStructure from the Stack (transfer information if needed)
 		
-		stackControlStructures.add(new ControlStructures());//(i)
-		stackControlStructures.peek().step();
+		stackControlStructures.add(new ControlStructures());
+		stackControlStructures.peek().step();//(i)
+		
 		node.getThenStatement().accept(this); // (ii)
 		
 		//to delete
 		System.out.println(stackControlStructures.peek());
 		//to delete
 		
-		//stackControlStructures.peek().step();
-		//node.getElseStatement();
+		//(iii)
+		aliasGraph.restoreDiagram(stackControlStructures.peek().getLastAdded(), stackControlStructures.peek().getLastRemoved());
+		stackControlStructures.peek().step();
+		
+		node.getElseStatement().accept(this); // (iv)
+		
+		//to delete
+		System.out.println(stackControlStructures.peek());
+		//to delete
+		
+		//(v)
+		aliasGraph.restoreDiagram(stackControlStructures.peek().getLastAdded(), stackControlStructures.peek().getLastRemoved());
+		
+		//here
 		
 		//TODO: transfer if needed
 		stackControlStructures.remove(); // (vii)

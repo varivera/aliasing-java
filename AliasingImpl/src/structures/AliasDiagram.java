@@ -203,6 +203,40 @@ public class AliasDiagram {
 		root.pop();
 	}
 	
+	/**
+	 * Restore the Alias Diagram: add the 'removed' edges and remove the 'added' edges. 
+	 * @param added edges in the Alias Diagram
+	 * @param removed edges in the Alias Diagram
+	 * 
+	 * This operation is needed when analysing control structures: e.g. in a conditional,
+	 * before analysing the else statement, the Alias Diagram is restored.
+	 */
+	public void restoreDiagram(ArrayList<Edge> added, ArrayList<Edge> removed) {
+		// remove added
+		for (Edge e: added) {
+			//to delete
+			System.out.println("restoreDiagram (remove added): " + e);
+			//to delete
+			assert e.source().succ.containsKey(e.tag());
+			assert e.target().pred.containsKey(e.tag());
+			e.source().succ.get(e.tag()).remove(e.target());
+			e.target().pred.get(e.tag()).remove(e.source());
+		}
+		
+		//added removed
+		for (Edge e: removed) {
+			System.out.println("restoreDiagram (add removed): " + e);
+			if (!e.source().succ.containsKey(e.tag())) {
+				e.source().succ.put(e.tag(), new ArrayList<AliasObject>());
+			}
+			e.source().succ.get(e.tag()).add(e.target());
+			if (!e.target().pred.containsKey(e.tag())) {
+				e.target().pred.put(e.tag(), new ArrayList<AliasObject>());
+			}
+			e.target().pred.get(e.tag()).add(e.source());
+		}
+	}
+	
 	
 	/**
 	 * @param p path in the Alias Diagram
