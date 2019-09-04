@@ -27,7 +27,7 @@ import java.util.Queue;
  */
 
 public class AliasDiagram {
-	
+	 
 	/**
 	 * the graph is rooted.
 	 * 'root' represents the graph's root. It cannot be
