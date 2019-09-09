@@ -159,24 +159,24 @@ public class Path {
 		AliasObject o2 = new AliasObject (id.getId());
 		AliasObject o3 = new AliasObject (id.getId());
 		
-		g.addEdge(o1, "a");
-		g.addEdge(o1, "d");
-		g.addEdge(o2, "e");
+		g.addEdge(o1, "a", null);
+		g.addEdge(o1, "d", null);
+		g.addEdge(o2, "e", null);
 		
 		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
 		l1.add(o1);
 		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o2, "b");
-		g.addEdge(o3, "f");
+		g.addEdge(o2, "b", null);
+		g.addEdge(o3, "f", null);
 		
 		l1 = new ArrayList<AliasObject>();
 		l1.add(o2);
 		l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o3, "c");
+		g.addEdge(o3, "c", null);
 		
 		g.changeBackRoot();
 		g.changeBackRoot();

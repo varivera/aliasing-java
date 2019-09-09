@@ -2,6 +2,8 @@ package model;
 
 import java.util.ArrayList;
 
+import structures.Variable;
+
 /**
  * It contains relevant information about a node to
  * be used in assignments.
@@ -23,9 +25,9 @@ public class nodeInfo {
 	/**
 	 * tag name of the node
 	 */
-	public String tag;
+	public Variable tag;
 	
-	public nodeInfo (String tag) {
+	public nodeInfo (Variable tag) {
 		this.tag = tag;
 		pointingAt = new ArrayList <ArrayList<AliasObject>>();
 	}
@@ -40,6 +42,6 @@ public class nodeInfo {
 	
 	@Override
 	public String toString() {
-		return tag;
+		return tag.toString();
 	}
 }

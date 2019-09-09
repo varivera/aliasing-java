@@ -1,6 +1,7 @@
 package model;
 
 import exceptions.AliasException;
+import structures.Variable;
 import structures.helpers.Const;
 import structures.helpers.Id;
 
@@ -54,7 +55,7 @@ public class Routine {
 	 * @param name of the argument
 	 */
 	public void addArgument (String name) {
-		formalArguments.initValMap(name, id.getId());
+		formalArguments.initValMap(name, null, id.getId());
 	}
 	
 	/**
@@ -63,7 +64,7 @@ public class Routine {
 	 */
 	public void addLocalVariable (String name) {
 		//TODO check if there is a need to use 'addMap'
-		locals.initValMap(name, id.getId());
+		locals.initValMap(name, null, id.getId());
 	}
 	
 	/**
@@ -72,7 +73,7 @@ public class Routine {
 	 * @param newKey to be updated to
 	 * @throws AliasException 
 	 */
-	public void updateKeyLocalVariable (String oldKey, String newKey) throws AliasException {
+	public void updateKeyLocalVariable (Variable oldKey, Variable newKey) throws AliasException {
 		locals.updateInHold(oldKey, newKey);
 	}
 	
@@ -82,7 +83,7 @@ public class Routine {
 	 * @return
 	 */
 	public boolean isUpdateNeeded (String oldKey){
-		return locals.isUpdateNeeded(oldKey);
+		return locals.isUpdateNeeded(new Variable(oldKey, null));
 	}
 	
 	/**
@@ -90,7 +91,7 @@ public class Routine {
 	 * @param type of the return value
 	 */
 	public void setReturnType () {
-		returnType.addMap(Const.RETURN, id.getId());
+		returnType.addMap(Const.RETURN, null, id.getId());
 	}
 	
 	/**
@@ -108,7 +109,8 @@ public class Routine {
 	 * 		False otherwise 
 	 */
 	public boolean isArgument (String a) {
-		return formalArguments.isIn(a);
+		//arguments exist only temporarily 
+		return formalArguments.isIn(new Variable(a, null));
 	}
 	
 	/**
@@ -118,7 +120,8 @@ public class Routine {
 	 * 		the current routine. False otherwise.
 	 */
 	public boolean isLocal (String a) {
-		return locals.isIn(a);
+		//locals exist only temporarily 
+		return locals.isIn(new Variable(a, null));
 	}
 	
 	/**
@@ -127,7 +130,7 @@ public class Routine {
 	 * 		False otherwise
 	 */
 	public boolean isFunction () {
-		return !returnType.succ.get(Const.RETURN).equals(Const.VOID);
+		return !returnType.succ.get(new Variable(Const.RETURN, null)).equals(Const.VOID);
 	}
 	
 	/**
@@ -157,7 +160,7 @@ public class Routine {
 	 * 			return value of the current routine
 	 */
 	public void aliasObjectsReturn (nodeInfo ref)  {
-		ref.addObjects(returnType.succ.get(Const.RETURN));
+		ref.addObjects(returnType.succ.get(new Variable(Const.RETURN, null)));
 	}
 	
 	/**
@@ -166,7 +169,7 @@ public class Routine {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append("T " + name + " (");
-		for (String arg: formalArguments.succ.keySet()) {
+		for (Variable arg: formalArguments.succ.keySet()) {
 			if (formalArguments.succ.get(arg).size() > 0) {
 				res.append(" " + arg + ", ");
 			}

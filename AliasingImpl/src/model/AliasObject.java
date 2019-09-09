@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import exceptions.AliasException;
+import structures.Variable;
 
 /**
  * 
@@ -24,16 +25,16 @@ public class AliasObject {
 	 * AliasObject could be the variables of a class, or 
 	 * arguments of a routine
 	 */
-	public Map<String, ArrayList<AliasObject>> succ;
+	public Map<Variable, ArrayList<AliasObject>> succ;
 	
 	/**
 	 * Predecessor of the AliasObject
 	 */
-	public Map<String, ArrayList<AliasObject>> pred;
+	public Map<Variable, ArrayList<AliasObject>> pred;
 	
 	public AliasObject(int id) {
-		succ = new HashMap<String, ArrayList<AliasObject>>();
-		pred = new HashMap<String, ArrayList<AliasObject>>();
+		succ = new HashMap<Variable, ArrayList<AliasObject>>();
+		pred = new HashMap<Variable, ArrayList<AliasObject>>();
 		setVisited(false);
 		this.id = id;
 	}
@@ -41,33 +42,37 @@ public class AliasObject {
 	/**
 	 * Add 'tag' to the map of the current object
 	 * @param mapName
+	 * @param compP: computational path
 	 * @param id 
 	 */
-	public void addMap (String mapName, int id)  {
-		if (!succ.containsKey(mapName)) {
-			succ.put (mapName, new ArrayList<AliasObject>());
+	public void addMap (String mapName, int[] compP, int id)  {
+		Variable key = new Variable (mapName, compP);
+		if (!succ.containsKey(key)) {
+			succ.put (key, new ArrayList<AliasObject>());
 		}
 		AliasObject newO = new AliasObject (id);
-		succ.get(mapName).add(newO);
+		succ.get(key).add(newO);
 		//update predecessor
-		newO.pred.put(mapName, new ArrayList<AliasObject>());
-		newO.pred.get(mapName).add(this);
+		newO.pred.put(key, new ArrayList<AliasObject>());
+		newO.pred.get(key).add(this);
 	}
 	
 	/**
 	 * Add 'tag' to the mapping of the current
 	 * object only if it was not there already
 	 * @param mapName
+	 * @param compP: computational path
 	 * @param id 
 	 */
-	public void initValMap (String mapName, int id)  {
-		if (!succ.containsKey(mapName)) {
-			succ.put (mapName, new ArrayList<AliasObject>());
+	public void initValMap (String mapName, int[] compP, int id)  {
+		Variable key = new Variable (mapName, compP);
+		if (!succ.containsKey(key)) {
+			succ.put (key, new ArrayList<AliasObject>());
 			AliasObject newO = new AliasObject (id);
-			succ.get(mapName).add(newO);
+			succ.get(key).add(newO);
 			//update predecessor
-			newO.pred.put(mapName, new ArrayList<AliasObject>());
-			newO.pred.get(mapName).add(this);
+			newO.pred.put(key, new ArrayList<AliasObject>());
+			newO.pred.get(key).add(this);
 		} 
 	}
 	
@@ -75,17 +80,19 @@ public class AliasObject {
 	 * Add object 'o' to the map[mapName] 
 	 * @param o Object
 	 * @param mapName tag
+	 * @param compP: computational path
 	 */
-	public void addObjectAtt (AliasObject o, String mapName)  {
-		if (!succ.containsKey(mapName)) {
-			succ.put (mapName, new ArrayList<AliasObject>());
+	public void addObjectAtt (AliasObject o, String mapName, int[] compP)  {
+		Variable key = new Variable (mapName, compP);
+		if (!succ.containsKey(key)) {
+			succ.put (key, new ArrayList<AliasObject>());
 		}
-		succ.get(mapName).add(o); 
+		succ.get(key).add(o); 
 		//update predecessor
-		if (!o.pred.containsKey(mapName)) {
-			o.pred.put(mapName, new ArrayList<AliasObject>());
+		if (!o.pred.containsKey(key)) {
+			o.pred.put(key, new ArrayList<AliasObject>());
 		}
-		o.pred.get(mapName).add(this);
+		o.pred.get(key).add(this);
 	}
 	
 	/**
@@ -94,7 +101,9 @@ public class AliasObject {
 	 * @return the list of objects associated to mapName, from the
 	 * 			current context
 	 */
-	public ArrayList<AliasObject> getObjects (String mapName)  {
+	public ArrayList<AliasObject> getObjects (Variable mapName)  {
+		// TODO (9919): the list of associated objects should be according to the computational
+		//					path (to fix)
 		return succ.get (mapName);
 	}
 	
@@ -103,7 +112,7 @@ public class AliasObject {
 	 * @param key
 	 * @throws AliasException 
 	 */
-	public void updateInHold (String oldKey, String newKey) throws AliasException {
+	public void updateInHold (Variable oldKey, Variable newKey) throws AliasException {
 		if (!succ.containsKey(oldKey)) {
 			throw new AliasException("Alias Object is not holding any key: " + oldKey);
 		}
@@ -123,7 +132,7 @@ public class AliasObject {
 	 * @param oldKey
 	 * @return
 	 */
-	public boolean isUpdateNeeded (String oldKey) {
+	public boolean isUpdateNeeded (Variable oldKey) {
 		return succ.containsKey(oldKey);
 	}
 	
@@ -147,7 +156,7 @@ public class AliasObject {
 		this.visited = visited;
 	}
 	
-	public boolean isIn (String tag) {
+	public boolean isIn (Variable tag) {
 		return succ.containsKey(tag);
 	}
 	

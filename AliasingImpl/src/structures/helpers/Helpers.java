@@ -20,6 +20,7 @@ import exceptions.Log;
 import model.AliasObject;
 import model.Routine;
 import structures.AliasDiagram;
+import structures.Variable;
 import structures.graphRep.Edge;
 import structures.graphRep.SetEdges;
 
@@ -63,7 +64,7 @@ public class Helpers {
 				nodeIds.put("n"+currentObject.idNode(), ""+currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.succ.keySet()){
+				for (Variable suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
 						objects.add(obj);
 						nodeIds.put("n"+obj.idNode(), ""+obj.idNode());
@@ -208,11 +209,11 @@ public class Helpers {
 				nodeIds.put(currentObject.idNode(), currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (String suc: currentObject.succ.keySet()){
+				for (Variable suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
 						objects.add(obj);
 						nodeIds.put(obj.idNode(), obj.idNode());
-						res.addEdge(new Edge (currentObject.idNode(), suc, obj.idNode()));
+						res.addEdge(new Edge (currentObject.idNode(), suc.toString(), obj.idNode()));
 					}
 				}
 			}
@@ -238,7 +239,7 @@ public class Helpers {
 		while (ind < visited.size()) {
 			n = visited.get(ind);
 			n.setVisited(false);
-			for (String suc: n.succ.keySet()){
+			for (Variable suc: n.succ.keySet()){
 				for (AliasObject obj: n.succ.get(suc)) {
 					if (!isIn (obj, visited)) {
 						visited.add(obj);
@@ -265,7 +266,7 @@ public class Helpers {
 			AliasObject tmp = q.remove();
 			tmp.setVisited(false);
 			already.add(tmp);
-			for (String suc: tmp.succ.keySet()){
+			for (Variable suc: tmp.succ.keySet()){
 				for (AliasObject obj: tmp.succ.get(suc)) {
 					if (!already.contains(obj)) {
 						q.add(obj);

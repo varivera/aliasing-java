@@ -73,10 +73,11 @@ public class AliasDiagram {
 	 * attribute 'tag'. If not, it throws an exception.
 	 * If so, it creates the edge.  
 	 * @param tag is the name of the class attribute
+	 * @param compP is the computational path
 	 */
-	public void addEdge (String tag) {
+	public void addEdge (String tag, int[] compP) {
 		for (AliasObject ao: getRoots()) {
-			ao.addMap(tag, id.getId());
+			ao.addMap(tag, compP, id.getId());
 		}
 	}
 	
@@ -84,10 +85,11 @@ public class AliasDiagram {
 	 * checks whether 'tag' is already in the graph
 	 * if not, it adds it
 	 * @param tag is the name of the class attribute
+	 * @param compP is the computational path
 	 */
-	public void initEdge (String tag) {
+	public void initEdge (String tag, int[] compP) {
 		for (AliasObject ao: getRoots()) {
-			ao.initValMap(tag, id.getId());
+			ao.initValMap(tag, compP, id.getId());
 		}
 	}
 	
@@ -98,10 +100,11 @@ public class AliasDiagram {
 	 * attribute 'tag'. If not, it throws an exception.
 	 * If so, it creates the edge.  
 	 * @param tag is the name of the class attribute
+	 * @param compP is the computational path
 	 */
-	public void addEdge (AliasObject o, String tag) {
+	public void addEdge (AliasObject o, String tag, int[] compP) {
 		for (AliasObject ao: getRoots()) {
-			ao.addObjectAtt (o, tag);
+			ao.addObjectAtt (o, tag, compP);
 		}
 	}
 	
@@ -165,7 +168,7 @@ public class AliasDiagram {
 	public boolean isVariable (String s) {
 		
 		for (AliasObject ao: getRoots ()) {
-			if (ao.isIn(s)){
+			if (ao.isIn(new Variable(s, null))){
 				return true;
 			}
 		}
@@ -204,6 +207,8 @@ public class AliasDiagram {
 	}
 	
 	/**
+	 * (9919): this action is not longer needed
+	 * 
 	 * Restore the Alias Diagram: add the 'removed' edges and remove the 'added' edges. 
 	 * @param added edges in the Alias Diagram
 	 * @param removed edges in the Alias Diagram
@@ -211,7 +216,7 @@ public class AliasDiagram {
 	 * This operation is needed when analysing control structures: e.g. in a conditional,
 	 * before analysing the else statement, the Alias Diagram is restored.
 	 */
-	public void restoreDiagram(ArrayList<Edge> added, ArrayList<Edge> removed) {
+	/*public void restoreDiagram(ArrayList<Edge> added, ArrayList<Edge> removed) {
 		// remove added
 		for (Edge e: added) {
 			//to delete
@@ -235,7 +240,7 @@ public class AliasDiagram {
 			}
 			e.target().pred.get(e.tag()).add(e.source());
 		}
-	}
+	}*/
 	
 	
 	/**
@@ -313,7 +318,7 @@ public class AliasDiagram {
 			AliasObject currentObject = objects.remove();
 			if (!currentObject.isVisited()) {
 				currentObject.setVisited(true);
-				for (String suc: currentObject.succ.keySet()){
+				for (Variable suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
 						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
 						if (!obj.pred.get(suc).contains(currentObject)) {
@@ -343,24 +348,24 @@ public class AliasDiagram {
 		AliasObject o2 = new AliasObject (id.getId());
 		AliasObject o3 = new AliasObject (id.getId());
 		
-		g.addEdge(o1, "a");
-		g.addEdge(o1, "d");
-		g.addEdge(o2, "e");
+		g.addEdge(o1, "a", null);
+		g.addEdge(o1, "d", null);
+		g.addEdge(o2, "e", null);
 		
 		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
 		l1.add(o1);
 		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o2, "b");
-		g.addEdge(o3, "f");
+		g.addEdge(o2, "b", null);
+		g.addEdge(o3, "f", null);
 		
 		l1 = new ArrayList<AliasObject>();
 		l1.add(o2);
 		l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o3, "c");
+		g.addEdge(o3, "c", null);
 		
 		g.changeBackRoot();
 		g.changeBackRoot();

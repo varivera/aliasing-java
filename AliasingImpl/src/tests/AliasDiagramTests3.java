@@ -60,11 +60,18 @@ class AliasDiagramTests3 {
 		assertTrue(v.predCheck());
 	}
 	
+	@AfterEach
+	public void done() {
+		System.out.println("\n====================DONE===============================");
+	}
+	
 	@Test
 	void test1() {
 		assertNotNull (v);
 		v.start(classAnalyse, "assignment", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 6), (0, a<0>, 6)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
@@ -72,7 +79,9 @@ class AliasDiagramTests3 {
 	void test2() {
 		assertNotNull (v);
 		v.start(classAnalyse, "composition", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a, 6), (0, x, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 6), (0, a<0>, 6), (0, x<0>, 6)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -80,7 +89,9 @@ class AliasDiagramTests3 {
 	void test3() {
 		assertNotNull (v);
 		v.start(classAnalyse, "creation", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, x, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, x<0>, 6)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -88,7 +99,9 @@ class AliasDiagramTests3 {
 	void test4() {
 		assertNotNull (v);
 		v.start(classAnalyse, "conditional", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, v, 15), (0, w, 15)]");
+		SetEdges expectedValue = new SetEdges ("[(0, v<0>, 15), (0, w<0>, 15)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -96,7 +109,9 @@ class AliasDiagramTests3 {
 	void test5() {
 		assertNotNull (v);
 		v.start(classAnalyse, "loop", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, v, 30), (30, a, 36), (30, b, 36)]");
+		SetEdges expectedValue = new SetEdges ("[(0, v<0>, 30), (30, a<0>, 36), (30, b<0>, 36)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -104,7 +119,9 @@ class AliasDiagramTests3 {
 	void test6() {
 		assertNotNull (v);
 		v.start(classAnalyse, "unqualifiedCall", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, x, 10), (0, a, 10)]");
+		SetEdges expectedValue = new SetEdges ("[(0, x<0>, 10), (0, a<0>, 10)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 
@@ -112,7 +129,9 @@ class AliasDiagramTests3 {
 	void test7() {
 		assertNotNull (v);
 		v.start(classAnalyse, "callSiteSensitivity", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, b, 17), (0, a, 10), (0, x, 17)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 17), (0, a<0>, 10), (0, x<0>, 17)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 	
@@ -120,7 +139,9 @@ class AliasDiagramTests3 {
 	void test8() {
 		assertNotNull (v);
 		v.start(classAnalyse, "qualifiedCall", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, b, 6), (0, a2, 5), (5, x, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 6), (0, a2<0>, 5), (5, x<0>, 6)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
 	}
 }
