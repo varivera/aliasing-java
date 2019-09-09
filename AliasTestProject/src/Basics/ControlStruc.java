@@ -13,9 +13,8 @@ public class ControlStruc {
 	}
 	
 	public void cond1(boolean cc) {
+		a = b;
 		if (cc) {
-			a = b;
-		}else {
 			c = d;
 		}
 		//a:b and c:d
@@ -27,8 +26,18 @@ public class ControlStruc {
 		}else {
 			c = d;
 		}
-		a.b = c;
 		//a:b and c:d
+	}
+	
+	public void cond3(boolean cc) {
+		if (cc) {
+			a = b;
+		}else {
+			c = d;
+		}
+		a.b = c;
+		//a:b, c:d, a.b = c
+		// b.b:c, a.b:d
 	}
 	
 		

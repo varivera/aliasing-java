@@ -18,10 +18,11 @@ import model.nodeInfo;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 import structures.AliasDiagram;
-import structures.ControlStructures;
+import structures.Conditional;
 import structures.Variable;
 import structures.graphRep.SetEdges;
 import structures.helpers.Const;
+import structures.helpers.GlobalCond;
 import structures.helpers.Helpers;
 import structures.helpers.Id;
 
@@ -50,7 +51,7 @@ public class AliasAnalysis extends ASTVisitor {
 	/**
 	 * Stores information from conditionals, loops, recursion.
 	 */
-	private Deque<ControlStructures> stackControlStructures;
+	private Deque<Conditional> stackControlStructures;
 
 	// Compilation Unit
 	private CompilationUnit cu;
@@ -68,6 +69,12 @@ public class AliasAnalysis extends ASTVisitor {
 	nodeInfo[] actualremoteArgs;
 	// Actual Remote Arguments types sent from source
 	String[] actualremoteTypes;
+	
+	/**
+	 * Keep track of the conditionals. This is important to determine
+	 * the computational path
+	 */
+	GlobalCond globalCond;
 
 	/**
 	 * Id generator: to give a unique identifier to Alias Objects
@@ -119,9 +126,10 @@ public class AliasAnalysis extends ASTVisitor {
 
 		}
 		stackCall = new ArrayDeque <Routine>();
-		stackControlStructures = new ArrayDeque<ControlStructures>();
+		stackControlStructures = new ArrayDeque<Conditional>();
 		idGen = new Id();
 		aliasGraph = new AliasDiagram (idGen);
+		globalCond = new GlobalCond();
 	}
 
 	/**
@@ -155,6 +163,7 @@ public class AliasAnalysis extends ASTVisitor {
 			stackCall = current.stackCall;
 			this.actualremoteArgs = actualremoteArgs;
 			this.actualremoteTypes = actualremoteTypes;
+			globalCond = current.globalCond;
 			Helpers.printStackAll(stackCall);
 		}
 		cu = cus.get(className);
@@ -890,25 +899,24 @@ public class AliasAnalysis extends ASTVisitor {
 	
 	public boolean visit(IfStatement node) {
 		System.out.println ("IfStatement");
-		
+		globalCond.count();
 		// the conditional is ignore
-		//node.getExpression().accept(this);
+		node.getExpression().accept(this);
 		
-		// (i) start a new Control Structure in the Stack
-		// (ii) Execute then statement (storing thing in the Stack)
-		// (iii) before executing the else statement: recover the Alias Diagram 
-		// (iv) Execute else statement (storing thing in the Stack)
-		// (v) recover the Alias Diagram 
-		// (vi) Implement algorithm to handle Conditionals
-		// (vii) remove the ControlStructure from the Stack (transfer information if needed)
+		// (i) start a new Conditional Control Structure in the Stack
+		// (ii) Execute 'then' statement (storing deletions in the peek of the Stack)
+		// 	(ii.a) make sure that changes in the Alias Diagram has the corresponding computational Path 
+		// (iii) Execute 'else' statement (storing deletions in the peek of the Stack)
+		// (iv) remove from Alias Diagram the intersection of the peek of the Stack
+		// (v) remove the Conditional ControlStructure from the Stack (transfer information if needed)
 		
-		// (9919) stackControlStructures.add(new ControlStructures());
-		// (9919) stackControlStructures.peek().step();//(i)
+		stackControlStructures.add(new Conditional());
+		stackControlStructures.peek().step();//(i)
 		
-		// (9919) node.getThenStatement().accept(this); // (ii)
+		node.getThenStatement().accept(this); // (ii)
 		
 		//to delete
-		// (9919) System.out.println(stackControlStructures.peek());
+		System.out.println(stackControlStructures.peek());
 		//to delete
 		
 		//(iii)
@@ -927,7 +935,8 @@ public class AliasAnalysis extends ASTVisitor {
 		//here
 		
 		//TODO: transfer if needed
-		// (9919) stackControlStructures.remove(); // (vii)
+		stackControlStructures.peek().stop();
+		stackControlStructures.remove(); // (vii)
 		return false;
 	}
 
@@ -1404,8 +1413,8 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "Basic";
-		String methodAnalyse = "localArg1";
+		String classAnalyse = "ControlStruc";
+		String methodAnalyse = "cond1";
 
 		long start1 = System.currentTimeMillis();
 		//Init
