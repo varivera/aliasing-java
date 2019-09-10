@@ -15,6 +15,7 @@ import exceptions.Log;
 import model.AliasObject;
 import model.Routine;
 import model.nodeInfo;
+
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 import structures.AliasDiagram;
@@ -569,7 +570,7 @@ public class AliasAnalysis extends ASTVisitor {
 						// adding information to the alias graph in case it has not been added
 						aliasGraph.initEdge (n.toString(), null);
 
-						res = new nodeInfo (new Variable(n.toString(), null));
+						res = new nodeInfo (n.toString());
 						aliasGraph.aliasObjects(res);
 					} 
 				}

@@ -117,6 +117,10 @@ public class AliasDiagram {
 	public void aliasObjects (nodeInfo ref)  {
 		for (AliasObject ao: getRoots()) {
 			//TODO: check if it exists
+			ref.newRoot();
+			
+			ao.getObjects(ref.tag)
+			
 			ref.addObjects(ao.getObjects(ref.tag));
 		}
 	}

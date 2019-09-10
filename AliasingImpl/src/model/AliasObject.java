@@ -102,8 +102,18 @@ public class AliasObject {
 	 * 			current context
 	 */
 	public ArrayList<AliasObject> getObjects (Variable mapName)  {
-		// TODO (9919): the list of associated objects should be according to the computational
-		//					path (to fix)
+		return succ.get (mapName);
+	}
+	
+	/**
+	 * @param tagName
+	 * @return the list of objects associated to a tag. This does not take
+	 * 			into consideration the computational path
+	 */
+	public ArrayList<??> getObjects (String tag)  {
+		the whole lot
+		(tag^c, target)
+		
 		return succ.get (mapName);
 	}
 	

@@ -2,10 +2,11 @@ package model;
 
 import java.util.ArrayList;
 
+import structures.Edge;
 import structures.Variable;
 
 /**
- * It contains relevant information about a node to
+ * It contains relevant information about the edges of the Alias Diagram to
  * be used in assignments.
  * 
  *  
@@ -15,33 +16,35 @@ import structures.Variable;
 public class nodeInfo {
 	
 	/**
-	 * contains the Alias Object that 'tag' is
-	 * pointing at.
-	 * It is an array of arrays since there could
-	 * be more than one root in the alias graph.
+	 * contains the edges associated to a tag.
+	 * It is an array of arrays since there could be more than 
+	 * 		one root in the alias graph.
 	 */
-	public ArrayList <ArrayList<AliasObject>> pointingAt;
-
-	/**
-	 * tag name of the node
-	 */
-	public Variable tag;
+	private ArrayList <ArrayList<Edge>> edges;
 	
-	public nodeInfo (Variable tag) {
+	// raw name (no computational path associated)
+	public String tag;
+	
+	public nodeInfo (String tag) {
 		this.tag = tag;
-		pointingAt = new ArrayList <ArrayList<AliasObject>>();
+		edges = new ArrayList <ArrayList<Edge>>();
+	}
+	
+	public void newRoot() {
+		edges.add(new ArrayList<Edge>());
 	}
 	
 	/**
 	 * 
 	 * @param objs to be added (the reference) to the current nodeInfo
 	 */
-	public void addObjects (ArrayList<AliasObject> objs) {
-		pointingAt.add(objs);
+	public void addEdge (AliasObject source, Variable tag, AliasObject target) {
+		assert edges.size()==0;
+		edges.get(edges.size()-1).add(new Edge(source, tag, target));
 	}
 	
 	@Override
 	public String toString() {
-		return tag.toString();
+		return edges.toString();
 	}
 }
