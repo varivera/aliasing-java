@@ -32,13 +32,16 @@ public final class Variable {
 	
 	public Variable (String name, int[] comp) {
 		assert name!=null;
+		assert comp!=null && comp.length>0;
 		this.name = name;
-		if (comp == null || comp.length==0) {
-			this.comp = new int[] {0};
-		}else {
-			this.comp = comp;
-		}
+		this.comp = comp;
 		
+	}
+	
+	public Variable (String name) {
+		assert name!=null;
+		this.name = name;
+		this.comp = new int[] {0};
 	}
 	
 	public String getName() {

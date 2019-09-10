@@ -118,10 +118,7 @@ public class AliasDiagram {
 		for (AliasObject ao: getRoots()) {
 			//TODO: check if it exists
 			ref.newRoot();
-			
-			ao.getObjects(ref.tag)
-			
-			ref.addObjects(ao.getObjects(ref.tag));
+			ao.getObjects(ref);
 		}
 	}
 	
@@ -172,7 +169,7 @@ public class AliasDiagram {
 	public boolean isVariable (String s) {
 		
 		for (AliasObject ao: getRoots ()) {
-			if (ao.isIn(new Variable(s, null))){
+			if (ao.isIn(new Variable(s))){
 				return true;
 			}
 		}
@@ -324,7 +321,7 @@ public class AliasDiagram {
 				currentObject.setVisited(true);
 				for (Variable suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
-						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
+						System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
 						if (!obj.pred.get(suc).contains(currentObject)) {
 							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
 							return false;

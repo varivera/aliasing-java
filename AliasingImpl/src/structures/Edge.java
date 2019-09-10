@@ -71,11 +71,11 @@ public class Edge {
 	
 	public static void main (String[] arg) {
 		ArrayList<Edge> l = new ArrayList<Edge>();
-		l.add(new Edge(new AliasObject(0), new Variable("b", null), new AliasObject(1)));
-		l.add(new Edge(new AliasObject(1), new Variable("c", null), new AliasObject(2)));
-		l.add(new Edge(new AliasObject(0), new Variable("b", null), new AliasObject(2)));
+		l.add(new Edge(new AliasObject(0), new Variable("b"), new AliasObject(1)));
+		l.add(new Edge(new AliasObject(1), new Variable("c"), new AliasObject(2)));
+		l.add(new Edge(new AliasObject(0), new Variable("b"), new AliasObject(2)));
 		System.out.println(l);
-		System.out.println(l.contains(new Edge(new AliasObject(0), new Variable("b", null), new AliasObject(0))));
+		System.out.println(l.contains(new Edge(new AliasObject(0), new Variable("b"), new AliasObject(0))));
 		
 	}
 	

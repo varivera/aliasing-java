@@ -42,13 +42,11 @@ public class Conditional {
 	}
 	
 	/**
-	 * @param source of the Edge
-	 * @param v tag associated
-	 * @param target old node
+	 * @param e is the edge: (source, tag, target) 
 	 * updates deletions
 	 */
-	public void add(AliasObject source, Variable v, AliasObject target) {
-		deletions.get(deletions.size()-1).add(new Edge(source, v, target));
+	public void add(Edge e) {
+		deletions.get(deletions.size()-1).add(e);
 	}
 	
 	/**
@@ -89,7 +87,7 @@ public class Conditional {
 	 * @param globalCond
 	 * @return the computational path. Information needed to update the Alias Diagram
 	 */
-	int[] computationalPath (int globalCond) {
+	public int[] computationalPath (int globalCond) {
 		int[] res = new int[deletions.size()+1];
 		res[0] = globalCond;
 		

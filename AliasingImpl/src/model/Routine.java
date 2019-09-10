@@ -83,7 +83,7 @@ public class Routine {
 	 * @return
 	 */
 	public boolean isUpdateNeeded (String oldKey){
-		return locals.isUpdateNeeded(new Variable(oldKey, null));
+		return locals.isUpdateNeeded(new Variable(oldKey));
 	}
 	
 	/**
@@ -110,7 +110,7 @@ public class Routine {
 	 */
 	public boolean isArgument (String a) {
 		//arguments exist only temporarily 
-		return formalArguments.isIn(new Variable(a, null));
+		return formalArguments.isIn(new Variable(a));
 	}
 	
 	/**
@@ -121,7 +121,7 @@ public class Routine {
 	 */
 	public boolean isLocal (String a) {
 		//locals exist only temporarily 
-		return locals.isIn(new Variable(a, null));
+		return locals.isIn(new Variable(a));
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class Routine {
 	 * 		False otherwise
 	 */
 	public boolean isFunction () {
-		return !returnType.succ.get(new Variable(Const.RETURN, null)).equals(Const.VOID);
+		return !returnType.succ.get(new Variable(Const.RETURN)).equals(Const.VOID);
 	}
 	
 	/**
@@ -140,7 +140,12 @@ public class Routine {
 	 * 			arguments of the current routine
 	 */
 	public void aliasObjectsArgument (nodeInfo ref)  {
-		ref.addObjects(formalArguments.succ.get(ref.tag));
+		ref.newRoot();//only one root
+		//add edges
+		Variable v = new Variable(ref.tag);
+		for (AliasObject o: formalArguments.succ.get(v)){
+			ref.addEdge(formalArguments, v, o);
+		}
 	}
 	
 	/**
@@ -150,7 +155,12 @@ public class Routine {
 	 * 			locals of the current routine
 	 */
 	public void aliasObjectsLocal (nodeInfo ref)  {
-		ref.addObjects(locals.succ.get(ref.tag));
+		ref.newRoot();//only one root
+		//add edges
+		Variable v = new Variable(ref.tag);
+		for (AliasObject o: locals.succ.get(v)){
+			ref.addEdge(locals, v, o);
+		}
 	}
 	
 	/**
@@ -160,7 +170,12 @@ public class Routine {
 	 * 			return value of the current routine
 	 */
 	public void aliasObjectsReturn (nodeInfo ref)  {
-		ref.addObjects(returnType.succ.get(new Variable(Const.RETURN, null)));
+		ref.newRoot();//only one root
+		//add edges
+		Variable v = new Variable(Const.RETURN);
+		for (AliasObject o: returnType.succ.get(v)){
+			ref.addEdge(returnType, v, o);
+		}
 	}
 	
 	/**

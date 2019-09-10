@@ -1,7 +1,6 @@
 package model;
 
 import java.util.ArrayList;
-
 import structures.Edge;
 import structures.Variable;
 
@@ -30,6 +29,9 @@ public class nodeInfo {
 		edges = new ArrayList <ArrayList<Edge>>();
 	}
 	
+	/**
+	 * creates rooms for edges in another root
+	 */
 	public void newRoot() {
 		edges.add(new ArrayList<Edge>());
 	}
@@ -39,8 +41,30 @@ public class nodeInfo {
 	 * @param objs to be added (the reference) to the current nodeInfo
 	 */
 	public void addEdge (AliasObject source, Variable tag, AliasObject target) {
-		assert edges.size()==0;
+		assert edges.size()!=0;
 		edges.get(edges.size()-1).add(new Edge(source, tag, target));
+	}
+	
+	/**
+	 * @return s the number of roots stored
+	 */
+	public int nRoots() {
+		return edges.size();
+	}
+	
+	public ArrayList <ArrayList<AliasObject>> getTargets(){
+		ArrayList <ArrayList<AliasObject>> res = new ArrayList <ArrayList<AliasObject>>();
+		for (ArrayList<Edge> es: edges) {
+			res.add(new ArrayList<AliasObject>());
+			for (Edge e: es) {
+				res.get(res.size()-1).add(e.target());
+			}
+		}
+		return res;
+	}
+	
+	public ArrayList <ArrayList<Edge>> getEdges (){
+		return edges;
 	}
 	
 	@Override

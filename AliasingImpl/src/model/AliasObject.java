@@ -46,7 +46,13 @@ public class AliasObject {
 	 * @param id 
 	 */
 	public void addMap (String mapName, int[] compP, int id)  {
-		Variable key = new Variable (mapName, compP);
+		Variable key = null;
+		if (compP == null) {
+			key = new Variable (mapName);
+		}else {
+			key = new Variable (mapName, compP);
+		}
+		
 		if (!succ.containsKey(key)) {
 			succ.put (key, new ArrayList<AliasObject>());
 		}
@@ -65,7 +71,12 @@ public class AliasObject {
 	 * @param id 
 	 */
 	public void initValMap (String mapName, int[] compP, int id)  {
-		Variable key = new Variable (mapName, compP);
+		Variable key = null;
+		if (compP == null) {
+			key = new Variable (mapName);
+		}else {
+			key = new Variable (mapName, compP);
+		}
 		if (!succ.containsKey(key)) {
 			succ.put (key, new ArrayList<AliasObject>());
 			AliasObject newO = new AliasObject (id);
@@ -110,11 +121,15 @@ public class AliasObject {
 	 * @return the list of objects associated to a tag. This does not take
 	 * 			into consideration the computational path
 	 */
-	public ArrayList<??> getObjects (String tag)  {
-		the whole lot
-		(tag^c, target)
+	public void getObjects (nodeInfo ref)  {
 		
-		return succ.get (mapName);
+		for (Variable s: succ.keySet()) {
+			if (s.getName().equals(ref.tag)) {
+				for (AliasObject o: succ.get(s)) {
+					ref.addEdge(this, s, o);
+				}
+			}
+		}
 	}
 	
 	/**
