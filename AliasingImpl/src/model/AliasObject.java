@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import exceptions.AliasException;
 import structures.Variable;
+import structures.Pair;
 
 /**
  * 
@@ -159,6 +160,125 @@ public class AliasObject {
 	 */
 	public boolean isUpdateNeeded (Variable oldKey) {
 		return succ.containsKey(oldKey);
+	}
+	
+	/**
+	 * returns the successors of 'tag' without taking into consideration
+	 * the computational path
+	 */
+	public ArrayList<AliasObject> getSucc (String tag){
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
+		
+		for (Variable v: succ.keySet()) {
+			if (v.getName().equals(tag)) {
+				for (AliasObject o: succ.get(v)) {
+					res.add(o);
+				}
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * Similar to getSucc but returns more information
+	 */
+	public ArrayList<Pair<Variable,AliasObject>> getSucc2 (String tag){
+		ArrayList<Pair<Variable,AliasObject>> res = new ArrayList<Pair<Variable,AliasObject>>();
+		
+		for (Variable v: succ.keySet()) {
+			if (v.getName().equals(tag)) {
+				for (AliasObject o: succ.get(v)) {
+					res.add(new Pair<Variable,AliasObject>(v, o));
+				}
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * returns the predecessors of 'tag' without taking into consideration
+	 * the computational path
+	 */
+	public ArrayList<AliasObject> getPred (String tag){
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
+		
+		for (Variable v: pred.keySet()) {
+			if (v.getName().equals(tag)) {
+				for (AliasObject o: pred.get(v)) {
+					res.add(o);
+				}
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * returns the predecessors of 'tag' that are in the same computational
+	 * path 'compP'
+	 */
+	public ArrayList<AliasObject> getPredSimilarCP (String tag, int[] compP){
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
+		
+		for (Variable v: pred.keySet()) {
+			if (v.getName().equals(tag) && sameCP (compP, v.getCompP())) {
+				for (AliasObject o: pred.get(v)) {
+					res.add(o);
+				}
+			}
+		}
+		
+		return res;
+	}
+	
+	/**
+	 * returns true is cp1 and cp2 are in the same computational
+	 * path
+	 */
+	private boolean sameCP (int[] cp1, int[] cp2) {
+		assert cp1!=null && cp2!=null;
+		if ((cp1.length == 1 && cp1[0] == 0) || (cp2.length == 1 && cp2[0]==0)) return true;
+		int[] d1;
+		int[] d2;
+		if (cp1.length <= cp2.length) {
+			d1 = cp1;
+			d2 = cp2;
+		}else {
+			d1 = cp2;
+			d2 = cp1;
+		}
+		for (int i=0;i<d1.length;i++) {
+			if (d1[i] != d2[i]) return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * returns true if 'tag' is a successor. It does not take into consideration
+	 * the computational path
+	 */
+	public boolean containsSucc (String tag){
+		for (Variable v: succ.keySet()) {
+			if (v.getName().equals(tag)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * returns true if 'tag' is a predecessor. It does not take into consideration
+	 * the computational path
+	 */
+	public boolean containsPred (String tag){
+		for (Variable v: pred.keySet()) {
+			if (v.getName().equals(tag)) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	

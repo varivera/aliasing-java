@@ -48,6 +48,10 @@ public final class Variable {
 		return name;
 	}
 	
+	public int[] getCompP() {
+		return comp;
+	}
+	
 	
 	@Override
     public boolean equals(Object o) {
