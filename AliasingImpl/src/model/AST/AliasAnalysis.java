@@ -417,6 +417,10 @@ public class AliasAnalysis extends ASTVisitor {
 	 * @param right
 	 */
 	public void aliasing (nodeInfo left, nodeInfo right) {
+		//to delete
+		System.out.println("left: " + left);
+		System.out.println("right: " + right);
+		//to delete
 		assert left != null && right != null;
 		assert left.nRoots() == right.nRoots();
 		assert left.nRoots() >= 1;
@@ -436,6 +440,9 @@ public class AliasAnalysis extends ASTVisitor {
 		if (stackControlStructures.size()>0) {
 			for (ArrayList<Edge> es: left.getEdges()) {
 				for (Edge e: es) {
+					//to delete
+					System.out.println("removed: " + e);
+					//to delete
 					stackControlStructures.peek().add(e);
 				}
 			}
@@ -448,11 +455,30 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 		}
 		
+		//to delete
+		//System.out.println("size: " + stackControlStructures.peek()..size());
+		//to delete
+		
 		
 		for (int i=0;i<left.nRoots(); i++) {
-			Variable newCP = new Variable(left.tag, (stackControlStructures.size()>0) ?
+			
+			int[] path = null;
+			if (stackControlStructures.size()>0) {
+				path = new int[stackControlStructures.size()+1];
+				path[0] = globalCond.getNumber();
+				globalCond.getNumber();
+				int c = stackControlStructures.size();
+				for (Conditional cond: stackControlStructures) {
+					path[c--] = cond.getDeletionCount();
+				}
+			}else {
+				path = new int[] {0};
+			}
+			
+			/*Variable newCP = new Variable(left.tag, (stackControlStructures.size()>0) ?
 					stackControlStructures.peek().computationalPath(globalCond.getNumber())
-					: new int[] {0});
+					: new int[] {0});*/
+			Variable newCP = new Variable(left.tag, path);
 			for (Edge edgeLeft: left.getEdges().get(i)) {
 				for (Edge edgeRight: right.getEdges().get(i)) {
 					if (!edgeLeft.source().succ.containsKey(newCP)) {
@@ -934,7 +960,7 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		// (i) start a new Conditional Control Structure in the Stack
 		// (ii) Execute 'then' statement (storing deletions in the peek of the Stack)
-		// 	(ii.a) make sure that changes in the Alias Diagram has the corresponding computational Path 
+		// 	(->) make sure that changes in the Alias Diagram has the corresponding computational Path 
 		// (iii) Execute 'else' statement (storing deletions in the peek of the Stack)
 		// (iv) remove from Alias Diagram the intersection of the peek of the Stack
 		// (v) remove the Conditional ControlStructure from the Stack (transfer information if needed)
@@ -949,17 +975,15 @@ public class AliasAnalysis extends ASTVisitor {
 		//to delete
 		
 		//(iii)
-		// (9919) aliasGraph.restoreDiagram(stackControlStructures.peek().getLastAdded(), stackControlStructures.peek().getLastRemoved());
-		// (9919) stackControlStructures.peek().step();
+		stackControlStructures.peek().step();
 		
-		// (9919) node.getElseStatement().accept(this); // (iv)
+		if (node.getElseStatement()!=null) {
+			node.getElseStatement().accept(this); // (iv)
+		}
 		
 		//to delete
-		// (9919) System.out.println(stackControlStructures.peek());
+		System.out.println(stackControlStructures.peek());
 		//to delete
-		
-		//(v)
-		// (9919) aliasGraph.restoreDiagram(stackControlStructures.peek().getLastAdded(), stackControlStructures.peek().getLastRemoved());
 		
 		//here
 		
@@ -1442,8 +1466,8 @@ public class AliasAnalysis extends ASTVisitor {
 			classpath = new String[]{"/Library/Java/JavaVirtualMachines/jdk1.8.0_151.jdk/Contents/Home/jre/librt.jar"};
 		}
 
-		String classAnalyse = "Basic";
-		String methodAnalyse = "assg1";
+		String classAnalyse = "ControlStruc";
+		String methodAnalyse = "cond4";
 
 		long start1 = System.currentTimeMillis();
 		//Init

@@ -98,6 +98,10 @@ public class Conditional {
 		return res;
 	}
 	
+	public int getDeletionCount() {
+		return deletions.size();
+	}
+	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		

@@ -115,9 +115,11 @@ public class AliasDiagram {
 	 * 			current context
 	 */
 	public void aliasObjects (nodeInfo ref)  {
+		//TODO: not sure if there is a need to have different roots. The Alias Diagram has changed
+		//				Issue: https://github.com/varivera/aliasing-java/issues/25
+		ref.newRoot();
 		for (AliasObject ao: getRoots()) {
 			//TODO: check if it exists
-			ref.newRoot();
 			ao.getObjects(ref);
 		}
 	}
@@ -205,44 +207,7 @@ public class AliasDiagram {
 	 */
 	public void changeBackRoot() {
 		root.pop();
-	}
-	
-	/**
-	 * (9919): this action is not longer needed
-	 * 
-	 * Restore the Alias Diagram: add the 'removed' edges and remove the 'added' edges. 
-	 * @param added edges in the Alias Diagram
-	 * @param removed edges in the Alias Diagram
-	 * 
-	 * This operation is needed when analysing control structures: e.g. in a conditional,
-	 * before analysing the else statement, the Alias Diagram is restored.
-	 */
-	/*public void restoreDiagram(ArrayList<Edge> added, ArrayList<Edge> removed) {
-		// remove added
-		for (Edge e: added) {
-			//to delete
-			System.out.println("restoreDiagram (remove added): " + e);
-			//to delete
-			assert e.source().succ.containsKey(e.tag());
-			assert e.target().pred.containsKey(e.tag());
-			e.source().succ.get(e.tag()).remove(e.target());
-			e.target().pred.get(e.tag()).remove(e.source());
-		}
-		
-		//added removed
-		for (Edge e: removed) {
-			System.out.println("restoreDiagram (add removed): " + e);
-			if (!e.source().succ.containsKey(e.tag())) {
-				e.source().succ.put(e.tag(), new ArrayList<AliasObject>());
-			}
-			e.source().succ.get(e.tag()).add(e.target());
-			if (!e.target().pred.containsKey(e.tag())) {
-				e.target().pred.put(e.tag(), new ArrayList<AliasObject>());
-			}
-			e.target().pred.get(e.tag()).add(e.source());
-		}
-	}*/
-	
+	}	
 	
 	/**
 	 * @param p path in the Alias Diagram
@@ -254,12 +219,13 @@ public class AliasDiagram {
 	}
 	
 	/**
-	 * @param p1 path in the Alias Diagram
-	 * @param p2 path in the Alias Diagram
+	 * @param p1 OO path (e.g.:  a.b.c)
+	 * @param p2 OO path (e.g.:  v.w)
 	 * @return true if p1 is aliased to p2. False otherwise
 	 */
 	public boolean areAliased (Path p1, Path p2) {
 		// if both path exists and point to the same node, they are aliased 
+		//TODO update
 		return p1.exists() && p2.exists() && Path.intersect(p1.getTarget(), p2.getTarget());
 	}
 	
@@ -321,7 +287,7 @@ public class AliasDiagram {
 				currentObject.setVisited(true);
 				for (Variable suc: currentObject.succ.keySet()){
 					for (AliasObject obj: currentObject.succ.get(suc)) {
-						System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
+						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
 						if (!obj.pred.get(suc).contains(currentObject)) {
 							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
 							return false;

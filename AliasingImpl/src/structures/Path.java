@@ -1,8 +1,11 @@
 package structures;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 
 import model.AliasObject;
+import model.Routine;
 import structures.helpers.Helpers;
 import structures.helpers.Id;
 
@@ -44,6 +47,13 @@ public class Path {
 		assert this.nodeTags != null;
 		assert correctNumberOfNodes();
 	}
+	
+	
+	//delete
+	public Path() {
+		
+	}
+	
 	
 	/**
 	 * @return the possible source nodes of the path
@@ -139,6 +149,36 @@ public class Path {
 		return res.toString();
 	}
 	
+	public boolean doesPathExist(String[] path, AliasDiagram g) {
+		assert path!=null && path.length>0;
+		Deque<Pair> S = new ArrayDeque <Pair>();
+		S.add(new Pair (0, g.getRoots().get(0)));
+		while (!S.isEmpty() ) {
+			Pair v = S.pop();
+			if (!v.v.isVisited()) {
+				v.v.setVisited(true);
+				if (v.v.succ.containsKey(new Variable (path[v.i]))) {
+					if (v.i == path.length-1) return true;
+					for (AliasObject n: v.v.succ.get(new Variable (path[v.i]))) {
+						S.add(new Pair (v.i+1, n));
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	class Pair {
+		public int i;
+		public AliasObject v;
+		public Pair(int i, AliasObject v) {
+			this.i = i;
+			this.v = v;
+		}
+	}
+	
+	
+	
 	/**
 	 * For testing purposes
 	 */
@@ -158,58 +198,69 @@ public class Path {
 		AliasObject o1 = new AliasObject (id.getId());
 		AliasObject o2 = new AliasObject (id.getId());
 		AliasObject o3 = new AliasObject (id.getId());
+		AliasObject o4 = new AliasObject (id.getId());
+		AliasObject o5 = new AliasObject (id.getId());
+		AliasObject o6 = new AliasObject (id.getId());
+		AliasObject o7 = new AliasObject (id.getId());
+		AliasObject o8 = new AliasObject (id.getId());
+		AliasObject o9 = new AliasObject (id.getId());
+		AliasObject o10 = new AliasObject (id.getId());
 		
-		g.addEdge(o1, "a", null);
-		g.addEdge(o1, "d", null);
-		g.addEdge(o2, "e", null);
+		
+		
+		g.addEdge(o1, "a", new int[] {0});
+		g.addEdge(o2, "a", new int[] {0});
+		
 		
 		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
 		l1.add(o1);
 		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o2, "b", null);
-		g.addEdge(o3, "f", null);
+		g.addEdge(o3, "b", new int[] {0});
+		g.addEdge(o4, "b", new int[] {0});
 		
 		l1 = new ArrayList<AliasObject>();
 		l1.add(o2);
 		l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o3, "c", null);
+		g.addEdge(o5, "b", new int[] {0});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o5);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o9, "e", new int[] {0});
+		g.addEdge(o10, "c", new int[] {0});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o4);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o7, "d", new int[] {0});
+		g.addEdge(o8, "cc", new int[] {0});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o3);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o6, "d", new int[] {0});
 		
 		g.changeBackRoot();
 		g.changeBackRoot();
-		
-		System.out.println("well-defined predecessor: " + g.predecesorsOK ());
-		
-		
-		
-		// Is path ok?
-		Path p = new Path(
-				new ArrayList<String>() { 
-		            { 
-		                add("a"); 
-		                add("b"); 
-		                add("c"); 
-		            }}, 
-				new ArrayList <ArrayList<AliasObject>>() { 
-			            { 
-			            	add(new  ArrayList<AliasObject>() {
-			                	{
-			                		add (g.getRoots().get(0));
-			                		add (o1);
-			                		add (o2);
-			                		add (o3);
-			                }});
-			            }});
+		g.changeBackRoot();
+		g.changeBackRoot();
+		g.changeBackRoot();
 		
 		
-		
-		System.out.println(p);
-		System.out.println("is path p ok?: " + p.exists());
 		String s = Helpers.toGraphAll (g.getRoots());
 		Helpers.createDot (s, "testingAliasDiagram", "source");
+		Path p = new Path();
+		System.out.println(p.doesPathExist(new String[] {"a", "b","e", "d"}, g));
 		System.out.println("done");
 	}
 	

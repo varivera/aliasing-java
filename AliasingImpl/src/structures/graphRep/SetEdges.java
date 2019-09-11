@@ -38,7 +38,7 @@ public class SetEdges {
 		if (d.length%3!=0) return;
 		
 		for (int i=0;i<d.length;i=i+3) {
-			addEdge (new Edge (Integer.parseInt(d[i]), d[i+1], Integer.parseInt(d[i+2])));
+			addEdge (new Edge (Integer.parseInt(d[i]), d[i+1].replaceAll("-", ","), Integer.parseInt(d[i+2])));
 		}
 		
 	}

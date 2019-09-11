@@ -36,8 +36,27 @@ public class ControlStruc {
 			c = d;
 		}
 		a.b = c;
-		//a:b, c:d, a.b = c
+		//a:b, c:d, a.b : c
 		// b.b:c, a.b:d
+	}
+	
+	public void cond4(boolean cc) {
+		if (cc) {
+			a = c;
+		}else {
+			b = c;
+		}
+		//a:c, b:c, not a:b
+	}
+	
+	public void cond5(boolean cc) {
+		a=b;
+		if (cc) {
+			a = c;
+		}else {
+			a = d;
+		}
+		//a:c, a:d, not a:b
 	}
 	
 		
