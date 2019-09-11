@@ -229,6 +229,114 @@ public class AliasDiagram {
 		return p1.exists() && p2.exists() && Path.intersect(p1.getTarget(), p2.getTarget());
 	}
 	
+	
+	/**
+	 * aliasing queries
+	 */
+	
+	/**
+	 * @param path OO path (e.g.: a.b.c) represented as a String array (e.g.: [a,b,c])
+	 * @return true is path 'path; is in Alias Diagram
+	 */
+	public boolean doesPathExist(String[] path) {
+		assert path!=null && path.length>0;
+		Deque<Pair<Integer, AliasObject>> S = new ArrayDeque <Pair<Integer, AliasObject>>();
+		S.add(new Pair<Integer, AliasObject> (0, getRoots().get(0)));
+		while (!S.isEmpty() ) {
+			Pair<Integer, AliasObject> v = S.pop();
+			//TODO: assuming no loops for now
+			if (v.prj2.containsSucc(path[v.prj1])) {
+				if (v.prj1 == path.length-1) {
+					Helpers.notVisited(getRoots());
+					return true;
+				}
+				for (AliasObject n: v.prj2.getSucc(path[v.prj1])) {
+					S.add(new Pair<Integer, AliasObject> (v.prj1+1, n));
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * @param path OO path (e.g.: a.b.c) represented as a String array (e.g.: [a,b,c])
+	 * @return the set of objects that 'path' is pointing at in the Alias Diagram
+	 */
+	private ArrayList<Pair<Variable, AliasObject>> pathObjects(String[] path) {
+		assert path!=null && path.length>0 && doesPathExist(path);
+		ArrayList<Pair<Variable, AliasObject>> res = new ArrayList<Pair<Variable, AliasObject>>();
+		Deque<Pair<Integer, AliasObject>> S = new ArrayDeque <Pair<Integer, AliasObject>>();
+		S.add(new Pair<Integer, AliasObject> (0, getRoots().get(0)));
+		while (!S.isEmpty() ) {
+			Pair<Integer, AliasObject> v = S.pop();
+			// TODO: assuming no loops for now
+			if (v.prj2.containsSucc(path[v.prj1])) {
+				if (v.prj1 == path.length-1) {
+					for (Pair<Variable, AliasObject> n: v.prj2.getSucc2(path[v.prj1])) {
+						res.add(n);
+					}
+				}else {
+					for (AliasObject n: v.prj2.getSucc(path[v.prj1])) {
+						S.add(new Pair<Integer, AliasObject> (v.prj1+1, n));
+					}
+				}
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 * returns true if there is a path from root to any node in 'endObjects' following 'path'
+	 * 	Note: the implementation evaluates the path backwards and determine whether
+	 * 			it reaches the root of the Alias Diagram.
+	 * It returns false, otherwise 
+	 */
+	private boolean isRootReach(ArrayList<Pair<Variable, AliasObject>> endObjects, String[] path) {
+		assert path!=null && path.length>0;
+		for (Pair<Variable, AliasObject> endO: endObjects) {
+			Deque<Pair<Integer, AliasObject>> S = new ArrayDeque <Pair<Integer, AliasObject>>();
+			S.add(new Pair<Integer, AliasObject> (path.length-1, endO.prj2));
+			while (!S.isEmpty() ) {
+				Pair<Integer, AliasObject> v = S.pop();
+				if (!v.prj2.isVisited()) {
+					if (!getRoots().contains(v.prj2)) {
+						v.prj2.setVisited(true);
+					}
+					if (v.prj1 == path.length-1) {////only the last part of the paths need to be in the same computational path
+						ArrayList<AliasObject> pred = endO.prj2.getPredSimilarCP (path[v.prj1], endO.prj1.getCompP());
+						if (pred.size()==0) {
+							Helpers.notVisited(getRoots());
+						}else {
+							for (AliasObject n: pred) {
+								S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
+							}
+						}
+					}else if (v.prj1 == -1) {
+						Helpers.notVisited(getRoots());
+						return getRoots().contains(v.prj2);
+					}else {
+						if (v.prj2.containsPred(path[v.prj1])) {
+							for (AliasObject n: v.prj2.getPred(path[v.prj1])) {
+								S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
+							}
+						}
+					}
+				}
+			}
+			Helpers.notVisited(getRoots());
+		}
+		Helpers.notVisited(getRoots());
+		return false;
+	}
+	
+	/**
+	 * return true if there is at least one computational path in the Alias Diagram
+	 * 	that makes p1 and p2 aliased.
+	 */
+	public boolean aliased (String[] p1, String[] p2) {
+		return isRootReach(pathObjects(p1), p2);
+	}
+	
 	/**
 	 * For Debugging and Testing phases
 	 */
@@ -314,81 +422,102 @@ public class AliasDiagram {
 		AliasObject o1 = new AliasObject (id.getId());
 		AliasObject o2 = new AliasObject (id.getId());
 		AliasObject o3 = new AliasObject (id.getId());
+		AliasObject o4 = new AliasObject (id.getId());
+		AliasObject o5 = new AliasObject (id.getId());
+		AliasObject o6 = new AliasObject (id.getId());
+		AliasObject o7 = new AliasObject (id.getId());
+		AliasObject o8 = new AliasObject (id.getId());
+		AliasObject o9 = new AliasObject (id.getId());
+		AliasObject o10 = new AliasObject (id.getId());
+		AliasObject o11 = new AliasObject (id.getId());
 		
-		g.addEdge(o1, "a", null);
-		g.addEdge(o1, "d", null);
-		g.addEdge(o2, "e", null);
+		
+		
+		g.addEdge(o1, "a", new int[] {0});
+		g.addEdge(o2, "a", new int[] {0});
+		g.addEdge(o5, "c", new int[] {0});
+		g.addEdge(o11, "c", new int[] {0});
+		
 		
 		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
 		l1.add(o1);
 		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o2, "b", null);
-		g.addEdge(o3, "f", null);
+		g.addEdge(o3, "b", new int[] {0});
+		g.addEdge(o4, "b", new int[] {1,1});
 		
 		l1 = new ArrayList<AliasObject>();
 		l1.add(o2);
 		l2 = new ArrayList<ArrayList<AliasObject>>();
 		l2.add(l1);
 		g.changeRoot(l2);
-		g.addEdge(o3, "c", null);
+		g.addEdge(o5, "b", new int[] {1,1});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o5);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o9, "e", new int[] {0});
+		g.addEdge(o10, "c", new int[] {0});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o4);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o7, "d", new int[] {0});
+		g.addEdge(o8, "cc", new int[] {0});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o3);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o6, "d", new int[] {0});
+
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o11);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o5, "c", new int[] {1,2});
+		
+		l1 = new ArrayList<AliasObject>();
+		l1.add(o10);
+		l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o8, "c", new int[] {1,2});
 		
 		g.changeBackRoot();
 		g.changeBackRoot();
+		g.changeBackRoot();
+		g.changeBackRoot();
+		g.changeBackRoot();
+		g.changeBackRoot();
+		g.changeBackRoot();
 		
-		System.out.println("well-defined predecessor: " + g.predecesorsOK ());
 		
-		
-		
-		Path p1 = new Path(
-				new ArrayList<String>() { 
-		            { 
-		                add("a"); 
-		                add("b"); 
-		            }}, 
-				new ArrayList <ArrayList<AliasObject>>() { 
-			            { 
-			            	add (g.getRoots());
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o1);
-			                }});
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o2);
-			                }});
-			            }});
-		
-		Path p2 = new Path(
-				new ArrayList<String>() { 
-		            { 
-		                add("a");
-		                add("b");
-		                add("c");
-		            }}, 
-				new ArrayList <ArrayList<AliasObject>>() { 
-			            { 
-			            	add (g.getRoots());
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o1);
-			                }});
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o2);
-			                }});
-			                add(new  ArrayList<AliasObject>() {
-			                	{
-			                	add (o3);
-			                }});
-			            }});
-		
-		System.out.println(p1);
-		System.out.println(p2);
-		System.out.println("p1:p2?: " + g.areAliased(p1, p2));
 		String s = Helpers.toGraphAll (g.getRoots());
 		Helpers.createDot (s, "testingAliasDiagram", "source");
+		Path p = new Path();
+		
+		assert g.doesPathExist(new String[] {"a", "b"});
+		assert g.doesPathExist(new String[] {"a", "b","e"});
+		assert !g.doesPathExist(new String[] {"b", "a"});
+		assert !g.doesPathExist(new String[] {"a", "b","e","s"});
+		assert g.doesPathExist(new String[] {"a", "b","cc"});
+		assert g.doesPathExist(new String[] {"a", "b","d"});
+		assert g.aliased (new String[] {"a", "b"}, new String[] {"c"});
+		assert g.aliased (new String[] {"c"}, new String[] {"c", "c"});
+		assert !g.aliased (new String[] {"c", "c"}, new String[] {"a","b"});
+		assert g.aliased (new String[] {"c", "c", "c", "c"}, new String[] {"a","b", "cc"});
+		//System.out.println(p.pathObjects(new String[] {"c", "c", "c", "c"}, g));
+		
+		System.out.println(">> " + g.aliased (new String[] {"c", "c"}, new String[] {"a","b"}));
+		
 		System.out.println("done");
 	}
 }

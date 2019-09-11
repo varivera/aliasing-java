@@ -1,5 +1,6 @@
 package structures;
 
+import model.AliasObject;
 
 /**
  * This class holds a pair of elements of any type (p1,p2) 
@@ -17,6 +18,8 @@ public class Pair<T1, T2> {
 	}
 	
 	public String toString () {
-		return "<"+prj1.toString()+","+prj2.toString()+">";
+		return "<"+
+				(prj1 instanceof AliasObject? ""+((AliasObject) prj1).idNode(): prj1.toString())+","+
+				(prj2 instanceof AliasObject? ""+((AliasObject) prj2).idNode(): prj2.toString())+">";
 	}
 }

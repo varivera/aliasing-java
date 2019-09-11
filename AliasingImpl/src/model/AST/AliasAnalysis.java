@@ -1448,6 +1448,15 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean predCheck() {
 		return aliasGraph.predecesorsOK();
 	}
+	
+	/**
+	 * Aliasing query 
+	*/
+	public boolean aliased (String p1, String p2) {
+		return aliasGraph.aliased(
+				p1.contains(".")?p1.split("."):new String[] {p1}, 
+				p2.contains(".")?p2.split("."):new String[] {p2});
+	}
 
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
@@ -1467,7 +1476,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "cond4";
+		String methodAnalyse = "cond5";
 
 		long start1 = System.currentTimeMillis();
 		//Init
