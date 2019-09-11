@@ -33,7 +33,7 @@ class AliasDiagramTests3 {
 			String[] unitName = new String[]{"QualifiedCall.java", "T.java", "Basic.java", "AAPaper.java"};
 			String[] classpath = new String[] {};
 			if (System.getProperty("os.name").contains("Windows")) {
-				sourcePath = "D:\\OneDrive\\Documents\\work\\aliasingJava\\aliasing-java\\AliasTestProject\\src\\Basics\\";
+				sourcePath = "C:\\Users\\varz8_p87ir1f\\git\\aliasing-java2\\AliasTestProject\\src\\Basics\\";
 				classpath = new String[]{"C:\\Program Files\\Java\\jre1.8.0_181\\lib\\rt.jar"};
 			}else if (System.getProperty("os.name").contains("Mac")) {
 				sourcePath = "/Users/victor/git/aliasing-java2/AliasTestProject/src/Basics/";
