@@ -58,19 +58,21 @@ public class Conditional {
 			return res;
 		}
 		int min = deletions.get(0).size();
+		int j = 0;
 		
 		
 		for (int i=1; i<deletions.size();i++) {
-			if (deletions.get(i).size() < deletions.get(min).size()) {
-				min = i;
+			if (deletions.get(i).size() < deletions.get(j).size()) {
+				min = deletions.get(i).size();
+				j = i;
 			}
 		}
 		
 		boolean inter;
-		for (Edge e: deletions.get(min)) {
+		for (Edge e: deletions.get(j)) {
 			inter = true;
 			for (int i=0;i<deletions.size()&&inter;i++) {
-				if (i!=min) {
+				if (i!=j) {
 					if (!deletions.get(i).contains(e)) {
 						inter = false;
 					}
@@ -105,9 +107,8 @@ public class Conditional {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		
-		res.append("*****************\nDeletions:\n");
+		res.append("\n*****************\n");
 		
-		res.append(">\n\nDeletions:\n");
 		for (int i=0;i<deletions.size();i++) {
 			res.append((i+1) + ". <");
 			for (int j=0;j<deletions.get(i).size();j++) {

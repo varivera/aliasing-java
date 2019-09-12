@@ -106,4 +106,48 @@ class AliasDiagramTests4 {
 		assertTrue(!v.aliased("a", "b"));
 	}
 	
+	@Test
+	void test5() {
+		assertNotNull (v);
+		v.start(classAnalyse, "cond5", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, c<0>, 9), (0, d<0>, 11), (0, a<1-1>, 9), (0, b<0>, 7), (0, a<1-2>, 11)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(!v.aliased("a", "b"));
+	}
+	
+	@Test
+	void test6() {
+		assertNotNull (v);
+		v.start(classAnalyse, "cond6", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, a<1-1-1>, 13), (0, d<0>, 9), (0, c<0>, 9), (0, a<1-1-2>, 15), (0, c<1-1>, 7), (0, f<0>, 15), (0, e<0>, 13), (0, a<1-2>, 9), (0, b<0>, 7)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("a", "e"));
+		assertTrue(v.aliased("b","c"));
+		assertTrue(v.aliased("a","f"));
+		assertTrue(v.aliased("d","c"));
+		assertTrue(v.aliased("c","a"));
+		assertTrue(v.aliased("a","d"));
+		assertTrue(!v.aliased("f","c"));
+		assertTrue(!v.aliased("b","a"));
+		assertTrue(!v.aliased("c","e"));
+	}
+	
+	@Test
+	void test7() {
+		assertNotNull (v);
+		v.start(classAnalyse, "cond7", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, c<1-2>, 9), (6, c<0>, 17), (0, a<0>, 6), (0, c<0>, 10), (0, x<0>, 14), (0, x<2-1>, 17), (6, right<1-1>, 9), (0, b<0>, 14), (6, right<0>, 7)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("x", "b"));
+		assertTrue(v.aliased("a.c","x"));
+		assertTrue(!v.aliased("a.right","c"));
+		assertTrue(!v.aliased("b","a.c"));
+	}
+	
 }

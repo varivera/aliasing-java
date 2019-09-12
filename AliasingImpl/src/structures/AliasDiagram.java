@@ -219,18 +219,6 @@ public class AliasDiagram {
 	}
 	
 	/**
-	 * @param p1 OO path (e.g.:  a.b.c)
-	 * @param p2 OO path (e.g.:  v.w)
-	 * @return true if p1 is aliased to p2. False otherwise
-	 */
-	public boolean areAliased (Path p1, Path p2) {
-		// if both path exists and point to the same node, they are aliased 
-		//TODO update
-		return p1.exists() && p2.exists() && Path.intersect(p1.getTarget(), p2.getTarget());
-	}
-	
-	
-	/**
 	 * aliasing queries
 	 */
 	

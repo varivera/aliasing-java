@@ -108,24 +108,13 @@ public class AliasObject {
 	}
 	
 	/**
-	 * 
-	 * @param mapName
-	 * @return the list of objects associated to mapName, from the
-	 * 			current context
-	 */
-	public ArrayList<AliasObject> getObjects (Variable mapName)  {
-		return succ.get (mapName);
-	}
-	
-	/**
 	 * @param tagName
 	 * @return the list of objects associated to a tag. This does not take
 	 * 			into consideration the computational path
 	 */
 	public void getObjects (nodeInfo ref)  {
-		
 		for (Variable s: succ.keySet()) {
-			if (s.getName().equals(ref.tag)) {
+			if (s.getName().equals(ref.tag) && sameCP(ref.CurrentCP, s.getCompP())) {
 				for (AliasObject o: succ.get(s)) {
 					ref.addEdge(this, s, o);
 				}
@@ -239,7 +228,8 @@ public class AliasObject {
 	 */
 	private boolean sameCP (int[] cp1, int[] cp2) {
 		assert cp1!=null && cp2!=null;
-		if ((cp1.length == 1 && cp1[0] == 0) || (cp2.length == 1 && cp2[0]==0)) return true;
+		if ((cp1.length == 1 && cp1[0] == 0) || (cp2.length == 1 && cp2[0]==0)) return true; //base CP
+		if ((cp1.length > 0 && cp2.length > 0 && cp1[0]!=cp2[0])) return true; // different CP
 		int[] d1;
 		int[] d2;
 		if (cp1.length <= cp2.length) {

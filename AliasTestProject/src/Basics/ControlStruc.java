@@ -2,7 +2,7 @@ package Basics;
 
 public class ControlStruc {
 	
-	T a, b, c, d;
+	T a, b, c, d, e, f, g, h,x;
 	
 	
 	public ControlStruc() {
@@ -10,6 +10,12 @@ public class ControlStruc {
 		b = new T();
 		c = new T();
 		d = new T();
+		e = new T();
+		f = new T();
+		g = new T();
+		h = new T();
+		x = new T();
+		
 	}
 	
 	public void cond1(boolean cc) {
@@ -57,6 +63,37 @@ public class ControlStruc {
 			a = d;
 		}
 		//a:c, a:d, not a:b
+	}
+	
+	public void cond6(boolean cc) {
+		a=b;
+		c=d;
+		if (cc) {
+			c=b;
+			if (cc) {
+				a = e;
+			}else {
+				a = f;
+			}
+		}else {
+			a = d;
+		}
+		//a:e, b:c, a:f, d:c, c:a, a:d
+		//not {f:c, b:a, c:e}
+	}
+	
+	public void cond7(boolean cc) {
+		if (cc) {
+			a.right = b.a;
+		}else {
+			c = b.a;
+		}
+		b = x;
+		if (true) {
+			x = a.c;
+		}
+		//a:e, b:c, a:f, d:c, c:a, a:d
+		//not {f:c, b:a, c:e}
 	}
 	
 		

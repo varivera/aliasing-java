@@ -24,8 +24,14 @@ public class nodeInfo {
 	// raw name (no computational path associated)
 	public String tag;
 	
-	public nodeInfo (String tag) {
+	/**
+	 * Computational Path when the assignment is performed
+	 */
+	public int[] CurrentCP;
+	
+	public nodeInfo (String tag, int[] cp) {
 		this.tag = tag;
+		CurrentCP = cp;
 		edges = new ArrayList <ArrayList<Edge>>();
 	}
 	
