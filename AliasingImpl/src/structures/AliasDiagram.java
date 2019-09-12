@@ -232,10 +232,8 @@ public class AliasDiagram {
 		S.add(new Pair<Integer, AliasObject> (0, getRoots().get(0)));
 		while (!S.isEmpty() ) {
 			Pair<Integer, AliasObject> v = S.pop();
-			//TODO: assuming no loops for now
 			if (v.prj2.containsSucc(path[v.prj1])) {
 				if (v.prj1 == path.length-1) {
-					Helpers.notVisited(getRoots());
 					return true;
 				}
 				for (AliasObject n: v.prj2.getSucc(path[v.prj1])) {
@@ -257,7 +255,6 @@ public class AliasDiagram {
 		S.add(new Pair<Integer, AliasObject> (0, getRoots().get(0)));
 		while (!S.isEmpty() ) {
 			Pair<Integer, AliasObject> v = S.pop();
-			// TODO: assuming no loops for now
 			if (v.prj2.containsSucc(path[v.prj1])) {
 				if (v.prj1 == path.length-1) {
 					for (Pair<Variable, AliasObject> n: v.prj2.getSucc2(path[v.prj1])) {

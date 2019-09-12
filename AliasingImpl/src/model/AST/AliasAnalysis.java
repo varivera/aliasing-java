@@ -228,7 +228,10 @@ public class AliasAnalysis extends ASTVisitor {
 							stackCall.peek().aliasObjectsArgument(formal);
 
 							if (formal != null && actualremoteArgs[i] != null) {
+								Deque<Conditional> tmp = ((ArrayDeque<Conditional>)  stackControlStructures).clone();
+								stackControlStructures = new ArrayDeque<Conditional>();
 								aliasing (formal, actualremoteArgs[i]);
+								stackControlStructures = tmp;
 							}else {
 								System.out.println ("Either left or right was null");
 
@@ -467,17 +470,23 @@ public class AliasAnalysis extends ASTVisitor {
 			Variable newCP = new Variable(left.tag, path);
 			for (Edge edgeLeft: left.getEdges().get(i)) {
 				for (Edge edgeRight: right.getEdges().get(i)) {
+					boolean exists = true;
 					if (!edgeLeft.source().succ.containsKey(newCP)) {
+						exists = false;
 						edgeLeft.source().succ.put(newCP, new ArrayList<AliasObject>());
 					}
-					edgeLeft.source().succ.get(newCP).add(edgeRight.target());
+					if (!exists || !edgeLeft.source().succ.get(newCP).contains(edgeRight.target())) {
+						edgeLeft.source().succ.get(newCP).add(edgeRight.target());
+					}
 					//update predecessors
-					//edgeLeft.target().pred.get(edgeLeft.tag()).remove(edgeLeft.source());
-					
+					exists = true;
 					if (!edgeRight.target().pred.containsKey(newCP)) {
+						exists = false;
 						edgeRight.target().pred.put(newCP, new ArrayList<AliasObject>());
 					}
-					edgeRight.target().pred.get(newCP).add(edgeLeft.source());
+					if (!exists || !edgeRight.target().pred.get(newCP).contains(edgeLeft.source())) {
+						edgeRight.target().pred.get(newCP).add(edgeLeft.source());
+					}
 				}	
 			}
 		}
@@ -616,7 +625,7 @@ public class AliasAnalysis extends ASTVisitor {
 					}else if (type.equals(Const.ARGUMENT)){
 						// adding information to the alias graph in case it has not been added
 
-						res = new nodeInfo (n.toString(), getCurrentCP());
+						res = new nodeInfo (n.toString(), new int[] {0});
 						currentRoutine().aliasObjectsArgument(res);
 					}else if (type.equals(Const.ATTRIBUTE)) {
 						// adding information to the alias graph in case it has not been added
@@ -1513,13 +1522,11 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "cond7";
+		String methodAnalyse = "cond8";
 
 		long start1 = System.currentTimeMillis();
 		//Init
 		AliasAnalysis v = new AliasAnalysis (sourcePath, unitName, classpath, classAnalyse);
-		
-		
 		
 		long start2 = System.currentTimeMillis();
 		v.start(classAnalyse, methodAnalyse, 0, null, null, null);

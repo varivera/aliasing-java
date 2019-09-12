@@ -1,7 +1,7 @@
 package Basics;
 
 public class T {
-	T a,b, c;
+	T a,b, c, x, y;
 	
 	T right;
 	
@@ -36,6 +36,14 @@ public class T {
 	void m(int i, boolean b, 
 			T v, T w) {
 		a = this.b;
+	}
+	
+	public void set_x(T ww) {
+		x = ww;
+	}
+	
+	public void set_y(T ww) {
+		y = ww;
 	}
 	
 

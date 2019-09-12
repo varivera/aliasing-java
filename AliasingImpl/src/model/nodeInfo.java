@@ -29,6 +29,7 @@ public class nodeInfo {
 	 */
 	public int[] CurrentCP;
 	
+	
 	public nodeInfo (String tag, int[] cp) {
 		this.tag = tag;
 		CurrentCP = cp;

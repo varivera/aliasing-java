@@ -150,4 +150,26 @@ class AliasDiagramTests4 {
 		assertTrue(!v.aliased("b","a.c"));
 	}
 	
+	@Test
+	void test8() {
+		assertNotNull (v);
+		v.start(classAnalyse, "cond8", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 7), (7, x<0>, 15), (0, v<0>, 9), (0, v<0>, 15), (7, x<1-1>, 9), (0, w<0>, 9), (0, a<0>, 7), (7, y<0>, 7), (0, t<0>, 31), (0, v<2-1>, 31)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("v", "w"));
+		assertTrue(v.aliased("a", "b"));
+		assertTrue(v.aliased("a.y", "b"));
+		assertTrue(v.aliased("b.y", "b"));
+		assertTrue(v.aliased("a.y.x", "w"));
+		assertTrue(v.aliased("a.x", "v"));
+		assertTrue(v.aliased("b.x", "w"));
+		assertTrue(v.aliased("b.x", "v"));
+		assertTrue(v.aliased("t", "v"));
+		assertTrue(v.aliased("a.y.x", "v"));
+		assertTrue(!v.aliased("b.x","t"));
+		assertTrue(!v.aliased("a.x","t"));
+	}
+	
 }
