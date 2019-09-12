@@ -170,6 +170,7 @@ class AliasDiagramTests4 {
 		assertTrue(v.aliased("a.y.x", "v"));
 		assertTrue(!v.aliased("b.x","t"));
 		assertTrue(!v.aliased("a.x","t"));
+		
 	}
 	
 }
