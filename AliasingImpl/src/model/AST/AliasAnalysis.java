@@ -15,16 +15,17 @@ import exceptions.Log;
 import model.AliasObject;
 import model.Routine;
 import model.nodeInfo;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.*;
 import structures.AliasDiagram;
 import structures.Conditional;
+import structures.ControlStructure;
 import structures.Edge;
+import structures.Loop;
 import structures.Variable;
 import structures.graphRep.SetEdges;
 import structures.helpers.Const;
-import structures.helpers.GlobalCond;
+import structures.helpers.Global;
 import structures.helpers.Helpers;
 import structures.helpers.Id;
 
@@ -53,7 +54,7 @@ public class AliasAnalysis extends ASTVisitor {
 	/**
 	 * Stores information from conditionals, loops, recursion.
 	 */
-	private Deque<Conditional> stackControlStructures;
+	private Deque<ControlStructure> stackControlStructures;
 
 	// Compilation Unit
 	private CompilationUnit cu;
@@ -73,10 +74,9 @@ public class AliasAnalysis extends ASTVisitor {
 	String[] actualremoteTypes;
 	
 	/**
-	 * Keep track of the conditionals. This is important to determine
-	 * the computational path
+	 * Keep track of the computational paths.
 	 */
-	GlobalCond globalCond;
+	Global global;
 
 	/**
 	 * Id generator: to give a unique identifier to Alias Objects
@@ -128,10 +128,10 @@ public class AliasAnalysis extends ASTVisitor {
 
 		}
 		stackCall = new ArrayDeque <Routine>();
-		stackControlStructures = new ArrayDeque<Conditional>();
+		stackControlStructures = new ArrayDeque<ControlStructure>();
 		idGen = new Id();
 		aliasGraph = new AliasDiagram (idGen);
-		globalCond = new GlobalCond();
+		global = new Global();
 	}
 
 	/**
@@ -165,7 +165,7 @@ public class AliasAnalysis extends ASTVisitor {
 			stackCall = current.stackCall;
 			this.actualremoteArgs = actualremoteArgs;
 			this.actualremoteTypes = actualremoteTypes;
-			globalCond = current.globalCond;
+			global = current.global;
 			Helpers.printStackAll(stackCall);
 		}
 		cu = cus.get(className);
@@ -228,8 +228,8 @@ public class AliasAnalysis extends ASTVisitor {
 							stackCall.peek().aliasObjectsArgument(formal);
 
 							if (formal != null && actualremoteArgs[i] != null) {
-								Deque<Conditional> tmp = ((ArrayDeque<Conditional>)  stackControlStructures).clone();
-								stackControlStructures = new ArrayDeque<Conditional>();
+								Deque<ControlStructure> tmp = ((ArrayDeque<ControlStructure>)  stackControlStructures).clone();
+								stackControlStructures = new ArrayDeque<ControlStructure>();
 								aliasing (formal, actualremoteArgs[i]);
 								stackControlStructures = tmp;
 							}else {
@@ -432,21 +432,33 @@ public class AliasAnalysis extends ASTVisitor {
 		 * b [[o3]]
 		 */
 		
-		//to delete
-		System.out.println("left: " + left);
-		System.out.println("right: " + right);
-		
-		//to delete
 		
 		//check if the aliasing happens inside a control structure. If so,
 		//store the edge that will be removed
 		if (stackControlStructures.size()>0) {
-			for (ArrayList<Edge> es: left.getEdges()) {
-				for (Edge e: es) {
-					//to delete
-					System.out.println("removed: " + e);
-					//to delete
-					stackControlStructures.peek().add(e);
+			if (stackControlStructures.peek() instanceof Conditional) {
+				for (ArrayList<Edge> es: left.getEdges()) {
+					for (Edge e: es) {
+						stackControlStructures.peek().add(e);
+					}
+				}
+			}else if (stackControlStructures.peek() instanceof Loop) {
+				for (int i=0;i<left.getEdges().size();i++) {
+					for (Edge le: left.getEdges().get(i)) {
+						for (Edge re: right.getEdges().get(i)) {
+							Variable v = new Variable(le.tag().getName(), getCurrentCP());
+							if (!stackControlStructures.peek().isIn(new Edge(le.source(),new Variable(le.tag().getName(), getCurrentCP()) ,re.target()))){
+								stackControlStructures.peek().add(new Edge(le.source(),new Variable(le.tag().getName(), getCurrentCP()) ,re.target()));
+							}
+						}
+					}	
+				}
+			}else {
+				try {//not exactly an AST exception
+					throw new ASTException ("Control Structure Stack: unknown type " + stackControlStructures.getClass());
+				} catch (ASTException e) {
+					e.printStackTrace();
+					Log.log.push(e);
 				}
 			}
 		}else {//It is in the base computation, then remove left from the Alias Diagram
@@ -458,9 +470,6 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 		}
 		
-		//to delete
-		System.out.println(stackControlStructures);
-		//to delete
 		
 		
 		for (int i=0;i<left.nRoots(); i++) {
@@ -501,12 +510,17 @@ public class AliasAnalysis extends ASTVisitor {
 	public int[] getCurrentCP() {
 		int[] path = null;
 		if (stackControlStructures.size()>0) {
-			path = new int[stackControlStructures.size()+1];
-			path[0] = globalCond.getNumber();
-			globalCond.getNumber();
-			int c = stackControlStructures.size();
-			for (Conditional cond: stackControlStructures) {
-				path[c--] = cond.getDeletionCount();
+			path = new int[stackControlStructures.size()+(stackControlStructures.peek() instanceof Conditional?1:0)];
+			path[0] = global.getCurrentCP();
+			int c = (stackControlStructures.peek() instanceof Conditional)? stackControlStructures.size():(stackControlStructures.size()-1);
+			//int c = stackControlStructures.size();
+			if (c==0) return path;
+			for (ControlStructure cs: stackControlStructures) {
+				if (stackControlStructures.peek() instanceof Loop && cs!=stackControlStructures.peek()) {
+					
+				}else {
+					path[c--] = cs.getCount();
+				}
 			}
 		}else {
 			path = new int[] {0};
@@ -969,7 +983,7 @@ public class AliasAnalysis extends ASTVisitor {
 	public boolean visit(IfStatement node) {
 		System.out.println ("IfStatement");
 		if (stackControlStructures.size() == 0) {
-			globalCond.count();
+			global.increaseCP();
 		}		
 		// the conditional is ignore
 		//node.getExpression().accept(this);
@@ -986,22 +1000,12 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		node.getThenStatement().accept(this); // (ii)
 		
-		//to delete
-		System.out.println(stackControlStructures.peek());
-		//to delete
-		
 		//(iii)
 		stackControlStructures.peek().step();
 		
 		if (node.getElseStatement()!=null) {
 			node.getElseStatement().accept(this); // (iv)
 		}
-		
-		//to delete
-		System.out.println(stackControlStructures.peek());
-		//to delete
-		
-		//here
 		
 		//(v) -> intersection is needed
 		ArrayList<Edge> inter = stackControlStructures.peek().stop();
@@ -1021,6 +1025,48 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 			stackControlStructures.remove(); // (vii)
 		}
+		return false;
+	}
+	
+	public boolean visit(ForStatement node) {
+		System.out.println ("ForStatement");
+		//TODO retrieve all local variables
+		
+		if (stackControlStructures.size() == 0) {
+			global.increaseCP();
+		}	
+		
+		/**
+		 * (i) start a new Loop Control Structure in the Stack
+		 * (ii) Execute the body of the loop, storing additions in the peek of the Stack
+		 * 		(->) make sure that changes in the Alias Diagram has the corresponding computational Path 
+		 * (iii.a) if the additions are all the same, then leave only one (this is the case 'loop a=b; end')
+		 * (iii.a) if the additions are different, then perform subsume (this is the case 'loop l=l.right; end')
+		// (iv) remove the Loop ControlStructure from the Stack (transfer information if needed)
+		 */
+		
+		//the condition (stop) is ignored
+		//node.getExpression();
+		
+		
+		
+		System.out.println("body: " + node.getBody());
+		
+		
+		stackControlStructures.push(new Loop());
+		
+		for (int i=0;i<global.getIter();i++) {
+		
+			stackControlStructures.peek().step();//(i)
+			
+			node.getBody().accept(this); // (ii)
+		
+		}
+		
+		// (iii) TODO
+		stackControlStructures.peek().stop();
+		stackControlStructures.remove(); // (vii)
+		
 		return false;
 	}
 
@@ -1187,11 +1233,6 @@ public class AliasAnalysis extends ASTVisitor {
 
 	public boolean visit(FieldDeclaration node) {
 		System.out.println ("FieldDeclaration");
-		return true;
-	}
-
-	public boolean visit(ForStatement node) {
-		System.out.println ("ForStatement");
 		return true;
 	}
 
@@ -1484,21 +1525,6 @@ public class AliasAnalysis extends ASTVisitor {
 	 * Aliasing query 
 	*/
 	public boolean aliased (String p1, String p2) {
-		//to delete
-		System.out.println(p1.contains("."));
-		System.out.println(p1.split("\\.").length);
-		
-		String[] pp = p1.contains(".")?p1.split("\\."):new String[] {p1};
-		for (String a: pp) {
-			System.out.println(a);
-		}
-		System.out.println("---");
-		pp = p2.contains(".")?p2.split("\\."):new String[] {p2};
-		for (String a: pp) {
-			System.out.println(a);
-		}
-		
-		//to delete
 		return aliasGraph.aliased(
 				p1.contains(".")?p1.split("\\."):new String[] {p1}, 
 				p2.contains(".")?p2.split("\\."):new String[] {p2});
@@ -1522,7 +1548,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "cond8";
+		String methodAnalyse = "loop2";
 
 		long start1 = System.currentTimeMillis();
 		//Init
@@ -1543,8 +1569,8 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println(g);
 		System.out.println("==========");
 		System.out.println(v.aliasGraph.toSetEdges());
-		float time1 = (end - start1) / 100F;
-		float time2 = (end - start2) / 100F;
+		float time1 = (end - start1) / 1000F;
+		float time2 = (end - start2) / 1000F;
 		System.out.println("Time Analysis (with AST generation): "+time1 + " seconds");
 		System.out.println("Time Analysis (AST as input): "+time2+ " seconds");
 		

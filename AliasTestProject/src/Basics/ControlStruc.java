@@ -113,5 +113,17 @@ public class ControlStruc {
 		}
 	}
 	
+	public void loop1() {
+		for (int i=0;i<10;i++) {
+			a = b;
+		}
+	}
+	
+	public void loop2() {
+		for (int i=0;i<10;i++) {
+			a = a.right;
+		}
+	}
+	
 		
 }
