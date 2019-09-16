@@ -176,7 +176,7 @@ class AliasDiagramTests4 {
 	void test9() {
 		assertNotNull (v);
 		v.start(classAnalyse, "loop1", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 6), (0, a<0>, 5), (0, a<1-1>, 6)]");
+		SetEdges expectedValue = new SetEdges ("[(0, b<0>, 6), (0, a<0>, 5), (0, a<1>, 6)]");
 		System.out.println(expectedValue + " : Expected value");
 		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));

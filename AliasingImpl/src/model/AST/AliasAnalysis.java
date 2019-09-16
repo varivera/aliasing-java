@@ -436,29 +436,14 @@ public class AliasAnalysis extends ASTVisitor {
 		//check if the aliasing happens inside a control structure. If so,
 		//store the edge that will be removed
 		if (stackControlStructures.size()>0) {
-			if (stackControlStructures.peek() instanceof Conditional) {
-				for (ArrayList<Edge> es: left.getEdges()) {
-					for (Edge e: es) {
-						stackControlStructures.peek().add(e);
+			
+			for (ArrayList<Edge> es: left.getEdges()) {
+				for (Edge e: es) {
+					stackControlStructures.peek().add(e);
+					if (stackControlStructures.peek() instanceof Loop) {
+						e.source().succ.get(e.tag()).remove(e.target());
+						e.target().pred.get(e.tag()).remove(e.source());
 					}
-				}
-			}else if (stackControlStructures.peek() instanceof Loop) {
-				for (int i=0;i<left.getEdges().size();i++) {
-					for (Edge le: left.getEdges().get(i)) {
-						for (Edge re: right.getEdges().get(i)) {
-							Variable v = new Variable(le.tag().getName(), getCurrentCP());
-							if (!stackControlStructures.peek().isIn(new Edge(le.source(),new Variable(le.tag().getName(), getCurrentCP()) ,re.target()))){
-								stackControlStructures.peek().add(new Edge(le.source(),new Variable(le.tag().getName(), getCurrentCP()) ,re.target()));
-							}
-						}
-					}	
-				}
-			}else {
-				try {//not exactly an AST exception
-					throw new ASTException ("Control Structure Stack: unknown type " + stackControlStructures.getClass());
-				} catch (ASTException e) {
-					e.printStackTrace();
-					Log.log.push(e);
 				}
 			}
 		}else {//It is in the base computation, then remove left from the Alias Diagram
@@ -1548,7 +1533,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "loop2";
+		String methodAnalyse = "loop1";
 
 		long start1 = System.currentTimeMillis();
 		//Init

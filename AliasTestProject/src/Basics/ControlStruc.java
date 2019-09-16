@@ -122,6 +122,7 @@ public class ControlStruc {
 	public void loop2() {
 		for (int i=0;i<10;i++) {
 			a = a.right;
+			v = t;
 		}
 	}
 	

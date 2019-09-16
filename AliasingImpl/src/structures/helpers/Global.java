@@ -15,7 +15,7 @@ public class Global {
 	
 	public Global() {
 		n = 0;
-		iter = 3;
+		iter = 3; //min is 3
 	}
 	
 	public int getCurrentCP () {

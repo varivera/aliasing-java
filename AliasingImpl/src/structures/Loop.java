@@ -26,17 +26,20 @@ public class Loop extends ControlStructure {
 		ArrayList<Edge> res = new ArrayList<Edge>();
 		// check only the last 2 elements
 		
-		/*for (int i=0;i<edges.get(edges.size()-1).size();i++) {
+		for (int i=0;i<edges.get(edges.size()-1).size();i++) {
 			if (edges.get(edges.size()-1).get(i).target().equals(edges.get(edges.size()-2).get(i).target())) { //same
-				for (int j=1;j<edges.size();j++) {
-					Edge e = edges.get(j).get(i);
-					e.source().succ.get(e.tag()).remove(e.target());
-					e.target().pred.get(e.tag()).remove(e.source());
-				}
+				Edge e = edges.get(0).get(i);
+				e.source().succ.get(e.tag()).add(e.target());
+				e.target().pred.get(e.tag()).add(e.source());
 			}else { //subsume
 				//TODO
+				for (int j=0;j<edges.size();j++) {
+					Edge e = edges.get(j).get(i);
+					e.source().succ.get(e.tag()).add(e.target());
+					e.target().pred.get(e.tag()).add(e.source());
+				}
 			}
-		*/
+		}
 		
 		
 		return res;
