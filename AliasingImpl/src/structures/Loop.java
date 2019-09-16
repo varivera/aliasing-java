@@ -11,8 +11,22 @@ import java.util.ArrayList;
 
 public class Loop extends ControlStructure {
 	
+	ArrayList<ArrayList<Edge>> added;
+	
 	public Loop() {
 		edges = new ArrayList<ArrayList<Edge>>();
+		added = new ArrayList<ArrayList<Edge>>();
+	}
+	
+	
+	public void added (Edge e) {
+		added.get(added.size()-1).add(e);
+	}
+	
+	@Override
+	public void step() {
+		super.step();
+		added.add(new ArrayList<Edge>());
 	}
 	
 	/**
@@ -23,6 +37,7 @@ public class Loop extends ControlStructure {
 	 */
 	public ArrayList<Edge> stop() {
 		assert edges.size() > 1;
+		assert edges.size() == added.size();
 		ArrayList<Edge> res = new ArrayList<Edge>();
 		// check only the last 2 elements
 		
@@ -31,18 +46,41 @@ public class Loop extends ControlStructure {
 				Edge e = edges.get(0).get(i);
 				e.source().succ.get(e.tag()).add(e.target());
 				e.target().pred.get(e.tag()).add(e.source());
-			}else { //subsume
-				//TODO
+			}else { 
 				for (int j=0;j<edges.size();j++) {
 					Edge e = edges.get(j).get(i);
 					e.source().succ.get(e.tag()).add(e.target());
 					e.target().pred.get(e.tag()).add(e.source());
 				}
+				//TODO subsume (n2, n1)
 			}
 		}
 		
 		
 		return res;
+	}
+	
+	@Override
+	public String toString() {
+		StringBuilder res = new StringBuilder();
+		res.append(super.toString());
+		
+		res.append("\nAdded*****************\n");
+		
+		for (int i=0;i<added.size();i++) {
+			res.append((i+1) + ". <");
+			for (int j=0;j<added.get(i).size();j++) {
+				res.append(added.get(i).get(j));
+				if (j<added.get(i).size()-1) {
+					res.append(", ");
+				}
+			}
+			if (i<added.size()-1) {
+				res.append(">\n");
+			}
+		}
+		res.append(">\n*****************\n");
+		return res.toString();
 	}
 	
 	

@@ -436,13 +436,17 @@ public class AliasAnalysis extends ASTVisitor {
 		//check if the aliasing happens inside a control structure. If so,
 		//store the edge that will be removed
 		if (stackControlStructures.size()>0) {
-			
-			for (ArrayList<Edge> es: left.getEdges()) {
-				for (Edge e: es) {
+			for (int i=0;i<left.getEdges().size();i++) {
+				ArrayList<Edge> es = left.getEdges().get(i);
+				for (int j=0;j<es.size();j++) {
+					Edge e = es.get(j);
 					stackControlStructures.peek().add(e);
 					if (stackControlStructures.peek() instanceof Loop) {
 						e.source().succ.get(e.tag()).remove(e.target());
 						e.target().pred.get(e.tag()).remove(e.source());
+						
+						Variable CP = new Variable(left.tag, getCurrentCP());
+						((Loop)stackControlStructures.peek()).added(new Edge(e.source(), CP, right.getEdges().get(i).get(j).target()));
 					}
 				}
 			}
@@ -1048,7 +1052,7 @@ public class AliasAnalysis extends ASTVisitor {
 		
 		}
 		
-		// (iii) TODO
+		// (iii) 
 		stackControlStructures.peek().stop();
 		stackControlStructures.remove(); // (vii)
 		
@@ -1533,7 +1537,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "loop1";
+		String methodAnalyse = "loop2";
 
 		long start1 = System.currentTimeMillis();
 		//Init
