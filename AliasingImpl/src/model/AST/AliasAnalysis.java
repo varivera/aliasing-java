@@ -442,8 +442,7 @@ public class AliasAnalysis extends ASTVisitor {
 					Edge e = es.get(j);
 					stackControlStructures.peek().add(e);
 					if (stackControlStructures.peek() instanceof Loop) {
-						e.source().succ.get(e.tag()).remove(e.target());
-						e.target().pred.get(e.tag()).remove(e.source());
+						AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
 						
 						Variable CP = new Variable(left.tag, getCurrentCP());
 						((Loop)stackControlStructures.peek()).added(new Edge(e.source(), CP, right.getEdges().get(i).get(j).target()));
@@ -453,8 +452,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}else {//It is in the base computation, then remove left from the Alias Diagram
 			for (ArrayList<Edge> es: left.getEdges()) {
 				for (Edge e: es) {
-					e.source().succ.get(e.tag()).remove(e.target());
-					e.target().pred.get(e.tag()).remove(e.source());
+					AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
 				}
 			}
 		}
@@ -468,23 +466,7 @@ public class AliasAnalysis extends ASTVisitor {
 			Variable newCP = new Variable(left.tag, path);
 			for (Edge edgeLeft: left.getEdges().get(i)) {
 				for (Edge edgeRight: right.getEdges().get(i)) {
-					boolean exists = true;
-					if (!edgeLeft.source().succ.containsKey(newCP)) {
-						exists = false;
-						edgeLeft.source().succ.put(newCP, new ArrayList<AliasObject>());
-					}
-					if (!exists || !edgeLeft.source().succ.get(newCP).contains(edgeRight.target())) {
-						edgeLeft.source().succ.get(newCP).add(edgeRight.target());
-					}
-					//update predecessors
-					exists = true;
-					if (!edgeRight.target().pred.containsKey(newCP)) {
-						exists = false;
-						edgeRight.target().pred.put(newCP, new ArrayList<AliasObject>());
-					}
-					if (!exists || !edgeRight.target().pred.get(newCP).contains(edgeLeft.source())) {
-						edgeRight.target().pred.get(newCP).add(edgeLeft.source());
-					}
+					AliasDiagram.addEdge(edgeLeft.source(), newCP, edgeRight.target());
 				}	
 			}
 		}
@@ -1008,9 +990,7 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 		}else {
 			for (Edge e: inter) {
-				e.source().succ.get(e.tag()).remove(e.target());
-				//update predecessor
-				e.target().pred.get(e.tag()).remove(e.source());
+				AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
 			}
 			stackControlStructures.remove(); // (vii)
 		}
@@ -1021,6 +1001,48 @@ public class AliasAnalysis extends ASTVisitor {
 		System.out.println ("ForStatement");
 		//TODO retrieve all local variables
 		
+		if (stackControlStructures.size() == 0) {
+			global.increaseCP();
+		}	
+		
+		/**
+		 * (i) start a new Loop Control Structure in the Stack
+		 * (ii) Execute the body of the loop, storing additions in the peek of the Stack
+		 * 		(->) make sure that changes in the Alias Diagram has the corresponding computational Path 
+		 * (iii.a) if the additions are all the same, then leave only one (this is the case 'loop a=b; end')
+		 * (iii.a) if the additions are different, then perform subsume (this is the case 'loop l=l.right; end')
+		// (iv) remove the Loop ControlStructure from the Stack (transfer information if needed)
+		 */
+		
+		//the condition (stop) is ignored
+		//node.getExpression();
+		
+		
+		
+		System.out.println("body: " + node.getBody());
+		
+		
+		stackControlStructures.push(new Loop());
+		
+		for (int i=0;i<global.getIter();i++) {
+		
+			stackControlStructures.peek().step();//(i)
+			
+			node.getBody().accept(this); // (ii)
+		
+		}
+		
+		// (iii) 
+		stackControlStructures.peek().stop();
+		stackControlStructures.remove(); // (vii)
+		
+		return false;
+	}
+	
+
+
+	public boolean visit(WhileStatement node) {
+		System.out.println ("WhileStatement");
 		if (stackControlStructures.size() == 0) {
 			global.increaseCP();
 		}	
@@ -1476,11 +1498,6 @@ public class AliasAnalysis extends ASTVisitor {
 		return true;
 	}
 
-	public boolean visit(WhileStatement node) {
-		System.out.println ("WhileStatement");
-		return true;
-	}
-
 	public boolean visit(WildcardType node) {
 		System.out.println ("WildcardType");
 		return true;
@@ -1537,16 +1554,27 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "loop2";
+		String methodAnalyse = "loop3";
 
 		long start1 = System.currentTimeMillis();
 		//Init
 		AliasAnalysis v = new AliasAnalysis (sourcePath, unitName, classpath, classAnalyse);
+		//to delete
 		
+		/*
+		 * AliasObject aa = new AliasObject(20);
+		 * AliasDiagram.addEdge(v.aliasGraph.getRoots().get(0), new Variable("b"), aa);
+		 * Variable vv = new Variable("a"); AliasDiagram.addEdge(aa,vv, aa);
+		 * vv.varSubsumed(aa);
+		 */
+		
+		//to delete
 		long start2 = System.currentTimeMillis();
 		v.start(classAnalyse, methodAnalyse, 0, null, null, null);
 		//End
 		long end = System.currentTimeMillis();
+		
+		
 		
 		//test pred
 		System.out.println("pred Check: " + v.predCheck());
@@ -1562,7 +1590,6 @@ public class AliasAnalysis extends ASTVisitor {
 		float time2 = (end - start2) / 1000F;
 		System.out.println("Time Analysis (with AST generation): "+time1 + " seconds");
 		System.out.println("Time Analysis (AST as input): "+time2+ " seconds");
-		
 	}
 
 }

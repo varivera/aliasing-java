@@ -71,7 +71,7 @@ public class Helpers {
 						
 						
 						// at the beginning of the list
-						lines.add(0, "n"+currentObject.idNode()+"->n"+obj.idNode()+" [label=\""+ suc +"\"]");
+						lines.add(0, "n"+currentObject.idNode()+"->n"+obj.idNode()+" [label=\""+ suc.toStringWithSubsume(obj) +"\"]");
 						
 					}
 				}

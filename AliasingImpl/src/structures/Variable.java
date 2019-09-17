@@ -1,5 +1,6 @@
 package structures;
 
+import model.AliasObject;
 
 /**
  * Variable class models the variable of the class and the computational
@@ -30,12 +31,24 @@ public final class Variable {
 	 */
 	private final int[] comp;
 	
+	/**
+	 * Mark when subsume is performed
+	 */
+	private AliasObject subsume;
+	
+	public boolean isSubsumed () {
+		return subsume!=null;
+	}
+	
+	public boolean isSubsumed(AliasObject o) {
+		return subsume!=null && subsume.equals(o);
+	}
+	
 	public Variable (String name, int[] comp) {
 		assert name!=null;
 		assert comp!=null && comp.length>0;
 		this.name = name;
 		this.comp = comp;
-		
 	}
 	
 	public Variable (String name) {
@@ -50,6 +63,10 @@ public final class Variable {
 	
 	public int[] getCompP() {
 		return comp;
+	}
+	
+	public void varSubsumed(AliasObject o) {
+		subsume = o;
 	}
 	
 	
@@ -82,6 +99,20 @@ public final class Variable {
     public String toString() {
     	StringBuilder res = new StringBuilder();
     	res.append(name);
+    	res.append("<");
+    	for (int i=0;i<comp.length;i++) {
+    		res.append(comp[i]);
+    		if (i<comp.length-1) {
+    			res.append(",");
+    		}
+    	}
+    	res.append(">");
+        return res.toString();
+    }	
+    
+    public String toStringWithSubsume(AliasObject o) {
+    	StringBuilder res = new StringBuilder();
+    	res.append(name+(o.equals(subsume)?"*":""));
     	res.append("<");
     	for (int i=0;i<comp.length;i++) {
     		res.append(comp[i]);

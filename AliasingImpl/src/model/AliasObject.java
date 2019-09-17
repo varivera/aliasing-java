@@ -26,12 +26,12 @@ public class AliasObject {
 	 * AliasObject could be the variables of a class, or 
 	 * arguments of a routine
 	 */
-	public Map<Variable, ArrayList<AliasObject>> succ;
+	private Map<Variable, ArrayList<AliasObject>> succ;
 	
 	/**
 	 * Predecessor of the AliasObject
 	 */
-	public Map<Variable, ArrayList<AliasObject>> pred;
+	private Map<Variable, ArrayList<AliasObject>> pred;
 	
 	public AliasObject(int id) {
 		succ = new HashMap<Variable, ArrayList<AliasObject>>();
@@ -269,6 +269,20 @@ public class AliasObject {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * returns true if variable 'v' is a successor. 
+	 */
+	public boolean containsSucc (Variable v){
+		return succ.containsKey(v);
+	}
+	
+	/**
+	 * returns true if variable 'v' is a predecessor. 
+	 */
+	public boolean containsPred (Variable v){
+		return pred.containsKey(v);
 	}
 	
 	

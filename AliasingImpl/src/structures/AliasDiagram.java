@@ -115,6 +115,8 @@ public class AliasDiagram {
 	 * @param n2
 	 */
 	static public void addEdge (AliasObject n1, Variable v, AliasObject n2) {
+		assert !v.isSubsumed();
+		
 		boolean exists = true;
 		if (!n1.succ.containsKey(v)) {
 			exists = false;
@@ -144,6 +146,9 @@ public class AliasDiagram {
 	 * @param n2
 	 */
 	static public void removeEdge (AliasObject n1, Variable v, AliasObject n2) {
+		if (v.isSubsumed(n2)) {// do no perform the operation
+			return;
+		}
 		//to delete
 		System.out.println("<"+n1.idNode()+","+v+","+n2.idNode()+">");
 		//to delete
@@ -330,27 +335,22 @@ public class AliasDiagram {
 			S.add(new Pair<Integer, AliasObject> (path.length-1, endO.prj2));
 			while (!S.isEmpty() ) {
 				Pair<Integer, AliasObject> v = S.pop();
-				if (!v.prj2.isVisited()) {
-					if (!getRoots().contains(v.prj2)) {
-						v.prj2.setVisited(true);
-					}
-					if (v.prj1 == path.length-1) {////only the last part of the paths need to be in the same computational path
-						ArrayList<AliasObject> pred = endO.prj2.getPredSimilarCP (path[v.prj1], endO.prj1.getCompP());
-						if (pred.size()==0) {
-							Helpers.notVisited(getRoots());
-						}else {
-							for (AliasObject n: pred) {
-								S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
-							}
-						}
-					}else if (v.prj1 == -1) {
+				if (v.prj1 == path.length-1) {////only the last part of the paths need to be in the same computational path
+					ArrayList<AliasObject> pred = endO.prj2.getPredSimilarCP (path[v.prj1], endO.prj1.getCompP());
+					if (pred.size()==0) {
 						Helpers.notVisited(getRoots());
-						return getRoots().contains(v.prj2);
 					}else {
-						if (v.prj2.containsPred(path[v.prj1])) {
-							for (AliasObject n: v.prj2.getPred(path[v.prj1])) {
-								S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
-							}
+						for (AliasObject n: pred) {
+							S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
+						}
+					}
+				}else if (v.prj1 == -1) {
+					Helpers.notVisited(getRoots());
+					return getRoots().contains(v.prj2);
+				}else {
+					if (v.prj2.containsPred(path[v.prj1])) {
+						for (AliasObject n: v.prj2.getPred(path[v.prj1])) {
+							S.add(new Pair<Integer, AliasObject> (v.prj1-1, n));
 						}
 					}
 				}
@@ -445,9 +445,7 @@ public class AliasDiagram {
 		return true;
 	}
 	
-	
-	public static void main(String[] args) {
-		System.out.println("start");
+	public static void t1() {
 		Id id = new Id();
 		AliasDiagram g = new AliasDiagram(id);
 		
@@ -549,7 +547,43 @@ public class AliasDiagram {
 		//System.out.println(p.pathObjects(new String[] {"c", "c", "c", "c"}, g));
 		
 		System.out.println(">> " + g.aliased (new String[] {"c", "c"}, new String[] {"a","b"}));
+	}
+	
+	public static void t2() {
+		Id id = new Id();
+		AliasDiagram g = new AliasDiagram(id);
 		
+		AliasObject o1 = new AliasObject (id.getId());
+		
+		g.addEdge(o1, "a", new int[] {0});
+		g.addEdge(o1, "b", new int[] {0});
+		
+		
+		ArrayList<AliasObject> l1 = new ArrayList<AliasObject>();
+		l1.add(o1);
+		ArrayList<ArrayList<AliasObject>> l2 = new ArrayList<ArrayList<AliasObject>>();
+		l2.add(l1);
+		g.changeRoot(l2);
+		g.addEdge(o1, "a", new int[] {0});
+		
+		
+		
+		g.changeBackRoot();
+		
+		
+		String s = Helpers.toGraphAll (g.getRoots());
+		Helpers.createDot (s, "testingAliasDiagram", "source");
+		
+		Path p = new Path();
+		
+		System.out.println(">> " + g.aliased (new String[] {"b"}, new String[] {"a","a"}));
+		
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("start");
+		//t1();
+		t2();
 		System.out.println("done");
 	}
 }

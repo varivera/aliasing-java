@@ -110,10 +110,15 @@ class AliasDiagramTests3 {
 	void test5() {
 		assertNotNull (v);
 		v.start(classAnalyse, "loop", 0, null, null, null);
-		SetEdges expectedValue = new SetEdges ("[(0, v<0>, 30), (30, a<0>, 36), (30, b<0>, 36)]");
+		SetEdges expectedValue = new SetEdges ("[(8, right<0>, 11), (0, l<1>, 11), (0, l<0>, 6), (11, right<0>, 11), (6, right<0>, 8), (0, l<1>, 8)]");
 		System.out.println(expectedValue + " : Expected value");
 		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("l", "l.right"));
+		assertTrue(v.aliased("l", "l.right.right"));
+		assertTrue(v.aliased("l.right.right.right","l"));
+		assertTrue(v.aliased("l", "l.right.right.right"));
+		assertTrue(v.aliased("l", "l.right.right.right.right"));
 	}
 	
 	@Test

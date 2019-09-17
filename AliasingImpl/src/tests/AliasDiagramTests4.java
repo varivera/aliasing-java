@@ -18,7 +18,11 @@ import java.io.IOException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import model.AliasObject;
 import model.AST.AliasAnalysis;
+import structures.AliasDiagram;
+import structures.Variable;
 import structures.graphRep.SetEdges;
 
 class AliasDiagramTests4 {
@@ -180,5 +184,36 @@ class AliasDiagramTests4 {
 		System.out.println(expectedValue + " : Expected value");
 		System.out.println(v.toSetEdges() + " : Obtained value");
 		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("a", "b"));
+	}
+	
+	@Test
+	void test10() {
+		assertNotNull (v);
+		v.start(classAnalyse, "loop2", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, a<1>, 7), (0, v<0>, 8), (12, right<0>, 12), (0, a<1>, 12), (0, t<0>, 9), (5, right<0>, 7), (7, right<0>, 12), (0, a<0>, 5), (0, v<1>, 9)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("t", "v"));
+		assertTrue(v.aliased("a", "a.right"));
+		assertTrue(v.aliased("a.right", "a.right.right"));
+		assertTrue(v.aliased("a.right.right.right.right.right", "a"));
+		assertTrue(v.aliased("a", "a.right.right.right.right.right"));
+	}
+	
+	@Test
+	void test11() {
+		assertNotNull (v);
+		
+		v.start(classAnalyse, "loop3", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(10, right<0>, 10), (5, right<0>, 7), (10, right<0>, 27), (0, a<1>, 10), (0, a<0>, 5), (7, right<0>, 10), (0, b<0>, 27), (0, a<1>, 7)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("a", "a.right"));
+		assertTrue(v.aliased("a.right", "a.right.right"));
+		assertTrue(v.aliased("a.right.right.right.right.right", "a"));
+		assertTrue(v.aliased("a", "a.right.right.right.right.right"));
 	}
 }

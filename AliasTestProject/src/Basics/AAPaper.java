@@ -52,12 +52,8 @@ public class AAPaper {
 		while (C) {
 			l = l.right;
 		}
-		/**
-		 * {(n0, l, n1), (n0, l, n2), (n0, l, n3),
-		 *  (n1, right, n2),
-		 *  (n2, right, n3)
-		 *  (n3, right, n3)}
-		 */
+		// l:l.right, l:l.right.right.right
+		// l:l.right.right.right.right
 	}
 	
 	public void unqualifiedCall() {

@@ -97,22 +97,16 @@ public class Loop extends ControlStructure {
 		for (Variable v: n2.pred.keySet()) {
 			for (AliasObject o: n2.pred.get(v)) {
 				if (o.equals(n2)) {// (i)
-					
 					AliasDiagram.addEdge(n1, v, n1);
-					//n2.pred.get(v).remove(n2);
-					//n2.succ.get(v).remove(n2);
-					
+					v.varSubsumed(n1);
+					toRemove.add(new Edge(n1, v, n1));
 				}if (o.equals(n1)) {// (ii)
-					//n2.pred.get(v).remove(n1);
-					//n1.succ.get(v).remove(n2);
 					AliasDiagram.addEdge(n1, v, n1);
+					v.varSubsumed(n1);
 					toRemove.add(new Edge(n1, v, n2));
 				}else { // (iv)
-					
 					AliasDiagram.addEdge(o, v, n1);
 					toRemove.add(new Edge(o, v, n2));
-					//o.succ.get(v).remove(n2);
-					//n2.pred.get(v).remove(o);
 				}
 			}
 		}
@@ -122,8 +116,6 @@ public class Loop extends ControlStructure {
 			for (AliasObject n: n2.succ.get(v)) {
 				AliasDiagram.addEdge(n1, v, n);
 				toRemove.add(new Edge(n2, v, n));
-				//n2.succ.get(v).remove(n);
-				//n.pred.get(v).remove(n2);
 			}
 		}
 		
