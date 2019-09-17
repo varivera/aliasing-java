@@ -130,7 +130,7 @@ public class Routine {
 	 * 		False otherwise
 	 */
 	public boolean isFunction () {
-		return !returnType.succ.get(new Variable(Const.RETURN)).equals(Const.VOID);
+		return !returnType.getSucc(new Variable(Const.RETURN)).get(0).equals(Const.VOID);
 	}
 	
 	/**
@@ -143,7 +143,7 @@ public class Routine {
 		ref.newRoot();//only one root
 		//add edges
 		Variable v = new Variable(ref.tag);
-		for (AliasObject o: formalArguments.succ.get(v)){
+		for (AliasObject o: formalArguments.getSucc(v)){
 			ref.addEdge(formalArguments, v, o);
 		}
 	}
@@ -158,7 +158,7 @@ public class Routine {
 		ref.newRoot();//only one root
 		//add edges
 		Variable v = new Variable(ref.tag);
-		for (AliasObject o: locals.succ.get(v)){
+		for (AliasObject o: locals.getSucc(v)){
 			ref.addEdge(locals, v, o);
 		}
 	}
@@ -173,7 +173,7 @@ public class Routine {
 		ref.newRoot();//only one root
 		//add edges
 		Variable v = new Variable(Const.RETURN);
-		for (AliasObject o: returnType.succ.get(v)){
+		for (AliasObject o: returnType.getSucc(v)){
 			ref.addEdge(returnType, v, o);
 		}
 	}
@@ -184,12 +184,12 @@ public class Routine {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append("T " + name + " (");
-		for (Variable arg: formalArguments.succ.keySet()) {
-			if (formalArguments.succ.get(arg).size() > 0) {
+		for (Variable arg: formalArguments.getVar()) {
+			if (formalArguments.getSucc(arg).size() > 0) {
 				res.append(" " + arg + ", ");
 			}
 		}
-		if (formalArguments.succ.size() > 0 && res.lastIndexOf(", ") >= 0) {
+		if (formalArguments.getSuccessors() > 0 && res.lastIndexOf(", ") >= 0) {
 			res.replace(res.lastIndexOf(", "), res.lastIndexOf(", ")+2, "");
 		}
 		

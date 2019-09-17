@@ -64,17 +64,7 @@ public class Helpers {
 				nodeIds.put("n"+currentObject.idNode(), ""+currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (Variable suc: currentObject.succ.keySet()){
-					for (AliasObject obj: currentObject.succ.get(suc)) {
-						objects.add(obj);
-						nodeIds.put("n"+obj.idNode(), ""+obj.idNode());
-						
-						
-						// at the beginning of the list
-						lines.add(0, "n"+currentObject.idNode()+"->n"+obj.idNode()+" [label=\""+ suc.toStringWithSubsume(obj) +"\"]");
-						
-					}
-				}
+				currentObject.updateInfoHelpers (objects, nodeIds, lines);
 			}
 		}
 		// to end of the list
@@ -209,8 +199,8 @@ public class Helpers {
 				nodeIds.put(currentObject.idNode(), currentObject.idNode());
 				
 				currentObject.setVisited(true);
-				for (Variable suc: currentObject.succ.keySet()){
-					for (AliasObject obj: currentObject.succ.get(suc)) {
+				for (Variable suc: currentObject.getVar()){
+					for (AliasObject obj: currentObject.getSucc(suc)) {
 						objects.add(obj);
 						nodeIds.put(obj.idNode(), obj.idNode());
 						res.addEdge(new Edge (currentObject.idNode(), suc.toString(), obj.idNode()));
@@ -239,11 +229,9 @@ public class Helpers {
 		while (ind < visited.size()) {
 			n = visited.get(ind);
 			n.setVisited(false);
-			for (Variable suc: n.succ.keySet()){
-				for (AliasObject obj: n.succ.get(suc)) {
-					if (!isIn (obj, visited)) {
-						visited.add(obj);
-					}
+			for (AliasObject obj: n.getSucc()) {
+				if (!isIn (obj, visited)) {
+					visited.add(obj);
 				}
 			}
 			ind++;
@@ -266,11 +254,9 @@ public class Helpers {
 			AliasObject tmp = q.remove();
 			tmp.setVisited(false);
 			already.add(tmp);
-			for (Variable suc: tmp.succ.keySet()){
-				for (AliasObject obj: tmp.succ.get(suc)) {
-					if (!already.contains(obj)) {
-						q.add(obj);
-					}
+			for (AliasObject obj: tmp.getSucc()) {
+				if (!already.contains(obj)) {
+					q.add(obj);
 				}
 			}
 		}

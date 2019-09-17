@@ -442,7 +442,7 @@ public class AliasAnalysis extends ASTVisitor {
 					Edge e = es.get(j);
 					stackControlStructures.peek().add(e);
 					if (stackControlStructures.peek() instanceof Loop) {
-						AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
+						e.source().removeEdge(e.tag(), e.target());
 						
 						Variable CP = new Variable(left.tag, getCurrentCP());
 						((Loop)stackControlStructures.peek()).added(new Edge(e.source(), CP, right.getEdges().get(i).get(j).target()));
@@ -452,7 +452,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}else {//It is in the base computation, then remove left from the Alias Diagram
 			for (ArrayList<Edge> es: left.getEdges()) {
 				for (Edge e: es) {
-					AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
+					e.source().removeEdge(e.tag(), e.target());
 				}
 			}
 		}
@@ -466,7 +466,7 @@ public class AliasAnalysis extends ASTVisitor {
 			Variable newCP = new Variable(left.tag, path);
 			for (Edge edgeLeft: left.getEdges().get(i)) {
 				for (Edge edgeRight: right.getEdges().get(i)) {
-					AliasDiagram.addEdge(edgeLeft.source(), newCP, edgeRight.target());
+					edgeLeft.source().addEdge(newCP, edgeRight.target());
 				}	
 			}
 		}
@@ -990,7 +990,7 @@ public class AliasAnalysis extends ASTVisitor {
 			}
 		}else {
 			for (Edge e: inter) {
-				AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
+				e.source().removeEdge(e.tag(), e.target());
 			}
 			stackControlStructures.remove(); // (vii)
 		}

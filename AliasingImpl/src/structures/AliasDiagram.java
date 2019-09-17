@@ -114,29 +114,9 @@ public class AliasDiagram {
 	 * @param v
 	 * @param n2
 	 */
-	static public void addEdge (AliasObject n1, Variable v, AliasObject n2) {
+	public void addEdge (AliasObject n1, Variable v, AliasObject n2) {
 		assert !v.isSubsumed();
-		
-		boolean exists = true;
-		if (!n1.succ.containsKey(v)) {
-			exists = false;
-			n1.succ.put(v, new ArrayList<AliasObject>());
-		}
-		if (!exists || !n1.succ.get(v).contains(n2)) {
-			n1.succ.get(v).add(n2);
-		}
-		//update predecessors
-		exists = true;
-		if (!n2.pred.containsKey(v)) {
-			exists = false;
-			n2.pred.put(v, new ArrayList<AliasObject>());
-		}
-		if (!exists || !n2.pred.get(v).contains(n1)) {
-			n2.pred.get(v).add(n1);
-		}
-		
-		assert n1.succ.get(v).contains(n2);
-		assert n2.pred.get(v).contains(n1);
+		n1.addEdge(v, n2);
 	}
 	
 	/**
@@ -145,19 +125,8 @@ public class AliasDiagram {
 	 * @param v
 	 * @param n2
 	 */
-	static public void removeEdge (AliasObject n1, Variable v, AliasObject n2) {
-		if (v.isSubsumed(n2)) {// do no perform the operation
-			return;
-		}
-		//to delete
-		System.out.println("<"+n1.idNode()+","+v+","+n2.idNode()+">");
-		//to delete
-		assert n1.succ.containsKey(v) && n1.succ.get(v).contains(n2);
-		assert n2.pred.containsKey(v) && n2.pred.get(v).contains(n1);
-		n1.succ.get(v).remove(n2);
-		n2.pred.get(v).remove(n1);
-		assert !n1.succ.get(v).contains(n2);
-		assert !n2.pred.get(v).contains(n1);
+	public void removeEdge (AliasObject n1, Variable v, AliasObject n2) {
+		n1.removeEdge(v, n2);
 	}
 	
 	/**
@@ -383,14 +352,6 @@ public class AliasDiagram {
 		}
 	}
 	
-	/**
-	 * @param p path possibly in the Alias Diagram
-	 * @return true if p is a path on the Alias Diagram. False otherwise
-	 */
-	public boolean isInGraph (Path p) {
-		return p.exists();
-	}
-	
 	
 	/**
 	 * 	Sanity check for predecessor
@@ -418,31 +379,7 @@ public class AliasDiagram {
 	 * @return true is the predecessors of root 'ao' are well-defined 
 	 */
 	private boolean predOk (AliasObject ao) {
-		Queue <AliasObject> objects = new LinkedList <AliasObject>();
-		objects.add(ao);
-		
-		while (!objects.isEmpty()) {
-			AliasObject currentObject = objects.remove();
-			if (!currentObject.isVisited()) {
-				currentObject.setVisited(true);
-				for (Variable suc: currentObject.succ.keySet()){
-					for (AliasObject obj: currentObject.succ.get(suc)) {
-						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
-						if (!obj.pred.get(suc).contains(currentObject)) {
-							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
-							return false;
-						}else {
-							/*System.out.println("predecessor found. Node: " + obj.idNode());
-							for (AliasObject p: obj.pred.get(suc)) {
-								System.out.println(p.idNode());
-							}*/
-						}
-						objects.add(obj);
-					}
-				}
-			}
-		}
-		return true;
+		return ao.predOk();
 	}
 	
 	public static void t1() {

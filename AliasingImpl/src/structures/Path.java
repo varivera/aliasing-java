@@ -80,21 +80,6 @@ public class Path {
 	}
 	
 	/**
-	 * @return true if the path all path are in the Alias Diagram. False otherwise
-	 */
-	public boolean exists() {
-		for(ArrayList<AliasObject> p: nodeTags) {
-			assert p.size() == tags.size()+1;
-			for (int i=0; i<tags.size();i++) {
-				if (!p.get(i).succ.containsKey(tags.get(i)) || !p.get(i).succ.get(tags.get(i)).contains(p.get(i+1))) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	
-	/**
 	 * @param s1
 	 * @param s2
 	 * @return is s1.intersection(s2) /= {}

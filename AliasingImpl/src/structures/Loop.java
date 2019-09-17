@@ -52,15 +52,12 @@ public class Loop extends ControlStructure {
 		for (int i=0;i<edges.get(edges.size()-1).size();i++) {
 			if (edges.get(edges.size()-1).get(i).target().equals(edges.get(edges.size()-2).get(i).target())) { //same
 				Edge e = edges.get(0).get(i);
-				e.source().succ.get(e.tag()).add(e.target());
-				e.target().pred.get(e.tag()).add(e.source());
+				e.source().addEdge(e.tag(), e.target());
 			}else { 
 				for (int j=0;j<edges.size();j++) {
 					Edge e = edges.get(j).get(i);
-					e.source().succ.get(e.tag()).add(e.target());
-					e.target().pred.get(e.tag()).add(e.source());
+					e.source().addEdge(e.tag(), e.target());
 				}
-				//TODO subsume (n2, n1)
 				assert added.size() > 2;
 				subsume (added.get(added.size()-2).get(i).target(), added.get(added.size()-1).get(i).target());
 			}
@@ -89,39 +86,8 @@ public class Loop extends ControlStructure {
 		 * (iii) for all v and n such that (n2, v, n) in G, then add (n1, v, n) to G
 		 *  (iv) for all v and n such that (n, v, n2) in G, then add (n, v, n1) to G
 		 * 
-		 * -> update the corresponding predecessors.
-		 * 		TODO: adding edges to the graph should be an operation of AliasDiagram
-		 * 				so there is not need to make sure the predecessors are updated
 		 */
-		ArrayList<Edge> toRemove = new ArrayList<Edge>();
-		for (Variable v: n2.pred.keySet()) {
-			for (AliasObject o: n2.pred.get(v)) {
-				if (o.equals(n2)) {// (i)
-					AliasDiagram.addEdge(n1, v, n1);
-					v.varSubsumed(n1);
-					toRemove.add(new Edge(n1, v, n1));
-				}if (o.equals(n1)) {// (ii)
-					AliasDiagram.addEdge(n1, v, n1);
-					v.varSubsumed(n1);
-					toRemove.add(new Edge(n1, v, n2));
-				}else { // (iv)
-					AliasDiagram.addEdge(o, v, n1);
-					toRemove.add(new Edge(o, v, n2));
-				}
-			}
-		}
-		
-		for (Variable v: n2.succ.keySet()) {
-			// (iii)
-			for (AliasObject n: n2.succ.get(v)) {
-				AliasDiagram.addEdge(n1, v, n);
-				toRemove.add(new Edge(n2, v, n));
-			}
-		}
-		
-		for (Edge e: toRemove) {
-			AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
-		}
+		n1.subsume(n2);
 	}
 	
 	@Override

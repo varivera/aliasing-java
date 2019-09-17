@@ -3,9 +3,14 @@ package model;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+
 import exceptions.AliasException;
 import structures.Variable;
+import structures.Edge;
 import structures.Pair;
 
 /**
@@ -105,6 +110,56 @@ public class AliasObject {
 			o.pred.put(key, new ArrayList<AliasObject>());
 		}
 		o.pred.get(key).add(this);
+	}
+	
+	/**
+	 * adds (this, v, n2) to G (it also updates the predecessors)
+	 * @param v
+	 * @param n2
+	 */
+	public void addEdge (Variable v, AliasObject n2) {
+		assert !v.isSubsumed();
+		
+		boolean exists = true;
+		if (!succ.containsKey(v)) {
+			exists = false;
+			succ.put(v, new ArrayList<AliasObject>());
+		}
+		if (!exists || !succ.get(v).contains(n2)) {
+			succ.get(v).add(n2);
+		}
+		//update predecessors
+		exists = true;
+		if (!n2.pred.containsKey(v)) {
+			exists = false;
+			n2.pred.put(v, new ArrayList<AliasObject>());
+		}
+		if (!exists || !n2.pred.get(v).contains(this)) {
+			n2.pred.get(v).add(this);
+		}
+		
+		assert succ.get(v).contains(n2);
+		assert n2.pred.get(v).contains(this);
+	}
+	
+	/**
+	 * removes (this, v, n2) from G (it also updates the predecessors)
+	 * @param v
+	 * @param n2
+	 */
+	public void removeEdge (Variable v, AliasObject n2) {
+		if (v.isSubsumed(n2)) {// do no perform the operation
+			return;
+		}
+		//to delete
+		System.out.println("<"+idNode()+","+v+","+n2.idNode()+">");
+		//to delete
+		assert succ.containsKey(v) && succ.get(v).contains(n2);
+		assert n2.pred.containsKey(v) && n2.pred.get(v).contains(this);
+		succ.get(v).remove(n2);
+		n2.pred.get(v).remove(this);
+		assert !succ.get(v).contains(n2);
+		assert !n2.pred.get(v).contains(this);
 	}
 	
 	/**
@@ -283,6 +338,141 @@ public class AliasObject {
 	 */
 	public boolean containsPred (Variable v){
 		return pred.containsKey(v);
+	}
+	
+	/**
+	 * 
+	 * @return true is the predecessors of root 'ao' are well-defined 
+	 */
+	public boolean predOk () {
+		Queue <AliasObject> objects = new LinkedList <AliasObject>();
+		objects.add(this);
+		
+		while (!objects.isEmpty()) {
+			AliasObject currentObject = objects.remove();
+			if (!currentObject.isVisited()) {
+				currentObject.setVisited(true);
+				for (Variable suc: currentObject.succ.keySet()){
+					for (AliasObject obj: currentObject.succ.get(suc)) {
+						//System.out.println("does pred in " + obj.idNode() + " contains " + suc + "?: " +obj.pred.containsKey(suc));
+						if (!obj.pred.get(suc).contains(currentObject)) {
+							System.out.println("predecessor no found. Node: " + obj.idNode() + " name: " + suc);
+							return false;
+						}else {
+							/*System.out.println("predecessor found. Node: " + obj.idNode());
+							for (AliasObject p: obj.pred.get(suc)) {
+								System.out.println(p.idNode());
+							}*/
+						}
+						objects.add(obj);
+					}
+				}
+			}
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * subsume (AliasObject n2) -> Subsume n2 into the current Alias Object
+	 */
+	public void subsume (AliasObject n2) {
+		/**
+		 * subsume n2 into this
+		 * 
+		 *   (i) for all v such that (n2, v, n2) in G, then add (this, v, this) to G
+		 *  (ii) for all v such that (this, v, n2) in G, then add (this, v, this) to G
+		 * (iii) for all v and n such that (n2, v, n) in G, then add (this, v, n) to G
+		 *  (iv) for all v and n such that (n, v, n2) in G, then add (n, v, this) to G
+		 * 
+		 */
+		ArrayList<Edge> toRemove = new ArrayList<Edge>();
+		for (Variable v: n2.pred.keySet()) {
+			for (AliasObject o: n2.pred.get(v)) {
+				if (o.equals(n2)) {// (i)
+					addEdge(v, this);
+					v.varSubsumed(this);
+					toRemove.add(new Edge(this, v, this));
+				}if (o.equals(this)) {// (ii)
+					addEdge(v, this);
+					v.varSubsumed(this);
+					toRemove.add(new Edge(this, v, n2));
+				}else { // (iv)
+					o.addEdge(v, this);
+					toRemove.add(new Edge(o, v, n2));
+				}
+			}
+		}
+		
+		for (Variable v: n2.succ.keySet()) {
+			// (iii)
+			for (AliasObject n: n2.succ.get(v)) {
+				addEdge(v, n);
+				toRemove.add(new Edge(n2, v, n));
+			}
+		}
+		
+		for (Edge e: toRemove) {
+			e.source().removeEdge(e.tag(), e.target());
+		}
+	}
+	
+	/**
+	 * Used by Helpers.java
+	 */
+	
+	/**
+	 * 
+	 * update the string representation of the diagram (nodes and their
+	 * 		relationship): to be used in Helper
+	 */
+	public void updateInfoHelpers (Queue <AliasObject> objects, HashMap <String, String> nodeIds, ArrayList<String> lines) {
+		
+		for (Variable suc: succ.keySet()){
+			for (AliasObject obj: succ.get(suc)) {
+				objects.add(obj);
+				nodeIds.put("n"+obj.idNode(), ""+obj.idNode());
+
+
+				// at the beginning of the list
+				lines.add(0, "n"+idNode()+"->n"+obj.idNode()+" [label=\""+ suc.toStringWithSubsume(obj) +"\"]");
+
+			}
+		}
+	}
+	
+	/**
+	 * returns all Variables this object has
+	 */
+	public Set<Variable> getVar(){
+		return succ.keySet();
+	}
+	
+	/**
+	 * returns alias object pointing by 'v'
+	 */
+	public ArrayList<AliasObject> getSucc(Variable v){
+		return succ.get(v);
+	}
+	
+	/**
+	 * returns the number of successors
+	 */
+	public int getSuccessors() {
+		return succ.size();
+	}
+	
+	/**
+	 * returns all alias objects
+	 */
+	public ArrayList<AliasObject> getSucc(){
+		ArrayList<AliasObject> res = new ArrayList<AliasObject>();
+		for (Variable v: succ.keySet()) {
+			for (AliasObject o: succ.get(v)) {
+				res.add(o);
+			}
+		}
+		return res;
 	}
 	
 	
