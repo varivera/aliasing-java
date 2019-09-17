@@ -109,6 +109,53 @@ public class AliasDiagram {
 	}
 	
 	/**
+	 * adds (n1, v, n2) to G (it also updates the predecessors)
+	 * @param n1
+	 * @param v
+	 * @param n2
+	 */
+	static public void addEdge (AliasObject n1, Variable v, AliasObject n2) {
+		boolean exists = true;
+		if (!n1.succ.containsKey(v)) {
+			exists = false;
+			n1.succ.put(v, new ArrayList<AliasObject>());
+		}
+		if (!exists || !n1.succ.get(v).contains(n2)) {
+			n1.succ.get(v).add(n2);
+		}
+		//update predecessors
+		exists = true;
+		if (!n2.pred.containsKey(v)) {
+			exists = false;
+			n2.pred.put(v, new ArrayList<AliasObject>());
+		}
+		if (!exists || !n2.pred.get(v).contains(n1)) {
+			n2.pred.get(v).add(n1);
+		}
+		
+		assert n1.succ.get(v).contains(n2);
+		assert n2.pred.get(v).contains(n1);
+	}
+	
+	/**
+	 * removes (n1, v, n2) from G (it also updates the predecessors)
+	 * @param n1
+	 * @param v
+	 * @param n2
+	 */
+	static public void removeEdge (AliasObject n1, Variable v, AliasObject n2) {
+		//to delete
+		System.out.println("<"+n1.idNode()+","+v+","+n2.idNode()+">");
+		//to delete
+		assert n1.succ.containsKey(v) && n1.succ.get(v).contains(n2);
+		assert n2.pred.containsKey(v) && n2.pred.get(v).contains(n1);
+		n1.succ.get(v).remove(n2);
+		n2.pred.get(v).remove(n1);
+		assert !n1.succ.get(v).contains(n2);
+		assert !n2.pred.get(v).contains(n1);
+	}
+	
+	/**
 	 * 
 	 * @param ref reference to update the nodeInfo
 	 * update the list of objects associated to 'ref.tag', from the

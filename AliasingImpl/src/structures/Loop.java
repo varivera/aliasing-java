@@ -2,6 +2,8 @@ package structures;
 
 import java.util.ArrayList;
 
+import model.AliasObject;
+
 /**
  * Keeps track of the added edges in the body of the loops.
  * This is important as it determines whether to delete added edges or subsume others.
@@ -11,6 +13,10 @@ import java.util.ArrayList;
 
 public class Loop extends ControlStructure {
 	
+	/**
+	 * keeps track of the added edges in a Loop body.
+	 * 	This is needed to subsume nodes (if any) 
+	 */
 	ArrayList<ArrayList<Edge>> added;
 	
 	public Loop() {
@@ -18,7 +24,9 @@ public class Loop extends ControlStructure {
 		added = new ArrayList<ArrayList<Edge>>();
 	}
 	
-	
+	/***
+	 * Update 'added' with 'e'
+	 */
 	public void added (Edge e) {
 		added.get(added.size()-1).add(e);
 	}
@@ -53,11 +61,75 @@ public class Loop extends ControlStructure {
 					e.target().pred.get(e.tag()).add(e.source());
 				}
 				//TODO subsume (n2, n1)
+				assert added.size() > 2;
+				subsume (added.get(added.size()-2).get(i).target(), added.get(added.size()-1).get(i).target());
 			}
 		}
 		
 		
 		return res;
+	}
+	
+	/**
+	 * Subsume is an over-approximation in the analysis needed as the stop
+	 * condition of the loop is not considered. An example of the need to 
+	 * subsume nodes:
+	 * 		loop
+	 * 			l = l.right;
+	 * 		end
+	 * 
+	 *  subsume (AliasObject n1, AliasObject n2) -> Subsume n2 into n1
+	 */
+	private void subsume (AliasObject n1, AliasObject n2) {
+		/**
+		 * subsume n2 into n1
+		 * 
+		 *   (i) for all v such that (n2, v, n2) in G, then add (n1, v, n1) to G
+		 *  (ii) for all v such that (n1, v, n2) in G, then add (n1, v, n1) to G
+		 * (iii) for all v and n such that (n2, v, n) in G, then add (n1, v, n) to G
+		 *  (iv) for all v and n such that (n, v, n2) in G, then add (n, v, n1) to G
+		 * 
+		 * -> update the corresponding predecessors.
+		 * 		TODO: adding edges to the graph should be an operation of AliasDiagram
+		 * 				so there is not need to make sure the predecessors are updated
+		 */
+		ArrayList<Edge> toRemove = new ArrayList<Edge>();
+		for (Variable v: n2.pred.keySet()) {
+			for (AliasObject o: n2.pred.get(v)) {
+				if (o.equals(n2)) {// (i)
+					
+					AliasDiagram.addEdge(n1, v, n1);
+					//n2.pred.get(v).remove(n2);
+					//n2.succ.get(v).remove(n2);
+					
+				}if (o.equals(n1)) {// (ii)
+					//n2.pred.get(v).remove(n1);
+					//n1.succ.get(v).remove(n2);
+					AliasDiagram.addEdge(n1, v, n1);
+					toRemove.add(new Edge(n1, v, n2));
+				}else { // (iv)
+					
+					AliasDiagram.addEdge(o, v, n1);
+					toRemove.add(new Edge(o, v, n2));
+					//o.succ.get(v).remove(n2);
+					//n2.pred.get(v).remove(o);
+				}
+			}
+		}
+		
+		for (Variable v: n2.succ.keySet()) {
+			// (iii)
+			for (AliasObject n: n2.succ.get(v)) {
+				AliasDiagram.addEdge(n1, v, n);
+				toRemove.add(new Edge(n2, v, n));
+				//n2.succ.get(v).remove(n);
+				//n.pred.get(v).remove(n2);
+			}
+		}
+		
+		for (Edge e: toRemove) {
+			AliasDiagram.removeEdge(e.source(), e.tag(), e.target());
+		}
 	}
 	
 	@Override
