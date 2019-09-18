@@ -13,28 +13,9 @@ import model.AliasObject;
 
 public class Loop extends ControlStructure {
 	
-	/**
-	 * keeps track of the added edges in a Loop body.
-	 * 	This is needed to subsume nodes (if any) 
-	 */
-	ArrayList<ArrayList<Edge>> added;
-	
 	public Loop() {
-		edges = new ArrayList<ArrayList<Edge>>();
-		added = new ArrayList<ArrayList<Edge>>();
-	}
-	
-	/***
-	 * Update 'added' with 'e'
-	 */
-	public void added (Edge e) {
-		added.get(added.size()-1).add(e);
-	}
-	
-	@Override
-	public void step() {
-		super.step();
-		added.add(new ArrayList<Edge>());
+		deletions = new ArrayList<ArrayList<Edge>>();
+		additions = new ArrayList<ArrayList<Edge>>();
 	}
 	
 	/**
@@ -44,22 +25,22 @@ public class Loop extends ControlStructure {
 	 * 				the number of added edges is the same in the same order.
 	 */
 	public ArrayList<Edge> stop() {
-		assert edges.size() > 1;
-		assert edges.size() == added.size();
+		assert deletions.size() > 1;
+		assert deletions.size() == additions.size();
 		ArrayList<Edge> res = new ArrayList<Edge>();
 		// check only the last 2 elements
 		
-		for (int i=0;i<edges.get(edges.size()-1).size();i++) {
-			if (edges.get(edges.size()-1).get(i).target().equals(edges.get(edges.size()-2).get(i).target())) { //same
-				Edge e = edges.get(0).get(i);
+		for (int i=0;i<deletions.get(deletions.size()-1).size();i++) {
+			if (deletions.get(deletions.size()-1).get(i).target().equals(deletions.get(deletions.size()-2).get(i).target())) { //same
+				Edge e = deletions.get(0).get(i);
 				e.source().addEdge(e.tag(), e.target());
 			}else { 
-				for (int j=0;j<edges.size();j++) {
-					Edge e = edges.get(j).get(i);
+				for (int j=0;j<deletions.size();j++) {
+					Edge e = deletions.get(j).get(i);
 					e.source().addEdge(e.tag(), e.target());
 				}
-				assert added.size() > 2;
-				subsume (added.get(added.size()-2).get(i).target(), added.get(added.size()-1).get(i).target());
+				assert additions.size() > 2;
+				subsume (additions.get(additions.size()-2).get(i).target(), additions.get(additions.size()-1).get(i).target());
 			}
 		}
 		
@@ -97,15 +78,15 @@ public class Loop extends ControlStructure {
 		
 		res.append("\nAdded*****************\n");
 		
-		for (int i=0;i<added.size();i++) {
+		for (int i=0;i<additions.size();i++) {
 			res.append((i+1) + ". <");
-			for (int j=0;j<added.get(i).size();j++) {
-				res.append(added.get(i).get(j));
-				if (j<added.get(i).size()-1) {
+			for (int j=0;j<additions.get(i).size();j++) {
+				res.append(additions.get(i).get(j));
+				if (j<additions.get(i).size()-1) {
 					res.append(", ");
 				}
 			}
-			if (i<added.size()-1) {
+			if (i<additions.size()-1) {
 				res.append(">\n");
 			}
 		}

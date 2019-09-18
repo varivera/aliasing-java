@@ -440,12 +440,15 @@ public class AliasAnalysis extends ASTVisitor {
 				ArrayList<Edge> es = left.getEdges().get(i);
 				for (int j=0;j<es.size();j++) {
 					Edge e = es.get(j);
-					stackControlStructures.peek().add(e);
+					stackControlStructures.peek().deleted(e);
+					Variable CP = new Variable(left.tag, getCurrentCP());
+					for (Edge e2: right.getEdges().get(i)) {
+						//stackControlStructures.peek().added(new Edge(e.source(), CP, right.getEdges().get(i).get(j).target()));
+						stackControlStructures.peek().added(new Edge(e.source(), CP, e2.target()));
+					}
+					
 					if (stackControlStructures.peek() instanceof Loop) {
 						e.source().removeEdge(e.tag(), e.target());
-						
-						Variable CP = new Variable(left.tag, getCurrentCP());
-						((Loop)stackControlStructures.peek()).added(new Edge(e.source(), CP, right.getEdges().get(i).get(j).target()));
 					}
 				}
 			}
@@ -985,8 +988,8 @@ public class AliasAnalysis extends ASTVisitor {
 		if (stackControlStructures.size() > 1) {
 			stackControlStructures.remove(); // (vii)
 			
-			for (Edge e: inter) {
-				stackControlStructures.peek().add(e);
+			for (Edge e: inter) { // TODO transfer
+				stackControlStructures.peek().deleted(e);
 			}
 		}else {
 			for (Edge e: inter) {
@@ -1554,21 +1557,11 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "loop3";
+		String methodAnalyse = "cond8";
 
 		long start1 = System.currentTimeMillis();
 		//Init
 		AliasAnalysis v = new AliasAnalysis (sourcePath, unitName, classpath, classAnalyse);
-		//to delete
-		
-		/*
-		 * AliasObject aa = new AliasObject(20);
-		 * AliasDiagram.addEdge(v.aliasGraph.getRoots().get(0), new Variable("b"), aa);
-		 * Variable vv = new Variable("a"); AliasDiagram.addEdge(aa,vv, aa);
-		 * vv.varSubsumed(aa);
-		 */
-		
-		//to delete
 		long start2 = System.currentTimeMillis();
 		v.start(classAnalyse, methodAnalyse, 0, null, null, null);
 		//End

@@ -24,7 +24,8 @@ import java.util.ArrayList;
 public class Conditional extends ControlStructure {
 	
 	public Conditional() {
-		edges = new ArrayList<ArrayList<Edge>>();
+		deletions = new ArrayList<ArrayList<Edge>>();
+		additions = new ArrayList<ArrayList<Edge>>();
 	}
 	
 	/**
@@ -32,24 +33,24 @@ public class Conditional extends ControlStructure {
 	 */
 	public ArrayList<Edge> stop() {
 		ArrayList<Edge> res = new ArrayList<Edge>();
-		if (edges.size() <= 1) {
+		if (deletions.size() <= 1) {
 			return res;
 		}
 		int j = 0;
 		
 		
-		for (int i=1; i<edges.size();i++) {
-			if (edges.get(i).size() < edges.get(j).size()) {
+		for (int i=1; i<deletions.size();i++) {
+			if (deletions.get(i).size() < deletions.get(j).size()) {
 				j = i;
 			}
 		}
 		
 		boolean inter;
-		for (Edge e: edges.get(j)) {
+		for (Edge e: deletions.get(j)) {
 			inter = true;
-			for (int i=0;i<edges.size()&&inter;i++) {
+			for (int i=0;i<deletions.size()&&inter;i++) {
 				if (i!=j) {
-					if (!edges.get(i).contains(e)) {
+					if (!deletions.get(i).contains(e)) {
 						inter = false;
 					}
 				}
