@@ -216,4 +216,22 @@ class AliasDiagramTests4 {
 		assertTrue(v.aliased("a.right.right.right.right.right", "a"));
 		assertTrue(v.aliased("a", "a.right.right.right.right.right"));
 	}
+	
+	@Test
+	void test12() {
+		assertNotNull (v);
+		
+		v.start(classAnalyse, "loop4", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(10, right<0>, 10), (5, right<0>, 7), (0, a<1>, 10), (0, a<0>, 5), (7, right<0>, 10), (0, b<0>, 10), (0, a<1>, 7)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("b", "a"));
+		assertTrue(v.aliased("b", "a.right"));
+		assertTrue(v.aliased("b", "a.right.right"));
+		assertTrue(v.aliased("a.right.right.right.right.right", "b"));
+		assertTrue(v.aliased("b", "a.right.right.right.right.right"));
+	}
+	
+	
 }

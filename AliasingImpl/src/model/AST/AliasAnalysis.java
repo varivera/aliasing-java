@@ -22,6 +22,7 @@ import structures.Conditional;
 import structures.ControlStructure;
 import structures.Edge;
 import structures.Loop;
+import structures.Pair;
 import structures.Variable;
 import structures.graphRep.SetEdges;
 import structures.helpers.Const;
@@ -982,17 +983,14 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 		
 		//(v) -> intersection is needed
-		ArrayList<Edge> inter = stackControlStructures.peek().stop();
+		Pair<ArrayList<Edge>, ArrayList<Edge>> inter = stackControlStructures.peek().stop();
 		// The intersection is removed from the Alias Diagram if this is
 		//	no a nested conditional. If so, we transfer the information
 		if (stackControlStructures.size() > 1) {
 			stackControlStructures.remove(); // (vii)
-			
-			for (Edge e: inter) { // TODO transfer
-				stackControlStructures.peek().deleted(e);
-			}
+			stackControlStructures.peek().transfer(inter.prj1, inter.prj2);
 		}else {
-			for (Edge e: inter) {
+			for (Edge e: inter.prj2) {
 				e.source().removeEdge(e.tag(), e.target());
 			}
 			stackControlStructures.remove(); // (vii)
@@ -1000,52 +998,19 @@ public class AliasAnalysis extends ASTVisitor {
 		return false;
 	}
 	
-	public boolean visit(ForStatement node) {
-		System.out.println ("ForStatement");
-		//TODO retrieve all local variables
-		
-		if (stackControlStructures.size() == 0) {
-			global.increaseCP();
-		}	
-		
-		/**
-		 * (i) start a new Loop Control Structure in the Stack
-		 * (ii) Execute the body of the loop, storing additions in the peek of the Stack
-		 * 		(->) make sure that changes in the Alias Diagram has the corresponding computational Path 
-		 * (iii.a) if the additions are all the same, then leave only one (this is the case 'loop a=b; end')
-		 * (iii.a) if the additions are different, then perform subsume (this is the case 'loop l=l.right; end')
-		// (iv) remove the Loop ControlStructure from the Stack (transfer information if needed)
-		 */
-		
-		//the condition (stop) is ignored
-		//node.getExpression();
-		
-		
-		
-		System.out.println("body: " + node.getBody());
-		
-		
-		stackControlStructures.push(new Loop());
-		
-		for (int i=0;i<global.getIter();i++) {
-		
-			stackControlStructures.peek().step();//(i)
-			
-			node.getBody().accept(this); // (ii)
-		
-		}
-		
-		// (iii) 
-		stackControlStructures.peek().stop();
-		stackControlStructures.remove(); // (vii)
-		
-		return false;
-	}
-	
-
-
 	public boolean visit(WhileStatement node) {
 		System.out.println ("WhileStatement");
+		return visitLoop(node);
+	}
+	public boolean visit(ForStatement node) {
+		System.out.println ("ForStatement");
+		//TODO: retrieve local variables
+		return visitLoop(node);
+	}
+	
+	public boolean visitLoop(Statement node) {
+		assert node instanceof WhileStatement || node instanceof ForStatement;
+		
 		if (stackControlStructures.size() == 0) {
 			global.increaseCP();
 		}	
@@ -1063,8 +1028,11 @@ public class AliasAnalysis extends ASTVisitor {
 		//node.getExpression();
 		
 		
-		
-		System.out.println("body: " + node.getBody());
+		if (node instanceof WhileStatement) {
+			System.out.println("body: " + ((WhileStatement)node).getBody());
+		}else {
+			System.out.println("body: " + ((ForStatement)node).getBody());
+		}
 		
 		
 		stackControlStructures.push(new Loop());
@@ -1073,14 +1041,21 @@ public class AliasAnalysis extends ASTVisitor {
 		
 			stackControlStructures.peek().step();//(i)
 			
-			node.getBody().accept(this); // (ii)
+			if (node instanceof WhileStatement) {
+				((WhileStatement)node).getBody().accept(this); // (ii)
+			}else {
+				((ForStatement)node).getBody().accept(this); // (ii)
+			}
+			
 		
 		}
 		
 		// (iii) 
-		stackControlStructures.peek().stop();
+		Pair<ArrayList<Edge>,ArrayList<Edge>> transfer = stackControlStructures.peek().stop();
 		stackControlStructures.remove(); // (vii)
-		
+		if (stackControlStructures.size()>0) {
+			stackControlStructures.peek().transfer(transfer.prj1, transfer.prj2);
+		}
 		return false;
 	}
 
@@ -1557,7 +1532,7 @@ public class AliasAnalysis extends ASTVisitor {
 		}
 
 		String classAnalyse = "ControlStruc";
-		String methodAnalyse = "cond8";
+		String methodAnalyse = "transfer2";
 
 		long start1 = System.currentTimeMillis();
 		//Init
@@ -1567,6 +1542,16 @@ public class AliasAnalysis extends ASTVisitor {
 		//End
 		long end = System.currentTimeMillis();
 		
+		//to delete
+		assert v.aliased("a", "c");
+		assert v.aliased("a", "d");
+		assert v.aliased("e", "a.b");
+		assert !v.aliased("a", "b");
+		assert !v.aliased("c", "d");
+		assert !v.aliased("c", "b");
+		assert !v.aliased("b", "d");
+		assert !v.aliased("e", "f");
+		//to delete
 		
 		
 		//test pred

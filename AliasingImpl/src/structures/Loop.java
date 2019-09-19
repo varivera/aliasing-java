@@ -24,7 +24,7 @@ public class Loop extends ControlStructure {
 	 * Note: there's no need to go through each list as it does not matter how many time the loop is executed,
 	 * 				the number of added edges is the same in the same order.
 	 */
-	public ArrayList<Edge> stop() {
+	public Pair<ArrayList<Edge>, ArrayList<Edge>> stop() {
 		assert deletions.size() > 1;
 		assert deletions.size() == additions.size();
 		ArrayList<Edge> res = new ArrayList<Edge>();
@@ -45,7 +45,8 @@ public class Loop extends ControlStructure {
 		}
 		
 		
-		return res;
+		//return res;
+		return null;
 	}
 	
 	/**

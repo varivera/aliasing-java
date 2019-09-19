@@ -140,5 +140,35 @@ public class ControlStruc {
 		b = a.right.right.right;
 	}
 	
+	public void transfer1(boolean cc) {
+		a = b;
+		if (cc) {
+			if (cc) {
+				a = c;
+			}
+		}else {
+			a = d;
+		}
+		//a:c, a:d, a:b
+		//not {c:d, c:b, b:d}
+	}
+	
+	public void transfer2(boolean cc) {
+		a = b;
+		if (cc) {
+			if (cc) {
+				a = c;
+			}else {
+				a = d;
+				f = d.b;
+			}
+		}else {
+			a = d;
+			e = a.b;
+		}
+		//a:c, a:d, e:a.b, e:d.b
+		//not {a:b, c:d, c:b, b:d, e:f}
+	}
+	
 		
 }

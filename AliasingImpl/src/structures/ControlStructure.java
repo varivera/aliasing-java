@@ -50,7 +50,7 @@ public abstract class ControlStructure {
 	 * implements the corresponding actions according to the different 
 	 * control structures
 	 */
-	public abstract ArrayList<Edge> stop();
+	public abstract Pair<ArrayList<Edge>,ArrayList<Edge>> stop();
 	
 	
 	/**
@@ -73,6 +73,16 @@ public abstract class ControlStructure {
 		return additions.size();
 	}
 	
+	/**
+	 * In case of nested control structures (e.g. then then a=b; end end), there is a 
+	 * transfer of actions (additions and deletions) from the inner control structure
+	 * to the outer.
+	 */
+	public void transfer(ArrayList<Edge> added, ArrayList<Edge> deleted) {
+		additions.get(additions.size()-1).addAll(added);
+		deletions.get(deletions.size()-1).addAll(deleted);
+	}
+	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		
@@ -91,17 +101,17 @@ public abstract class ControlStructure {
 			}
 		}
 		res.append(">\n*****************\n");
-		res.append("\nAdded*****************\n");
+		res.append("\ndeleted*****************\n");
 		
-		for (int i=0;i<additions.size();i++) {
+		for (int i=0;i<deletions.size();i++) {
 			res.append((i+1) + ". <");
-			for (int j=0;j<additions.get(i).size();j++) {
-				res.append(additions.get(i).get(j));
-				if (j<additions.get(i).size()-1) {
+			for (int j=0;j<deletions.get(i).size();j++) {
+				res.append(deletions.get(i).get(j));
+				if (j<deletions.get(i).size()-1) {
 					res.append(", ");
 				}
 			}
-			if (i<additions.size()-1) {
+			if (i<deletions.size()-1) {
 				res.append(">\n");
 			}
 		}

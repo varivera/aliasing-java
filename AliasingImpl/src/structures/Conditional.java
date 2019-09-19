@@ -29,10 +29,18 @@ public class Conditional extends ControlStructure {
 	}
 	
 	/**
-	 * @return the intersection of edges in deletion
+	 * @return the set of added edges and the set of deleted edges:
+	 * 	this operation only deleted the intersection of edges in deletion
 	 */
-	public ArrayList<Edge> stop() {
-		ArrayList<Edge> res = new ArrayList<Edge>();
+	public Pair<ArrayList<Edge>,ArrayList<Edge>> stop() {
+		Pair<ArrayList<Edge>,ArrayList<Edge>> res = new Pair<ArrayList<Edge>,ArrayList<Edge>>(new ArrayList<Edge>(), new ArrayList<Edge>());
+		
+		//res.prj1 -> additions
+		//res.prj2 -> deletions
+		for (ArrayList<Edge> a: additions) {
+			res.prj1.addAll(a);
+		}
+		
 		if (deletions.size() <= 1) {
 			return res;
 		}
@@ -56,7 +64,7 @@ public class Conditional extends ControlStructure {
 				}
 			}
 			if (inter) {
-				res.add(e);
+				res.prj2.add(e);
 			}
 		}
 		return res;
