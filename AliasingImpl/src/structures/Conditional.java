@@ -70,5 +70,23 @@ public class Conditional extends ControlStructure {
 		return res;
 	}
 	
+	/**
+	 * This method is called when the conditional is inside a loop. In this
+	 * case, the logic is different: the set of added and deleted edges is transfer
+	 * back. In particular, the intersection of the deletions is not removed as this
+	 * condition is in a loop and the loop might not be executed.
+	 */
+	public Pair<ArrayList<Edge>,ArrayList<Edge>> stop2() {
+		Pair<ArrayList<Edge>,ArrayList<Edge>> res = new Pair<ArrayList<Edge>,ArrayList<Edge>>(new ArrayList<Edge>(), new ArrayList<Edge>());
+		for (ArrayList<Edge> a: additions) {
+			res.prj1.addAll(a);
+		}
+		
+		for (ArrayList<Edge> a: deletions) {
+			res.prj2.addAll(a);
+		}
+		return res;
+	}
+	
 	
 }

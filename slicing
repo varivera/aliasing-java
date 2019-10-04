@@ -1,0 +1,5 @@
+Slicing:
+
+* no very useful if the code is highly cohesive
+* check the relation with model abstraction
+* check C Wolf model-extraction tool: static slicing and abstraction1/*-

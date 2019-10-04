@@ -170,5 +170,26 @@ public class ControlStruc {
 		//not {a:b, c:d, c:b, b:d, e:f}
 	}
 	
+	public void transfer3(boolean cc) {
+		c = d;
+		while (cc) {
+			if (cc) {
+				//a = a.right;
+				c = e;
+			}else {
+				//b = b.right;
+				c = f;
+			}
+		}
+	}
+	
+	public void check(boolean cc) {
+		if (cc) {
+			a = b;
+		}else {
+			a = c;
+		}
+	}
+	
 		
 }

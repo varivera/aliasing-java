@@ -27,26 +27,32 @@ public class Loop extends ControlStructure {
 	public Pair<ArrayList<Edge>, ArrayList<Edge>> stop() {
 		assert deletions.size() > 1;
 		assert deletions.size() == additions.size();
-		ArrayList<Edge> res = new ArrayList<Edge>();
+		//res.prj1 -> additions
+		//res.prj2 -> deletions
+		Pair<ArrayList<Edge>, ArrayList<Edge>> res = new Pair<ArrayList<Edge>, ArrayList<Edge>>(
+			new ArrayList<Edge>(),
+			new ArrayList<Edge>()
+			);
 		// check only the last 2 elements
 		
 		for (int i=0;i<deletions.get(deletions.size()-1).size();i++) {
 			if (deletions.get(deletions.size()-1).get(i).target().equals(deletions.get(deletions.size()-2).get(i).target())) { //same
 				Edge e = deletions.get(0).get(i);
 				e.source().addEdge(e.tag(), e.target());
+				res.prj1.add(new Edge (e.source(), e.tag(), e.target()));
 			}else { 
 				for (int j=0;j<deletions.size();j++) {
 					Edge e = deletions.get(j).get(i);
 					e.source().addEdge(e.tag(), e.target());
+					res.prj1.add(new Edge (e.source(), e.tag(), e.target()));
 				}
 				assert additions.size() > 2;
-				subsume (additions.get(additions.size()-2).get(i).target(), additions.get(additions.size()-1).get(i).target());
+				subsume (additions.get(additions.size()-2).get(i).target(), additions.get(additions.size()-1).get(i).target(), res);
 			}
 		}
 		
 		
-		//return res;
-		return null;
+		return res;
 	}
 	
 	/**
@@ -59,7 +65,7 @@ public class Loop extends ControlStructure {
 	 * 
 	 *  subsume (AliasObject n1, AliasObject n2) -> Subsume n2 into n1
 	 */
-	private void subsume (AliasObject n1, AliasObject n2) {
+	private void subsume (AliasObject n1, AliasObject n2, Pair<ArrayList<Edge>, ArrayList<Edge>> ad) {
 		/**
 		 * subsume n2 into n1
 		 * 
@@ -69,31 +75,7 @@ public class Loop extends ControlStructure {
 		 *  (iv) for all v and n such that (n, v, n2) in G, then add (n, v, n1) to G
 		 * 
 		 */
-		n1.subsume(n2);
+		n1.subsume(n2, ad);
 	}
-	
-	@Override
-	public String toString() {
-		StringBuilder res = new StringBuilder();
-		res.append(super.toString());
-		
-		res.append("\nAdded*****************\n");
-		
-		for (int i=0;i<additions.size();i++) {
-			res.append((i+1) + ". <");
-			for (int j=0;j<additions.get(i).size();j++) {
-				res.append(additions.get(i).get(j));
-				if (j<additions.get(i).size()-1) {
-					res.append(", ");
-				}
-			}
-			if (i<additions.size()-1) {
-				res.append(">\n");
-			}
-		}
-		res.append(">\n*****************\n");
-		return res.toString();
-	}
-	
 	
 }

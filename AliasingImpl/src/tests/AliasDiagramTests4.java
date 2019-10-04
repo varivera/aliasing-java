@@ -233,5 +233,58 @@ class AliasDiagramTests4 {
 		assertTrue(v.aliased("b", "a.right.right.right.right.right"));
 	}
 	
+	@Test
+	void test13() {
+		assertNotNull (v);
+		
+		v.start(classAnalyse, "transfer1", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, a<1-1-1>, 9), (0, a<1-2>, 11), (0, d<0>, 11), (0, c<0>, 9), (0, b<0>, 7), (0, a<0>, 7)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("c", "a"));
+		assertTrue(v.aliased("a", "d"));
+		assertTrue(v.aliased("b", "a"));
+		assertTrue(!v.aliased("c", "d"));
+		assertTrue(!v.aliased("b", "c"));
+		assertTrue(!v.aliased("b", "d"));
+	}
+	
+	@Test
+	void test14() {
+		assertNotNull (v);
+		
+		v.start(classAnalyse, "transfer2", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(0, f<1-1-2>, 14), (0, c<0>, 9), (0, a<1-1-1>, 9), (0, b<0>, 7), (11, b<0>, 14), (0, f<0>, 12), (0, e<0>, 17), (0, e<1-2>, 19), (0, e<1-2>, 14), (0, a<1-1-2>, 11), (7, b<0>, 19), (0, a<1-2>, 11), (0, d<0>, 11)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("c", "a"));
+		assertTrue(v.aliased("a", "d"));
+		assertTrue(v.aliased("e", "a.b"));
+		assertTrue(v.aliased("d.b", "e"));
+		assertTrue(!v.aliased("b", "a"));
+		assertTrue(!v.aliased("b", "c"));
+		assertTrue(!v.aliased("b", "d"));
+		assertTrue(!v.aliased("e", "f"));
+	}
+	
+	@Test
+	void test15() {
+		assertNotNull (v);
+		
+		v.start(classAnalyse, "transfer3", 0, null, null, null);
+		SetEdges expectedValue = new SetEdges ("[(13, right<0>, 15), (20, right<0>, 20), (0, a<0>, 8), (0, c<1>, 12), (0, d<0>, 7), (0, b<1>, 15), (0, a<1>, 10), (0, b<1>, 25), (0, a<1>, 20), (0, b<0>, 13), (0, c<0>, 7), (8, right<0>, 10), (15, right<0>, 25), (25, right<0>, 25), (0, f<0>, 17), (0, e<0>, 12), (10, right<0>, 20)]");
+		System.out.println(expectedValue + " : Expected value");
+		System.out.println(v.toSetEdges() + " : Obtained value");
+		assertTrue (expectedValue.equals(v.toSetEdges()));
+		assertTrue(v.aliased("c", "d"));
+		assertTrue(v.aliased("f", "c"));
+		assertTrue(v.aliased("e", "c"));
+		assertTrue(!v.aliased("f", "e"));
+		assertTrue(!v.aliased("b", "a"));
+		assertTrue(v.aliased("a.right.right.right.right", "a"));
+		assertTrue(v.aliased("b", "b.right.right.right.right"));
+	}
 	
 }

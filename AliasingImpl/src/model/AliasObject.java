@@ -375,8 +375,12 @@ public class AliasObject {
 	
 	/**
 	 * subsume (AliasObject n2) -> Subsume n2 into the current Alias Object
+	 * 
+	 * ad: keep track of additions and deletions
+	 * 		ad.prj1 -> additions
+	 * 		ad.prj2 -> deletions
 	 */
-	public void subsume (AliasObject n2) {
+	public void subsume (AliasObject n2, Pair<ArrayList<Edge>, ArrayList<Edge>> ad) {
 		/**
 		 * subsume n2 into this
 		 * 
@@ -390,15 +394,15 @@ public class AliasObject {
 		for (Variable v: n2.pred.keySet()) {
 			for (AliasObject o: n2.pred.get(v)) {
 				if (o.equals(n2)) {// (i)
-					addEdge(v, this);
+					addEdge(v, this); ad.prj1.add(new Edge (this, v, this));
 					v.varSubsumed(this);
 					toRemove.add(new Edge(this, v, this));
 				}if (o.equals(this)) {// (ii)
-					addEdge(v, this);
+					addEdge(v, this); ad.prj1.add(new Edge (this, v, this));
 					v.varSubsumed(this);
 					toRemove.add(new Edge(this, v, n2));
 				}else { // (iv)
-					o.addEdge(v, this);
+					o.addEdge(v, this); ad.prj1.add(new Edge (o, v, this));
 					toRemove.add(new Edge(o, v, n2));
 				}
 			}
@@ -407,13 +411,13 @@ public class AliasObject {
 		for (Variable v: n2.succ.keySet()) {
 			// (iii)
 			for (AliasObject n: n2.succ.get(v)) {
-				addEdge(v, n);
+				addEdge(v, n); ad.prj1.add(new Edge (this, v, n));
 				toRemove.add(new Edge(n2, v, n));
 			}
 		}
 		
 		for (Edge e: toRemove) {
-			e.source().removeEdge(e.tag(), e.target());
+			e.source().removeEdge(e.tag(), e.target()); ad.prj2.add(new Edge (e.source(), e.tag(), e.target()));
 		}
 	}
 	

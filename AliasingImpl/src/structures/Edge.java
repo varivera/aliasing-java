@@ -33,6 +33,10 @@ public class Edge {
 		return tag;
 	}
 	
+	public void changeTag(Variable v) {
+		tag = v;
+	}
+	
 	
 	public String toString() {
 		StringBuilder res = new StringBuilder();
